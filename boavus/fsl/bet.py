@@ -17,3 +17,5 @@ def run_bet(BET_PATH, task):
            ]
 
     run(cmd, env=ENVIRON)
+
+    return bet_nii
