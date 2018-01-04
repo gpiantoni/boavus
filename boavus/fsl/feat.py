@@ -1,21 +1,10 @@
 from bidso.utils import replace_underscore, find_root, remove_underscore
-from os import environ, pathsep, setpgrp
+from os import setpgrp
 from pathlib import Path
 from nibabel import load as niload
 from subprocess import Popen, run
 
-
-def _remove_python3_from_PATH(path):
-    return pathsep.join(x for x in path.split(pathsep) if 'miniconda' not in x and 'venv/bin' not in x)
-
-
-ENVIRON = {
-    'FSLDIR': '/usr/share/fsl/5.0',
-    'FSLOUTPUTTYPE': 'NIFTI_GZ',  # depends on COMPRESSED
-    'PATH': '/usr/share/fsl/5.0/bin' + pathsep + _remove_python3_from_PATH(environ.get('PATH', '')),
-    'LD_LIBRARY_PATH': '/usr/lib/fsl/5.0' + pathsep + environ.get('LD_LIBRARY_PATH', ''),
-    }
-ENVIRON = {**environ, **ENVIRON}
+from .utils import ENVIRON, mkdir_task
 
 
 EVENT_VALUE = {
@@ -28,11 +17,7 @@ DESIGN_TEMPLATE = Path('/home/giovanni/tools/boavus/boavus/data/design_template.
 
 def run_feat(FEAT_OUTPUT, task, dry_run=False):
 
-    feat_path = FEAT_OUTPUT / ('sub-' + task.subject)
-    feat_path.mkdir(exist_ok=True)
-    if task.session is not None:
-        feat_path = feat_path / ('ses-' + task.session)
-        feat_path.mkdir(exist_ok=True)
+    feat_path = mkdir_task(FEAT_OUTPUT, task)
 
     subj_design = prepare_design(feat_path, task)
     cmd = ['fsl5.0-feat', str(subj_design)]
