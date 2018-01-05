@@ -30,7 +30,7 @@ def project_electrodes(electrodes_file, freesurfer_path):
         for _chan in chan.chan:
             xyz = "\t".join(f'{x:f}' for x in _chan.xyz)
             one_chans = [x for x in chans if x['name'] == _chan.label][0]
-            elec_type = one_chans['elec_type']
+            elec_type = one_chans['type']
             size = one_chans['size']
             material = one_chans['material']
             f.write(f'{_chan.label}\t{xyz}\t{elec_type}\t{size}\t{material}\n')
