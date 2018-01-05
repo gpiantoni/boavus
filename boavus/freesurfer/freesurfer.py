@@ -7,7 +7,7 @@ from ..utils import ENVIRON
 def run_freesurfer(FREESURFER_PATH, task):
 
     cmd = ['recon-all',
-           '-all',
+           '-autorecon1',  # '-all',
            '-cw256',
            '-sd', str(FREESURFER_PATH),
            '-subjid', 'sub-' + task.subject,
