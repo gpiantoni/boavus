@@ -78,3 +78,16 @@ def _write_events(events_input, events_output):
     with events_output.open('w') as f:
         for event in tsv:
             f.write(f'{event["onset"]}\t{event["duration"]}\t{EVENT_VALUE[event["trial_type"]]}\n')
+
+
+def coreg_feat2freesurfer(feat_path):
+    """TODO"""
+    freesurfer_path = feat_path.parent / FREESURFER_NAME
+
+    if not freesurfer_path.exists():
+        print('Run Freesurfer before feat, to run coregistration')
+
+    cmd = ['reg-feat2anat', '--feat', feat_path.name, '--subject', FREESURFER_NAME]
+    run(cmd,
+        env={**ENVIRON, 'SUBJECTS_DIR': str(feat_path.parent)},
+        cwd=str(feat_path.parent))
