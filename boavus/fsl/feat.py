@@ -3,11 +3,8 @@ from pathlib import Path
 from nibabel import load as niload
 from subprocess import Popen, run
 
-from bidso import file_Core
-from bidso.utils import replace_underscore, find_root, remove_underscore
-
 from .bet import run_bet
-from .utils import ENVIRON, mkdir_task
+from ..utils import ENVIRON, mkdir_task, replace_underscore, remove_underscore, read_tsv
 
 
 EVENT_VALUE = {
@@ -18,27 +15,28 @@ EVENT_VALUE = {
 DESIGN_TEMPLATE = Path('/home/giovanni/tools/boavus/boavus/data/design_template.fsf')
 
 
-def run_feat(FEAT_OUTPUT, task, dry_run=False):
+def run_feat(FEAT_OUTPUT, layout, task, dry_run=False):
 
-    subj_design = prepare_design(FEAT_OUTPUT, task)
+    subj_design = prepare_design(FEAT_OUTPUT, layout, task)
     cmd = ['fsl5.0-feat', str(subj_design)]
 
     if not dry_run:
-        # Popen(cmd, env=ENVIRON, preexec_fn=setpgrp)
-        run(cmd, env=ENVIRON)
+        Popen(cmd, env=ENVIRON, preexec_fn=setpgrp)
+        # run(cmd, env=ENVIRON)
 
     feat_path = mkdir_task(FEAT_OUTPUT, task)
-    return feat_path / remove_underscore(task.filename.name)
+    return feat_path / remove_underscore(Path(task.filename).name)
 
 
-def prepare_design(FEAT_OUTPUT, task):
+def prepare_design(FEAT_OUTPUT, layout, task):
     feat_path = mkdir_task(FEAT_OUTPUT, task)
 
-    tsv_events = feat_path / replace_underscore(task.filename.name, 'events.tsv')
-    _write_events(task, tsv_events)
+    events_bids = layout.get_events(task.filename)
+    events_fsl = feat_path / replace_underscore(Path(task.filename).name, 'events.tsv')
+    _write_events(events_bids, events_fsl)
 
-    anat_nii = find_anat(task)
-    bet_nii = run_bet(FEAT_OUTPUT, file_Core(anat_nii))
+    anat_task = find_anat(layout, task)
+    bet_nii = run_bet(FEAT_OUTPUT, anat_task)
 
     # collect info
     img = niload(str(task.filename))
@@ -48,7 +46,7 @@ def prepare_design(FEAT_OUTPUT, task):
     with DESIGN_TEMPLATE.open('r') as f:
         design = f.read()
 
-    output_dir = feat_path / remove_underscore(task.filename.name)
+    output_dir = feat_path / remove_underscore(Path(task.filename).name)
 
     design_values = {
         'XXX_OUTPUTDIR': str(output_dir),
@@ -57,13 +55,13 @@ def prepare_design(FEAT_OUTPUT, task):
         'XXX_FEAT_FILE': str(task.filename),
         'XXX_HIGHRES_FILE': str(bet_nii),
         'XXX_EV1': 'motor',
-        'XXX_TSVFILE': str(tsv_events),
+        'XXX_TSVFILE': str(events_fsl),
         }
 
     for pattern, value in design_values.items():
         design = design.replace(pattern, value)
 
-    subj_design = feat_path / replace_underscore(task.filename.name, 'design.fsf')
+    subj_design = feat_path / replace_underscore(Path(task.filename).name, 'design.fsf')
 
     with subj_design.open('w') as f:
         f.write(design)
@@ -71,13 +69,12 @@ def prepare_design(FEAT_OUTPUT, task):
     return subj_design
 
 
-def find_anat(task):
-    """TODO: this could be used in bidso"""
-    subj_path = find_root(task.filename)
-    return next(subj_path.rglob('anat/*_T1w.nii.gz'))
+def find_anat(layout, task):
+    return layout.get(extensions='.nii.gz', modality='anat', subject=task.subject)[0]
 
 
-def _write_events(task, tsv_events):
-    with tsv_events.open('w') as f:
-        for event in task.events.tsv:
+def _write_events(events_input, events_output):
+    tsv = read_tsv(events_input)
+    with events_output.open('w') as f:
+        for event in tsv:
             f.write(f'{event["onset"]}\t{event["duration"]}\t{EVENT_VALUE[event["trial_type"]]}\n')
