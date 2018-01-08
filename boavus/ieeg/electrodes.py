@@ -1,7 +1,6 @@
 from json import dump
 from pathlib import Path
 from numpy import array, median
-from bidso import Electrodes
 from bidso.utils import replace_underscore
 
 from wonambi.attr.chan import Channels
@@ -30,7 +29,7 @@ def project_electrodes(elec, freesurfer_path):
 
     chan = snap_to_surface(surf, chan)
 
-    tsv_electrodes = Path(elec.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acquisition}projected_electrodes.tsv'
+    tsv_electrodes = Path(elec.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acq}projected_electrodes.tsv'
 
     with tsv_electrodes.open('w') as f:
         f.write('name\tx\ty\tz\ttype\tsize\tmaterial\n')
@@ -49,8 +48,7 @@ def project_electrodes(elec, freesurfer_path):
         dump(elec.coordframe.json, f, indent=2)
 
 
-def assign_regions(electrode_path, freesurfer_path):
-    elec = Electrodes(electrode_path)
+def assign_regions(elec, freesurfer_path):
     tsv_electrodes = Path(elec.electrodes.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acq}regions_electrodes.tsv'
 
     freesurfer = Freesurfer(freesurfer_path / f'sub-{elec.subject}')
