@@ -10,14 +10,15 @@ class Dataset(wDataset):
     def __init__(self, filename):
         super().__init__(filename)
 
+        # find a more elegant way of doing this, probably with iEEG
+        self.electrode_file = next(self.filename.parents[1].rglob('*projectedregions*.tsv'))
+
         _read_channels(self)
 
     def read_data(self, **kwargs):
         data = super().read_data(**kwargs)
 
-        electrode_file = next(self.filename.parents[1].rglob('*projected*.tsv'))
-
-        data.attr['chan'] = _read_electrodes(electrode_file)
+        data.attr['chan'] = _read_electrodes(self.electrode_file)
         return data
 
 

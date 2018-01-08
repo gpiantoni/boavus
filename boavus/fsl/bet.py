@@ -1,7 +1,9 @@
 from pathlib import Path
 from subprocess import run
 
-from ..utils import ENVIRON, mkdir_task, replace_underscore
+from bidso.utils import mkdir_task, replace_underscore
+
+from ..utils import ENVIRON
 
 
 def run_bet(BET_PATH, task):

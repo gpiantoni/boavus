@@ -3,8 +3,10 @@ from pathlib import Path
 from nibabel import load as niload
 from subprocess import Popen, run
 
+from bidso.utils import mkdir_task, replace_underscore, remove_underscore, read_tsv
+
 from .bet import run_bet
-from ..utils import ENVIRON, mkdir_task, replace_underscore, remove_underscore, read_tsv
+from ..utils import ENVIRON
 
 
 EVENT_VALUE = {
