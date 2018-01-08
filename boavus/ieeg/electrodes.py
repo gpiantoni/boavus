@@ -1,8 +1,8 @@
+from json import dump
 from pathlib import Path
-from shutil import copyfile
 from numpy import array, median
 from bidso import Electrodes
-from bidso.utils import read_tsv, replace_underscore
+from bidso.utils import replace_underscore
 
 from wonambi.attr.chan import Channels
 from wonambi.attr import Freesurfer
@@ -10,13 +10,19 @@ from wonambi.attr import Freesurfer
 from .elec.project_elec import snap_to_surface
 
 
-def project_electrodes(electrodes_file, freesurfer_path):
-    chans = read_tsv(electrodes_file.filename)
-    chan = Channels(
-        [x['name'] for x in chans],
-        array([(float(x['x']), float(x['y']), float(x['z'])) for x in chans]))
+def project_electrodes(elec, freesurfer_path):
+    fs = Freesurfer(freesurfer_path / ('sub-' + elec.subject))
 
-    fs = Freesurfer(freesurfer_path / ('sub-' + electrodes_file.subject))
+    xyz = array([(float(x['x']), float(x['y']), float(x['z'])) for x in elec.electrodes.tsv])
+
+    if elec.coordframe.json['iEEGCoordinateSystem'] == 'RAS':
+        # convert from RAS to tkRAS
+        xyz -= fs.surface_ras_shift
+
+    chan = Channels(
+        [x['name'] for x in elec.electrodes.tsv],
+        xyz)
+
     if median(chan.return_xyz()[:, 0]) > 0:
         surf = fs.read_brain().rh
     else:
@@ -24,21 +30,23 @@ def project_electrodes(electrodes_file, freesurfer_path):
 
     chan = snap_to_surface(surf, chan)
 
-    tsv_electrodes = Path(electrodes_file.filename).parent / f'sub-{electrodes_file.subject}_ses-{electrodes_file.session}_acq-{electrodes_file.acquisition}projected_electrodes.tsv'
+    tsv_electrodes = Path(elec.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acquisition}projected_electrodes.tsv'
 
     with tsv_electrodes.open('w') as f:
         f.write('name\tx\ty\tz\ttype\tsize\tmaterial\n')
         for _chan in chan.chan:
             xyz = "\t".join(f'{x:f}' for x in _chan.xyz)
-            one_chans = [x for x in chans if x['name'] == _chan.label][0]
+            one_chans = [x for x in elec.electrodes.tsv if x['name'] == _chan.label][0]
             elec_type = one_chans['type']
             size = one_chans['size']
             material = one_chans['material']
             f.write(f'{_chan.label}\t{xyz}\t{elec_type}\t{size}\t{material}\n')
 
-    old_json = replace_underscore(Path(electrodes_file.filename), 'coordframe.json')
+    elec.coordframe.json['iEEGCoordinateSystem'] = 'tkRAS'
+    elec.coordframe.json['iEEGCoordinateProcessingDescripton'] += '; Dijkstra et al.'  # TODO: better description + remove None
     new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
-    copyfile(old_json, new_json)  # TODO: add info about transformation
+    with new_json.open('w') as f:
+        dump(elec.coordframe.json, f, indent=2)
 
 
 def assign_regions(electrode_path, freesurfer_path):
@@ -54,6 +62,7 @@ def assign_regions(electrode_path, freesurfer_path):
             region = freesurfer.find_brain_region(xyz, exclude_regions=('White', 'WM', 'Unknown'))[0]
             f.write(f'{_tsv["name"]}\t{_tsv["x"]}\t{_tsv["y"]}\t{_tsv["z"]}\t{_tsv["type"]}\t{_tsv["size"]}\t{_tsv["material"]}\t{region}\n')
 
-    old_json = replace_underscore(Path(elec.filename), 'coordframe.json')
+    elec.coordframe.json['iEEGCoordinateProcessingDescripton'] += '; Assign brain regions'  # TODO: better description + remove None
     new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
-    copyfile(old_json, new_json)  # TODO: add info about transformation
+    with new_json.open('w') as f:
+        dump(elec.coordframe.json, f, indent=2)
