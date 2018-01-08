@@ -1,6 +1,7 @@
 from json import dump
 from pathlib import Path
 from numpy import array, median
+from bidso import Electrodes
 from bidso.utils import replace_underscore
 
 from wonambi.attr.chan import Channels
@@ -47,6 +48,8 @@ def project_electrodes(elec, freesurfer_path):
     with new_json.open('w') as f:
         dump(elec.coordframe.json, f, indent=2)
 
+    return Electrodes(tsv_electrodes)
+
 
 def assign_regions(elec, freesurfer_path):
     tsv_electrodes = Path(elec.electrodes.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acq}regions_electrodes.tsv'
@@ -64,3 +67,5 @@ def assign_regions(elec, freesurfer_path):
     new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
     with new_json.open('w') as f:
         dump(elec.coordframe.json, f, indent=2)
+
+    return Electrodes(tsv_electrodes)
