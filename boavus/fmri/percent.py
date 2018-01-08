@@ -5,7 +5,7 @@ from nibabel import save as nsave
 from nibabel import Nifti1Image
 
 from bidso import file_Core
-from boavus.utils import mkdir_task
+from bidso.utils import mkdir_task
 
 
 def compute_fmri_percent(feat_path, output_dir):

@@ -1,12 +1,13 @@
 from pathlib import Path
 from shutil import copyfile
 from numpy import array, median
+from bidso import Electrodes
+from bidso.utils import read_tsv, replace_underscore
 
 from wonambi.attr.chan import Channels
 from wonambi.attr import Freesurfer
 
 from .elec.project_elec import snap_to_surface
-from ..utils import read_tsv, replace_underscore
 
 
 def project_electrodes(electrodes_file, freesurfer_path):
@@ -36,5 +37,23 @@ def project_electrodes(electrodes_file, freesurfer_path):
             f.write(f'{_chan.label}\t{xyz}\t{elec_type}\t{size}\t{material}\n')
 
     old_json = replace_underscore(Path(electrodes_file.filename), 'coordframe.json')
+    new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
+    copyfile(old_json, new_json)  # TODO: add info about transformation
+
+
+def assign_regions(electrode_path, freesurfer_path):
+    elec = Electrodes(electrode_path)
+    tsv_electrodes = Path(elec.electrodes.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acq}regions_electrodes.tsv'
+
+    freesurfer = Freesurfer(freesurfer_path / f'sub-{elec.subject}')
+
+    with tsv_electrodes.open('w') as f:
+        f.write('name\tx\ty\tz\ttype\tsize\tmaterial\tregion\n')  # TODO: region is not in BEP010
+        for _tsv in elec.electrodes.tsv:
+            xyz = array([float(_tsv['x']), float(_tsv['y']), float(_tsv['z'])])
+            region = freesurfer.find_brain_region(xyz, exclude_regions=('White', 'WM', 'Unknown'))[0]
+            f.write(f'{_tsv["name"]}\t{_tsv["x"]}\t{_tsv["y"]}\t{_tsv["z"]}\t{_tsv["type"]}\t{_tsv["size"]}\t{_tsv["material"]}\t{region}\n')
+
+    old_json = replace_underscore(Path(elec.filename), 'coordframe.json')
     new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
     copyfile(old_json, new_json)  # TODO: add info about transformation
