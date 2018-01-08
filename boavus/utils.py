@@ -18,7 +18,7 @@ def mkdir_task(base_path, task):
 
     feat_path = base_path / ('sub-' + task.subject)
     feat_path.mkdir(exist_ok=True)
-    if hasattr(task, 'session'):
+    if hasattr(task, 'session') and task.session is not None:  # hasattr for pybids, isnone for bidso
         feat_path = feat_path / ('ses-' + task.session)
         feat_path.mkdir(exist_ok=True)
 

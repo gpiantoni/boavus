@@ -35,6 +35,6 @@ def project_electrodes(electrodes_file, freesurfer_path):
             material = one_chans['material']
             f.write(f'{_chan.label}\t{xyz}\t{elec_type}\t{size}\t{material}\n')
 
-    old_json = replace_underscore(Path(f.filename), 'coordframe.json')
+    old_json = replace_underscore(Path(electrodes_file.filename), 'coordframe.json')
     new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
     copyfile(old_json, new_json)  # TODO: add info about transformation
