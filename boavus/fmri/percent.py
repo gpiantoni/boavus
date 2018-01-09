@@ -16,6 +16,8 @@ def compute_fmri_percent(feat_path, output_dir):
 
     nsave(percent_nifti, str(task_path))
 
+    return percent_nifti
+
 
 def percent_fmri(feat_path):
     """Calculate percent change for a task.

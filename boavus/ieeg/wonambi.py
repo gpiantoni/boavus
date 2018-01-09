@@ -1,7 +1,7 @@
 """Glue code for wonambi"""
 from numpy import array
-from bidso import iEEG
-from bidso.utils import read_tsv
+from bidso import iEEG, file_Events
+from bidso.utils import read_tsv, replace_underscore
 from wonambi import Dataset as wDataset
 from wonambi.attr import Channels
 
@@ -20,6 +20,12 @@ class Dataset(wDataset):
 
         data.attr['chan'] = _read_electrodes(self.electrode_file)
         return data
+
+    def read_events(self):
+        """this is different from markers. Here you have 'onset', 'duration' and 'trial_type'
+        """
+        events = file_Events(replace_underscore(self.filename, 'events.tsv'))
+        return events.tsv
 
 
 def _read_channels(d):
