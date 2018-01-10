@@ -1,4 +1,5 @@
 """Glue code for wonambi"""
+from copy import deepcopy
 from numpy import array
 from bidso import iEEG, file_Events
 from bidso.utils import read_tsv, replace_underscore
@@ -24,8 +25,13 @@ class Dataset(wDataset):
     def read_events(self):
         """this is different from markers. Here you have 'onset', 'duration' and 'trial_type'
         """
-        events = file_Events(replace_underscore(self.filename, 'events.tsv'))
-        return events.tsv
+        events_file = file_Events(replace_underscore(self.filename, 'events.tsv'))
+
+        events = deepcopy(events_file.tsv)
+        for evt in events:
+            evt['duration'] = float(evt['duration'])
+            evt['onset'] = float(evt['onset'])
+        return events
 
 
 def _read_channels(d):
