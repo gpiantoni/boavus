@@ -1,4 +1,3 @@
-from pathlib import Path
 from os import environ, pathsep
 
 def _remove_python3_from_PATH(path):

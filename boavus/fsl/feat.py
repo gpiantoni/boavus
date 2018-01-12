@@ -4,9 +4,10 @@ from nibabel import load as niload
 from subprocess import Popen, run
 
 from bidso import file_Core
-from bidso.utils import mkdir_task, replace_underscore, remove_underscore, read_tsv
+from bidso.utils import bids_mkdir, replace_underscore, remove_underscore, read_tsv
+from bidso.find import find_modality
 
-from .bet import run_bet
+from .misc import run_bet, run_reorient2std
 from ..utils import ENVIRON
 
 
@@ -15,10 +16,12 @@ EVENT_VALUE = {
     'rest': 0,
     }
 
-DESIGN_TEMPLATE = Path('/home/giovanni/tools/boavus/boavus/data/design_template.fsf')
+DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fsf'
 
 
 def run_feat(FEAT_OUTPUT, task, dry_run=False):
+
+    run_reorient2std(task.filename)  # TODO: this modifies the BIDS
 
     subj_design = prepare_design(FEAT_OUTPUT, task)
     cmd = ['fsl5.0-feat', str(subj_design)]
@@ -27,18 +30,20 @@ def run_feat(FEAT_OUTPUT, task, dry_run=False):
         # Popen(cmd, env=ENVIRON, preexec_fn=setpgrp)
         run(cmd, env=ENVIRON)
 
-    feat_path = mkdir_task(FEAT_OUTPUT, task)
+    feat_path = bids_mkdir(FEAT_OUTPUT, task)
     return feat_path / remove_underscore(Path(task.filename).name)
 
 
 def prepare_design(FEAT_OUTPUT, task):
-    feat_path = mkdir_task(FEAT_OUTPUT, task)
+    feat_path = bids_mkdir(FEAT_OUTPUT, task)
 
     events_fsl = feat_path / task.events.filename.name
     _write_events(task.events.filename, events_fsl)
 
-    anat_task = file_Core('/home/giovanni/tools/bidso/tests/bids/sub-bert/ses-day10/anat/sub-bert_T1w.nii.gz')  # TODO
-    mkdir_task(FEAT_OUTPUT, anat_task)
+    anat_path = find_modality(task, 'anat')
+    anat_task = file_Core(anat_path / f'sub-{task.subject}_T1w.nii.gz')
+    run_reorient2std(anat_task.filename)  # TODO: this modifies the BIDS
+    bids_mkdir(FEAT_OUTPUT, anat_task)
 
     bet_nii = run_bet(FEAT_OUTPUT, anat_task)
 
