@@ -1,24 +1,48 @@
 """Glue code for wonambi"""
 from copy import deepcopy
-from numpy import array
 from bidso import iEEG, file_Events
-from bidso.utils import read_tsv, replace_underscore
-from wonambi.attr import Channels
+from bidso.utils import replace_underscore
+from wonambi import ChanTime
+from numpy import memmap, float64, c_, NaN, empty, arange, asarray
 
 
-class Task_iEEG(iEEG):
+class Dataset(iEEG):
     def __init__(self, filename):
         super().__init__(filename)
 
-        # find a more elegant way of doing this, probably with iEEG
-        self.electrode_file = next(self.filename.parents[1].rglob('*projectedregions*.tsv'))
+    def read_data(self, chan=None, begsam=None, endsam=None):
 
-        _read_channels(self)
+        all_chan_names = [x['name'] for x in self.channels.tsv]
+        if chan is None:
+            chan = all_chan_names
+        if not (isinstance(chan, list) or isinstance(chan, tuple)):
+            raise TypeError('Parameter "chan" should be a list')
+        idx_chan = [all_chan_names.index(x) for x in chan]
 
-    def read_data(self, **kwargs):
-        data = super().read_data(**kwargs)
+        sf = float(self.channels.tsv[0]['sampling_frequency'])
+        RecordingDuration = self.json.json['RecordingDuration']
+        n_samples = int(sf * RecordingDuration)
+        n_channels = len(self.channels.tsv)
 
-        data.attr['chan'] = _read_electrodes(self.electrode_file)
+        if not isinstance(begsam, list):
+            begsam = [begsam]
+        if not isinstance(endsam, list):
+            endsam = [endsam]
+
+        n_trl = len(begsam)
+
+        data = ChanTime()
+        data.s_freq = sf
+        data.axis['chan'] = empty(n_trl, dtype='O')
+        data.axis['time'] = empty(n_trl, dtype='O')
+        data.data = empty(n_trl, dtype='O')
+
+        for i, one_begsam, one_endsam in zip(range(n_trl), begsam, endsam):
+            data.axis['chan'][i] = asarray(chan, dtype='U')
+            data.axis['time'][i] = arange(one_begsam, one_endsam) / sf
+            data.data[i] = _read_dat(self.filename, (n_channels, n_samples),
+                                     idx_chan, one_begsam, one_endsam)
+
         return data
 
     def read_events(self):
@@ -33,25 +57,28 @@ class Task_iEEG(iEEG):
         return events
 
 
-def _read_channels(d):
-    task = iEEG(d.filename)  # TODO: this is backwards: the iEEG class should be the base
+def _read_dat(filename, dat_shape, idx_chan, begsam, endsam):
+    n_samples = dat_shape[1]
 
-    labels = [x['name'] for x in task.channels.tsv]
-    new_labels = []
-    for i, old in enumerate(d.header['chan_name']):
+    if begsam is None:
+        begsam = 0
+    if endsam is None:
+        endsam = n_samples - 1
 
-        if i < len(labels) and labels[i] != '':
-            new_labels.append(labels[i])
-        else:
-            new_labels.append(old)
+    data = memmap(str(filename), dtype=float64, mode='c',
+                  shape=dat_shape, order='F')
+    dat = data[:, max((begsam, 0)):min((endsam, n_samples))].astype(float64)
 
-    d.header['chan_name'] = new_labels
+    if begsam < 0:
 
+        pad = empty((dat.shape[0], 0 - begsam))
+        pad.fill(NaN)
+        dat = c_[pad, dat]
 
-def _read_electrodes(electrode_file):
-    """The correct term is Electrodes, not Channels, in this case"""
-    chans = read_tsv(electrode_file)
-    chan = Channels(
-        [x['name'] for x in chans],
-        array([(float(x['x']), float(x['y']), float(x['z'])) for x in chans]))
-    return chan
+    if endsam >= n_samples:
+
+        pad = empty((dat.shape[0], endsam - n_samples))
+        pad.fill(NaN)
+        dat = c_[dat, pad]
+
+    return dat
