@@ -31,7 +31,7 @@ def run_feat(FEAT_OUTPUT, task, dry_run=False):
         run(cmd, env=ENVIRON)
 
     feat_path = bids_mkdir(FEAT_OUTPUT, task)
-    return feat_path / remove_underscore(Path(task.filename).name)
+    return feat_path / (remove_underscore(Path(task.filename).name) + '.feat')
 
 
 def prepare_design(FEAT_OUTPUT, task):

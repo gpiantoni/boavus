@@ -14,4 +14,4 @@ def test_run_feat_dryrun():
 
     t = Task(fmri_file)
     if environ.get('FSLDIR') is not None:
-        run_feat(FEAT_PATH, t, dry_run=True)
+        run_feat(FEAT_PATH, t, dry_run=False)
