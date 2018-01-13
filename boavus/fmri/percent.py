@@ -5,14 +5,14 @@ from nibabel import save as nsave
 from nibabel import Nifti1Image
 
 from bidso import file_Core
-from bidso.utils import mkdir_task
+from bidso.utils import bids_mkdir
 
 
 def compute_fmri_percent(feat_path, output_dir):
 
     percent_nifti = percent_fmri(feat_path)
     feat = file_Core(feat_path)
-    task_path = mkdir_task(output_dir, feat) / (feat.filename.stem + '_percent.nii.gz')
+    task_path = bids_mkdir(output_dir, feat) / (feat.filename.stem + '_percent.nii.gz')
 
     nsave(percent_nifti, str(task_path))
 
