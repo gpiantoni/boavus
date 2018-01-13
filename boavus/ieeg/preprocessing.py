@@ -1,7 +1,7 @@
 from wonambi.trans import select, montage, math, timefrequency, concatenate
 from numpy import mean, std
 
-from boavus.ieeg.wonambi import Dataset
+from boavus.ieeg.dataset import Dataset
 
 
 def preprocessing(filename):
