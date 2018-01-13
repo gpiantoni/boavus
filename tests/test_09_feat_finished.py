@@ -3,7 +3,7 @@ from time import sleep
 
 from os import environ
 from boavus.fmri.percent import percent_fmri
-from boavus.fmri.feat import coreg_feat2freesurfer
+from boavus.fsl.feat import coreg_feat2freesurfer
 from .paths import FREESURFER_PATH
 
 feat_path = Path('tests/data/derivatives/feat/sub-bert/ses-day01/func/sub-bert_ses-day01_task-block_run-00.feat')
