@@ -9,3 +9,4 @@ def test_ieeg_dataset():
     modality_path = bids_mkdir(BIDS_PATH, task_ieeg)
     ieeg_file = modality_path / f'sub-{task_ieeg.subject}_ses-{task_ieeg.session}_task-block_run-00_ieeg.bin'
     d = Dataset(ieeg_file)
+    data = d.read_data(begsam=10, endsam=20)
