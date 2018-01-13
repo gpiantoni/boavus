@@ -38,6 +38,7 @@ script:
     - py.test --cov=boavus tests
 
 after_success:
+ - ls tests/data/* -lR
  - codecov
 
 notifications:

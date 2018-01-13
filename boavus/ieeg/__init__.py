@@ -1,1 +1,1 @@
-from .wonambi import Dataset
+from .dataset import Dataset

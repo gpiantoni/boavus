@@ -1,3 +1,5 @@
+from os import environ
+
 from bidso import Task
 from bidso.utils import bids_mkdir
 from boavus.fsl.feat import run_feat
@@ -11,4 +13,5 @@ def test_run_feat_dryrun():
     fmri_file = modality_path / f'sub-{task_fmri.subject}_ses-{task_fmri.session}_task-block_run-00_bold.nii.gz'
 
     t = Task(fmri_file)
-    run_feat(FEAT_PATH, t, dry_run=True)
+    if environ.get('FSLDIR') is not None:
+        run_feat(FEAT_PATH, t, dry_run=True)
