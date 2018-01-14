@@ -4,7 +4,7 @@ from numpy import mean, std
 from boavus.ieeg.dataset import Dataset
 
 
-def preprocessing(filename):
+def preprocess_ecog(filename):
     self = Dataset(filename)
     s_freq = float(self.channels.tsv[0]['sampling_frequency'])
 
@@ -30,6 +30,8 @@ def preprocessing(filename):
 
     hfa_move, freq_move = compute_freq(dat_move)
     hfa_rest, freq_rest = compute_freq(dat_rest)
+
+    return hfa_move, hfa_rest
 
 
 def reject_channels(dat):
