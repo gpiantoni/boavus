@@ -1,5 +1,5 @@
 from boavus.ieeg.dataset import Dataset
-from boavus.ieeg.preprocessing import preprocessing
+from boavus.ieeg.preprocessing import preprocess_ecog
 from bidso.utils import bids_mkdir
 
 from .paths import BIDS_PATH, FEAT_PATH
@@ -18,4 +18,4 @@ def test_ieeg_preprocessing():
 
     modality_path = bids_mkdir(BIDS_PATH, task_ieeg)
     ieeg_file = modality_path / f'sub-{task_ieeg.subject}_ses-{task_ieeg.session}_task-block_run-00_ieeg.bin'
-    preprocessing(ieeg_file)
+    preprocess_ecog(ieeg_file)
