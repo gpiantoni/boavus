@@ -13,7 +13,7 @@ from scipy.stats import ttest_ind
 from numpy import repeat, diag
 from nibabel import load as nload
 from multiprocessing import Pool
-from scipy.distributions import norm as normdistr
+from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
 
@@ -72,6 +72,12 @@ def _compute_gauss(pos, mri_shape, ndi, gauss_size):
     return normdistr.pdf(dist_chan, scale=gauss_size).reshape(mri_shape)
 
 
+def _compute_correcog(pos, mri_shape, ndi, gauss_size):
+    p_compute_gauss = partial(_compute_gauss, mri_shape=mri_shape, ndi=ndi, gauss_size=gauss_size)
+    with Pool() as p:
+        all_m = p.map(p_compute_gauss, chan_xyz)
+
+
 def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
 
     p_compute_gauss = partial(_compute_gauss, mri_shape=mri_shape, ndi=ndi, gauss_size=gauss_size)
@@ -86,12 +92,56 @@ def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
     return mq
 
 
+def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
+
+    output_path = DERIVATIVES_PATH / 'corr_fmri_ecog'
+    output_path.mkdir(exist_ok=True)
+
+    d = Dataset(ieeg_file, '*fridge')
+
+    freesurfer_path = FREESURFER_PATH / d.subject
+    fs = Freesurfer(freesurfer_path)
+    ecog_val, labels = _read_ecog_val(d)
+    elec = _read_elec(d)
+    elec = elec(lambda x: x.label in labels)
+    print(len(elec.return_label()))
+    print(len(ecog_val))
+    print('ecog done')
+
+    img = _read_fmri_val(feat_path, output_path, to_plot)
+    mri = img.get_data()
+    print('fmri done')
+
+    chan_xyz = elec.return_xyz()
+    nd = array(list(ndindex(mri.shape)))
+    ndi = from_mrifile_to_chan(img, fs, nd)
+    print('ndindex done')
+
+    r = []
+    for KERNEL in GAUSS_SIZE:
+        print(KERNEL)
+        fmri_val = []
+
+        for pos in chan_xyz:
+            m = _compute_gauss(pos, mri.shape, ndi, KERNEL)
+            m /= m.sum()  # normalize so that the sum is 1
+
+            # write this to file
+            mq = (m * mri)
+            fmri_val.append(mq.sum())
+
+        lr = linregress(ecog_val, array(fmri_val))
+        print(lr)
+        r.append(lr.rvalue ** 2)
+        
+    return r
+
 def _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
 
     output_path = DERIVATIVES_PATH / 'corr_fmri_ecog'
     output_path.mkdir(exist_ok=True)
 
-    d = Dataset(ieeg_file)
+    d = Dataset(ieeg_file, '*fridge')
 
     freesurfer_path = FREESURFER_PATH / d.subject
     fs = Freesurfer(freesurfer_path)
