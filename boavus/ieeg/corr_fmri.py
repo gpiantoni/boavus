@@ -1,4 +1,5 @@
 from functools import partial
+from os import environ
 
 from boavus.fmri.percent import percent_fmri
 from boavus.ieeg.dataset import Dataset
@@ -107,7 +108,11 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     output_path = DERIVATIVES_PATH / 'corr_fmri_ecog'
     output_path.mkdir(exist_ok=True)
 
-    d = Dataset(ieeg_file, '*fridge')
+    if environ.get('TRAVIS') is None:
+        pattern = '*'
+    else:
+        pattern = '*fridge'
+    d = Dataset(ieeg_file, pattern)
 
     freesurfer_path = FREESURFER_PATH / d.subject
     fs = Freesurfer(freesurfer_path)

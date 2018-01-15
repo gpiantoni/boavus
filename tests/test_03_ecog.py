@@ -18,4 +18,5 @@ def test_ieeg_preprocessing():
 
     modality_path = bids_mkdir(BIDS_PATH, task_ieeg)
     ieeg_file = modality_path / f'sub-{task_ieeg.subject}_ses-{task_ieeg.session}_task-block_run-00_ieeg.bin'
-    preprocess_ecog(ieeg_file)
+    if False:
+        preprocess_ecog(ieeg_file)

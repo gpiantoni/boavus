@@ -1,4 +1,4 @@
-from boavus.ieeg.corr_fmri import _main
+from boavus.ieeg.corr_fmri import _main_to_elec
 from bidso.utils import bids_mkdir
 
 from .paths import BIDS_PATH, FEAT_PATH, FREESURFER_PATH, DERIVATIVES_PATH
@@ -10,4 +10,4 @@ ieeg_file = modality_path / f'sub-{task_ieeg.subject}_ses-{task_ieeg.session}_ta
 
 
 def test_corr_ecogfmri():
-    _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, [5, ])
+    _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, [5, ])
