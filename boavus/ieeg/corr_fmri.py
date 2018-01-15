@@ -4,7 +4,7 @@ from boavus.ieeg.dataset import Dataset
 from boavus.ieeg.preprocessing import preprocess_ecog
 from wonambi.attr import Channels, Freesurfer
 
-from numpy import ndindex, NaN, array, exp, stack, isnan, arange
+from numpy import ndindex, NaN, array, stack, isnan, arange
 from numpy.linalg import norm
 from nibabel import Nifti1Image
 from nibabel.affines import apply_affine
@@ -13,16 +13,17 @@ from scipy.stats import ttest_ind
 from numpy import repeat, diag
 from nibabel import load as nload
 from multiprocessing import Pool
+from scipy.distributions import norm as normdistr
 from scipy.stats import linregress
-
-gauss = lambda x, s: exp(-.5 * (x ** 2 / s ** 2))
 
 
 def from_chan_to_mrifile(img, fs, xyz):
     return apply_affine(inv(img.affine), xyz + fs.surface_ras_shift).astype(int)
 
+
 def from_mrifile_to_chan(img, fs, xyz):
     return apply_affine(img.affine, xyz) - fs.surface_ras_shift
+
 
 def _read_ecog_val(d):
     hfa_move, hfa_rest = preprocess_ecog(d.filename)
@@ -68,7 +69,7 @@ def _read_fmri_val(feat_path, output_dir, to_plot):
 
 def _compute_gauss(pos, mri_shape, ndi, gauss_size):
     dist_chan = norm(ndi - pos, axis=1)
-    return gauss(dist_chan, gauss_size).reshape(mri_shape)
+    return normdistr.pdf(dist_chan, scale=gauss_size).reshape(mri_shape)
 
 
 def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
@@ -78,7 +79,7 @@ def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
         all_m = p.map(p_compute_gauss, chan_xyz)
     ms = stack(all_m, axis=-1)
     MAX_STD = 3
-    ms[ms.max(axis=-1) < gauss(gauss_size * MAX_STD, gauss_size), :] = NaN
+    ms[ms.max(axis=-1) < normdistr.pdf(gauss_size * MAX_STD, scale=gauss_size), :] = NaN
     print(ms.shape)
     mq = ms / ms.sum(axis=-1)[..., None]
 
