@@ -7,8 +7,8 @@ from numpy import memmap, float64, c_, NaN, empty, arange, asarray
 
 
 class Dataset(iEEG):
-    def __init__(self, filename):
-        super().__init__(filename)
+    def __init__(self, filename, electrodes='*'):
+        super().__init__(filename, electrodes)
 
     def read_data(self, chan=None, begsam=None, endsam=None):
 

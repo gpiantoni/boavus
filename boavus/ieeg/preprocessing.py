@@ -5,10 +5,13 @@ from boavus.ieeg.dataset import Dataset
 
 
 def preprocess_ecog(filename):
-    self = Dataset(filename)
+    self = Dataset(filename, '*regions')
     s_freq = float(self.channels.tsv[0]['sampling_frequency'])
 
-    move_times, rest_times = read_markers(self, 'move', 'rest')
+    if self.subject == 'ommen':
+        move_times, rest_times = read_markers(self)
+    else:
+        move_times, rest_times = read_markers(self, 'move', 'rest')
     # convert to s_freq
     rest_times = [[int(x0 * s_freq) for x0 in x1] for x1 in rest_times]
     move_times = [[int(x0 * s_freq) for x0 in x1] for x1 in move_times]
@@ -17,16 +20,21 @@ def preprocess_ecog(filename):
     data = self.read_data(begsam=rest_times[0][0], endsam=rest_times[1][-1])
     data = select(data, chan=elec_names)
     clean_labels = reject_channels(data)
+    print(clean_labels)
+    print(data.chan[0])
 
     data = self.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
+    print(data.chan[0])
 
     dat_move = run_montage(self, move_times, clean_labels)
     dat_rest = run_montage(self, rest_times, clean_labels)
 
-    clean_roi_labels = [x['name'] for x in self.channels.tsv if x['name'].startswith('grid')]
+    if False:
+        clean_roi_labels = [x['name'] for x in self.channels.tsv if x['name'].startswith('grid')]
+        print(clean_roi_labels)
 
-    dat_move = select(dat_move, chan=clean_roi_labels)
-    dat_rest = select(dat_rest, chan=clean_roi_labels)
+        dat_move = select(dat_move, chan=clean_roi_labels)
+        dat_rest = select(dat_rest, chan=clean_roi_labels)
 
     hfa_move, freq_move = compute_freq(dat_move)
     hfa_rest, freq_rest = compute_freq(dat_rest)
