@@ -72,12 +72,6 @@ def _compute_gauss(pos, mri_shape, ndi, gauss_size):
     return normdistr.pdf(dist_chan, scale=gauss_size).reshape(mri_shape)
 
 
-def _compute_correcog(pos, mri_shape, ndi, gauss_size):
-    p_compute_gauss = partial(_compute_gauss, mri_shape=mri_shape, ndi=ndi, gauss_size=gauss_size)
-    with Pool() as p:
-        all_m = p.map(p_compute_gauss, chan_xyz)
-
-
 def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
 
     p_compute_gauss = partial(_compute_gauss, mri_shape=mri_shape, ndi=ndi, gauss_size=gauss_size)
@@ -90,6 +84,14 @@ def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
     mq = ms / ms.sum(axis=-1)[..., None]
 
     return mq
+
+def _compute_val_at_elec(pos, mri, ndi, KERNEL):
+    m = _compute_gauss(pos, mri.shape, ndi, KERNEL)
+    m /= m.sum()  # normalize so that the sum is 1
+
+    # TODO: write this to file
+    mq = m * mri
+    return mq.sum()
 
 
 def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
@@ -118,22 +120,18 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     print('ndindex done')
 
     r = []
-    for KERNEL in GAUSS_SIZE:
+    for KERNEL in KERNEL_SIZES:
         print(KERNEL)
-        fmri_val = []
 
-        for pos in chan_xyz:
-            m = _compute_gauss(pos, mri.shape, ndi, KERNEL)
-            m /= m.sum()  # normalize so that the sum is 1
+        p_compute_val_at_elec = partial(_compute_val_at_elec, mri=mri, ndi=ndi, gauss_size=KERNEL)
 
-            # write this to file
-            mq = (m * mri)
-            fmri_val.append(mq.sum())
+        with Pool() as p:
+            fmri_val = p.map(p_compute_val_at_elec, chan_xyz)
 
         lr = linregress(ecog_val, array(fmri_val))
         print(lr)
         r.append(lr.rvalue ** 2)
-        
+
     return r
 
 def _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
