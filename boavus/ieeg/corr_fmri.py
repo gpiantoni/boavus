@@ -79,6 +79,7 @@ def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
     ms = stack(all_m, axis=-1)
     MAX_STD = 3
     ms[ms.max(axis=-1) < gauss(gauss_size * MAX_STD, gauss_size), :] = NaN
+    print(ms.shape)
     mq = ms / ms.sum(axis=-1)[..., None]
 
     return mq

@@ -13,6 +13,8 @@ cache:
  - directories:
    - $CACHE
    - $HOME/.cache/pip
+ - timeout: 1200
+   
 
 before_install:
  - sudo apt-get update
