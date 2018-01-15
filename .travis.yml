@@ -25,7 +25,9 @@ before_install:
  - mkdir $DERIVATIVES/freesurfer -p
  - if [ ! -d $CACHE/freesurfer ]; then
     wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
-    tar -C $CACHE 
+    tar 
+    -xvf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
+    -C $CACHE 
     --exclude='freesurfer/trctrain' 
     --exclude='freesurfer/subjects/fsaverage_sym' 
     --exclude='freesurfer/subjects/fsaverage3' 
@@ -38,7 +40,6 @@ before_install:
     --exclude='freesurfer/average/mult-comp-cor' 
     --exclude='freesurfer/lib/cuda' 
     --exclude='freesurfer/lib/qt' 
-    -xvf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
     freesurfer  ;
    fi
  - echo -e FREESURFER_LICENSE > $CACHE/freesurfer/license.txt
