@@ -58,7 +58,7 @@ def _upsample(img_lowres):
 def _read_fmri_val(feat_path, output_dir, to_plot):
     # fmri = percent_fmri(Path('/Fridge/users/giovanni/projects/mofe/derivatives/feat/sub-ommen/ses-daym25/func/sub-ommen_ses-daym25_task-motor-hand-left_run-00.feat'))
 
-    img_lowres = nload(feat_path / 'stats' / 'zstat1.nii.gz')
+    img_lowres = nload(str(feat_path / 'stats' / 'zstat1.nii.gz'))
     upsampled = _upsample(img_lowres)
     if to_plot:
         upsampled.to_filename(str(output_dir / 'upsampled.nii.gz'))
