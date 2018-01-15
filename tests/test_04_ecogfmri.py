@@ -10,4 +10,4 @@ ieeg_file = modality_path / f'sub-{task_ieeg.subject}_ses-{task_ieeg.session}_ta
 
 
 def test_corr_ecogfmri():
-    _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, 5)
+    _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, [5, ])
