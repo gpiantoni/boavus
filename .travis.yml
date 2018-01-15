@@ -26,7 +26,7 @@ before_install:
  - if [ ! -d $CACHE/freesurfer ]; then
     wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
     tar 
-    -xvf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
+    -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
     -C $CACHE 
     --exclude='freesurfer/trctrain' 
     --exclude='freesurfer/subjects/fsaverage_sym' 
