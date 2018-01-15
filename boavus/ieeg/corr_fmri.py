@@ -1,7 +1,9 @@
 from functools import partial
 
+from boavus.fmri.percent import percent_fmri
 from boavus.ieeg.dataset import Dataset
 from boavus.ieeg.preprocessing import preprocess_ecog
+from boavus.ieeg.percent import percent_ecog
 from wonambi.attr import Channels, Freesurfer
 
 from numpy import ndindex, NaN, array, stack, isnan, arange
@@ -16,6 +18,8 @@ from multiprocessing import Pool
 from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
+MEASURE = 'percent'
+
 
 def from_chan_to_mrifile(img, fs, xyz):
     return apply_affine(inv(img.affine), xyz + fs.surface_ras_shift).astype(int)
@@ -28,9 +32,11 @@ def from_mrifile_to_chan(img, fs, xyz):
 def _read_ecog_val(d):
     hfa_move, hfa_rest = preprocess_ecog(d.filename)
 
-    # ecog_stats = percent_ecog(hfa_move, hfa_rest).data[0]
-    t = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1).statistic
-    return t, hfa_move.chan[0]
+    if MEASURE == 'percent':
+        ecog_stats = percent_ecog(hfa_move, hfa_rest).data[0]
+    elif MEASURE == 'zstat':
+        ecog_stats = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1).statistic
+    return ecog_stats, hfa_move.chan[0]
 
 
 def _read_elec(d):
@@ -57,9 +63,11 @@ def _upsample(img_lowres):
 
 
 def _read_fmri_val(feat_path, output_dir, to_plot):
-    # fmri = percent_fmri(Path('/Fridge/users/giovanni/projects/mofe/derivatives/feat/sub-ommen/ses-daym25/func/sub-ommen_ses-daym25_task-motor-hand-left_run-00.feat'))
+    if MEASURE == 'percent':
+        img_lowres = percent_fmri(feat_path)
+    elif MEASURE == 'zstat':
+        img_lowres = nload(str(feat_path / 'stats' / 'zstat1.nii.gz'))
 
-    img_lowres = nload(str(feat_path / 'stats' / 'zstat1.nii.gz'))
     upsampled = _upsample(img_lowres)
     if to_plot:
         upsampled.to_filename(str(output_dir / 'upsampled.nii.gz'))
@@ -123,7 +131,7 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     for KERNEL in KERNEL_SIZES:
         print(KERNEL)
 
-        p_compute_val_at_elec = partial(_compute_val_at_elec, mri=mri, ndi=ndi, gauss_size=KERNEL)
+        p_compute_val_at_elec = partial(_compute_val_at_elec, mri=mri, ndi=ndi, KERNEL=KERNEL)
 
         with Pool() as p:
             fmri_val = p.map(p_compute_val_at_elec, chan_xyz)
@@ -133,6 +141,7 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
         r.append(lr.rvalue ** 2)
 
     return r
+
 
 def _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
 
