@@ -7,7 +7,7 @@ from boavus.ieeg.preprocessing import preprocess_ecog
 from boavus.ieeg.percent import percent_ecog
 from wonambi.attr import Channels, Freesurfer
 
-from numpy import ndindex, NaN, array, stack, isnan, arange, nansum
+from numpy import ndindex, NaN, array, stack, isnan, arange, nansum, power, zeros
 from numpy.linalg import norm
 from nibabel import Nifti1Image
 from nibabel.affines import apply_affine
@@ -20,6 +20,7 @@ from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
 MEASURE = 'zstat'
+DISTANCE_METRIC = 'sphere'
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -75,12 +76,6 @@ def _read_fmri_val(feat_path, output_dir, to_plot):
 
     return upsampled
 
-
-def _compute_gauss(pos, mri_shape, ndi, gauss_size):
-    dist_chan = norm(ndi - pos, axis=1)
-    return normdistr.pdf(dist_chan, scale=gauss_size).reshape(mri_shape)
-
-
 def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
 
     p_compute_gauss = partial(_compute_gauss, mri_shape=mri_shape, ndi=ndi, gauss_size=gauss_size)
@@ -94,21 +89,44 @@ def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
 
     return mq
 
-def _compute_val_at_elec(pos, mri, ndi, KERNEL, affine=None, output=None):
-    m = _compute_gauss(pos, mri.shape, ndi, KERNEL)
-    m /= m.sum()  # normalize so that the sum is 1
-    if output is not None:
-        nifti = Nifti1Image(m, affine)
-        nifti.to_filename(str(output))
 
-    mq = m * mri
-    return nansum(mq)
+def _compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
+    fmri_val = []
+    for pos in chan_xyz:
+        dist_chan = norm(ndi - pos, axis=1)
+
+        if DISTANCE_METRIC == 'gaussian':
+            m = normdistr.pdf(dist_chan, scale=KERNEL)
+
+        elif DISTANCE_METRIC == 'sphere':
+            m = zeros(dist_chan.shape)
+            m[dist_chan <= KERNEL] = 1
+
+        elif DISTANCE_METRIC == 'inverse':
+            m = power(dist_chan, KERNEL)
+
+        m /= nansum(m)  # normalize so that the sum is 1
+        m = m.reshape(mri.shape)
+
+        if output is not None:
+            nifti = Nifti1Image(m, affine)
+            nifti.to_filename(str(output))
+
+        mq = m * mri
+        fmri_val.append(nansum(mq))
+
+    lr = linregress(ecog_val, array(fmri_val))
+    return lr.rvalue ** 2
 
 
 def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
 
     output_path = DERIVATIVES_PATH / 'corr_fmri_ecog'
     output_path.mkdir(exist_ok=True)
+
+    img = _read_fmri_val(feat_path, output_path, to_plot)
+    mri = img.get_data()
+    print('fmri done')
 
     if environ.get('TRAVIS') is not None:
         pattern = '*'  # in TRAVIS
@@ -124,29 +142,15 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     print(ecog_val)
     print('ecog done')
 
-    img = _read_fmri_val(feat_path, output_path, to_plot)
-    mri = img.get_data()
-    print('fmri done')
-
     chan_xyz = elec.return_xyz()
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
     print('ndindex done')
 
-    r = []
-    for KERNEL in KERNEL_SIZES:
-        print(KERNEL)
+    p_compute_each_kernel = partial(_compute_each_kernel, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
 
-        p_compute_val_at_elec = partial(_compute_val_at_elec, mri=mri, ndi=ndi, KERNEL=KERNEL)
-
-        with Pool() as p:
-            fmri_val = p.map(p_compute_val_at_elec, chan_xyz)
-
-        print(fmri_val)
-
-        lr = linregress(ecog_val, array(fmri_val))
-        print(lr)
-        r.append(lr.rvalue ** 2)
+    with Pool() as p:
+        r = p.map(p_compute_each_kernel, KERNEL_SIZES)
 
     return r
 

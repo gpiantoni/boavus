@@ -1,17 +1,25 @@
 from wonambi.trans import select, montage, math, timefrequency, concatenate
+from os import environ
 from numpy import mean, std
 
 from boavus.ieeg.dataset import Dataset
 
 
 def preprocess_ecog(filename):
-    self = Dataset(filename, '*fridge')
+    if environ.get('TRAVIS') is not None:
+        pattern = '*'  # in TRAVIS
+    else:
+        if 'ommen' in filename.stem:
+            pattern = '*fridge'
+        else:
+            pattern = '*regions'
+    self = Dataset(filename, pattern)
     s_freq = float(self.channels.tsv[0]['sampling_frequency'])
 
-    if self.subject == 'ommen':
-        move_times, rest_times = read_markers(self)
-    else:
+    if self.subject == 'bert':
         move_times, rest_times = read_markers(self, 'move', 'rest')
+    else:
+        move_times, rest_times = read_markers(self)
     # convert to s_freq
     rest_times = [[int(x0 * s_freq) for x0 in x1] for x1 in rest_times]
     move_times = [[int(x0 * s_freq) for x0 in x1] for x1 in move_times]
