@@ -59,10 +59,12 @@ install:
  - pip install -e .
 
 script:
-    - py.test -s --cov=boavus tests
+    - py.test -s --cov=boavus tests/test_01_simulate.py
+    - py.test -s --cov=boavus tests/test_02_feat.py
 
 after_success:
  - ls tests/data/* -lR
+ - cat /home/travis/build/gpiantoni/boavus/tests/data/derivatives/feat/sub-bert/ses-day01/func/sub-bert_ses-day01_task-block_run-00.feat/logs/*
  - codecov
 
 notifications:

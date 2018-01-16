@@ -7,7 +7,7 @@ from boavus.ieeg.preprocessing import preprocess_ecog
 from boavus.ieeg.percent import percent_ecog
 from wonambi.attr import Channels, Freesurfer
 
-from numpy import ndindex, NaN, array, stack, isnan, arange
+from numpy import ndindex, NaN, array, stack, isnan, arange, nansum
 from numpy.linalg import norm
 from nibabel import Nifti1Image
 from nibabel.affines import apply_affine
@@ -100,7 +100,7 @@ def _compute_val_at_elec(pos, mri, ndi, KERNEL):
 
     # TODO: write this to file
     mq = m * mri
-    return mq.sum()
+    return nansum(mq)
 
 
 def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
