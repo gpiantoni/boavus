@@ -20,7 +20,7 @@ from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
 MEASURE = 'zstat'
-DISTANCE_METRIC = 'gaussian'
+DISTANCE_METRIC = 'sphere'
 
 
 def from_chan_to_mrifile(img, fs, xyz):
