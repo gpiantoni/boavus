@@ -22,6 +22,7 @@ before_install:
  - export FSLOUTPUTTYPE=NIFTI_GZ
  - mkdir $DERIVATIVES/freesurfer -p
  - wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
+ - mkdir $LIB -p
  - tar 
    -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
    -C $LIB 

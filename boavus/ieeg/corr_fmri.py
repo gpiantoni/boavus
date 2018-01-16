@@ -19,7 +19,7 @@ from multiprocessing import Pool
 from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
-MEASURE = 'percent'
+MEASURE = 'zstat'
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -108,7 +108,7 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     output_path = DERIVATIVES_PATH / 'corr_fmri_ecog'
     output_path.mkdir(exist_ok=True)
 
-    if environ.get('TRAVIS') is None:
+    if environ.get('TRAVIS') is not None:
         pattern = '*'
     else:
         pattern = '*fridge'
