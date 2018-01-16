@@ -119,8 +119,7 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     ecog_val, labels = _read_ecog_val(d)
     elec = _read_elec(d)
     elec = elec(lambda x: x.label in labels)
-    print(len(elec.return_label()))
-    print(len(ecog_val))
+    print(ecog_val)
     print('ecog done')
 
     img = _read_fmri_val(feat_path, output_path, to_plot)
@@ -140,6 +139,8 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
 
         with Pool() as p:
             fmri_val = p.map(p_compute_val_at_elec, chan_xyz)
+
+        print(fmri_val)
 
         lr = linregress(ecog_val, array(fmri_val))
         print(lr)
