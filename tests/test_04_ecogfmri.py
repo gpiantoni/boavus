@@ -21,6 +21,13 @@ def test_corr_ecogfmri_1():
     mri = img.get_data()
     print('fmri done')
 
+def test_corr_ecogfmri_3():
+
+    if environ.get('TRAVIS') is not None:
+        pattern = '*'  # in TRAVIS
+    else:
+        pattern = '*fridge'
+    print(pattern)
 
 def test_corr_ecogfmri_2():
 
