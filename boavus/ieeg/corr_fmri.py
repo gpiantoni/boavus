@@ -19,7 +19,7 @@ from multiprocessing import Pool
 from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
-MEASURE = 'percent'
+MEASURE = 'zstat'
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -156,6 +156,10 @@ def _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES,
     output_path = DERIVATIVES_PATH / 'corr_fmri_ecog'
     output_path.mkdir(exist_ok=True)
 
+    img = _read_fmri_val(feat_path, output_path, to_plot)
+    mri = img.get_data()
+    print('fmri done')
+
     d = Dataset(ieeg_file, '*fridge')
 
     freesurfer_path = FREESURFER_PATH / d.subject
@@ -166,10 +170,6 @@ def _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES,
     print(len(elec.return_label()))
     print(len(ecog_val))
     print('ecog done')
-
-    img = _read_fmri_val(feat_path, output_path, to_plot)
-    mri = img.get_data()
-    print('fmri done')
 
     chan_xyz = elec.return_xyz()
     nd = array(list(ndindex(mri.shape)))
