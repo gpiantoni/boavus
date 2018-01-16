@@ -37,10 +37,3 @@ def test_corr_ecogfmri_2():
         pattern = '*fridge'
     print(pattern)
     d = Dataset(ieeg_file, pattern)
-
-    freesurfer_path = FREESURFER_PATH / d.subject
-    fs = Freesurfer(freesurfer_path)
-    ecog_val, labels = _read_ecog_val(d)
-    elec = _read_elec(d)
-    elec = elec(lambda x: x.label in labels)
-    print(ecog_val)
