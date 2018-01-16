@@ -6,14 +6,12 @@ python:
 env:
   global:
    - DOWNLOADS=$HOME/downloads
-   - CACHE=$HOME/cache
+   - LIB=$HOME/lib
    - DERIVATIVES=tests/data/derivatives
 
 cache: 
  - directories:
-   - $CACHE
    - $HOME/.cache/pip
- - timeout: 1200
    
 
 before_install:
@@ -23,33 +21,30 @@ before_install:
  - source /etc/fsl/fsl.sh
  - export FSLOUTPUTTYPE=NIFTI_GZ
  - mkdir $DERIVATIVES/freesurfer -p
- - if [ ! -d $CACHE/freesurfer ]; then
-    wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
-    echo "downloaded" ;
-    tar 
-    -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
-    -C $CACHE 
-    --exclude='freesurfer/trctrain' 
-    --exclude='freesurfer/subjects/fsaverage_sym' 
-    --exclude='freesurfer/subjects/fsaverage3' 
-    --exclude='freesurfer/subjects/fsaverage4'
-    --exclude='freesurfer/subjects/fsaverage5' 
-    --exclude='freesurfer/subjects/fsaverage6' 
-    --exclude='freesurfer/subjects/cvs_avg35' 
-    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' 
-    --exclude='freesurfer/subjects/V1_average' 
-    --exclude='freesurfer/average/mult-comp-cor' 
-    --exclude='freesurfer/lib/cuda' 
-    --exclude='freesurfer/lib/qt' 
-    --exclude='freesurfer/lib/tcltktixblt'
-    --exclude='freesurfer/lib/vtk' 
-    --exclude='freesurfer/diffusion' 
-    freesurfer  ;
-   fi
- - echo -e FREESURFER_LICENSE > $CACHE/freesurfer/license.txt
- - export FREESURFER_HOME=$CACHE/freesurfer
+ - wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
+ - tar 
+   -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
+   -C $LIB 
+   --exclude='freesurfer/trctrain' 
+   --exclude='freesurfer/subjects/fsaverage_sym' 
+   --exclude='freesurfer/subjects/fsaverage3' 
+   --exclude='freesurfer/subjects/fsaverage4'
+   --exclude='freesurfer/subjects/fsaverage5' 
+   --exclude='freesurfer/subjects/fsaverage6' 
+   --exclude='freesurfer/subjects/cvs_avg35' 
+   --exclude='freesurfer/subjects/cvs_avg35_inMNI152' 
+   --exclude='freesurfer/subjects/V1_average' 
+   --exclude='freesurfer/average/mult-comp-cor' 
+   --exclude='freesurfer/lib/cuda' 
+   --exclude='freesurfer/lib/qt' 
+   --exclude='freesurfer/lib/tcltktixblt'
+   --exclude='freesurfer/lib/vtk' 
+   --exclude='freesurfer/diffusion' 
+   freesurfer  ;
+ - echo -e FREESURFER_LICENSE > $LIB/freesurfer/license.txt
+ - export FREESURFER_HOME=$LIB/freesurfer
  - source $FREESURFER_HOME/SetUpFreeSurfer.sh
- - ln -s $CACHE/freesurfer/subjects/bert $DERIVATIVES/freesurfer/bert -r
+ - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/bert -r
 
 install: 
  # install requirements
