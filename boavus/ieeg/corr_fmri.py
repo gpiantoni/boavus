@@ -19,7 +19,7 @@ from multiprocessing import Pool
 from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
-MEASURE = 'zstat'
+MEASURE = 'percent'
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -94,11 +94,13 @@ def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
 
     return mq
 
-def _compute_val_at_elec(pos, mri, ndi, KERNEL):
+def _compute_val_at_elec(pos, mri, ndi, KERNEL, affine=None, output=None):
     m = _compute_gauss(pos, mri.shape, ndi, KERNEL)
     m /= m.sum()  # normalize so that the sum is 1
+    if output is not None:
+        nifti = Nifti1Image(m, affine)
+        nifti.to_filename(str(output))
 
-    # TODO: write this to file
     mq = m * mri
     return nansum(mq)
 
@@ -109,7 +111,7 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     output_path.mkdir(exist_ok=True)
 
     if environ.get('TRAVIS') is not None:
-        pattern = '*'
+        pattern = '*'  # in TRAVIS
     else:
         pattern = '*fridge'
     d = Dataset(ieeg_file, pattern)
