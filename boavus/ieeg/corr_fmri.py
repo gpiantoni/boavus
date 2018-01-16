@@ -20,7 +20,7 @@ from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
 MEASURE = 'zstat'
-DISTANCE_METRIC = 'sphere'
+DISTANCE_METRIC = 'gaussian'
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -103,7 +103,7 @@ def _compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
             m[dist_chan <= KERNEL] = 1
 
         elif DISTANCE_METRIC == 'inverse':
-            m = power(dist_chan, KERNEL)
+            m = power(dist_chan, -1 * KERNEL)
 
         m /= nansum(m)  # normalize so that the sum is 1
         m = m.reshape(mri.shape)
@@ -131,7 +131,10 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     if environ.get('TRAVIS') is not None:
         pattern = '*'  # in TRAVIS
     else:
-        pattern = '*fridge'
+        if 'ommen' in ieeg_file.stem:
+            pattern = '*fridge'
+        else:
+            pattern = '*regions'
     d = Dataset(ieeg_file, pattern)
 
     freesurfer_path = FREESURFER_PATH / d.subject
