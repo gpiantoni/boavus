@@ -41,6 +41,9 @@ before_install:
     --exclude='freesurfer/average/mult-comp-cor' 
     --exclude='freesurfer/lib/cuda' 
     --exclude='freesurfer/lib/qt' 
+    --exclude='freesurfer/lib/tcltktixblt'
+    --exclude='freesurfer/lib/vtk' 
+    --exclude='freesurfer/diffusion' 
     freesurfer  ;
    fi
  - echo -e FREESURFER_LICENSE > $CACHE/freesurfer/license.txt
