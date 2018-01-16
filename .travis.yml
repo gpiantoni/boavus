@@ -59,7 +59,7 @@ install:
  - pip install -e .
 
 script:
-    - py.test -s --cov=boavus tests/test_01_simulate.py
+    - py.test -s --cov=boavus tests
 
 after_success:
  - ls tests/data/* -lR
