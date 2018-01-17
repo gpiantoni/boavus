@@ -128,7 +128,7 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     mri = img.get_data()
     print('fmri done')
 
-    if environ.get('TRAVIS') is not None:
+    if environ.get('CI') is not None:
         pattern = '*'  # in TRAVIS
     else:
         if 'ommen' in ieeg_file.stem:

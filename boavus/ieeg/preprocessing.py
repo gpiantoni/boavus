@@ -6,7 +6,7 @@ from boavus.ieeg.dataset import Dataset
 
 
 def preprocess_ecog(filename):
-    if environ.get('TRAVIS') is not None:
+    if environ.get('CI') is not None:
         pattern = '*'  # in TRAVIS
     else:
         if 'ommen' in filename.stem:
@@ -24,17 +24,13 @@ def preprocess_ecog(filename):
     rest_times = [[int(x0 * s_freq) for x0 in x1] for x1 in rest_times]
     move_times = [[int(x0 * s_freq) for x0 in x1] for x1 in move_times]
     elec_names = [x['name'] for x in self.electrodes.electrodes.tsv]
-    print(elec_names)
 
     data = self.read_data(begsam=rest_times[0][0], endsam=rest_times[1][-1])
-    print(data.chan[0])
 
     data = select(data, chan=elec_names)
     clean_labels = reject_channels(data)
-    print(clean_labels)
 
     data = self.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
-    print(data.chan[0])
 
     dat_move = run_montage(self, move_times, clean_labels)
     dat_rest = run_montage(self, rest_times, clean_labels)

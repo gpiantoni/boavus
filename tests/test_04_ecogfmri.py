@@ -19,23 +19,12 @@ def test_corr_ecogfmri_1():
 
     img = _read_fmri_val(feat_path, output_path, to_plot=True)
     mri = img.get_data()
-    print('fmri done')
-
-
-def test_corr_ecogfmri_3():
-
-    if environ.get('TRAVIS') is not None:
-        pattern = '*'  # in TRAVIS
-    else:
-        pattern = '*fridge'
-    print(pattern)
 
 
 def test_corr_ecogfmri_2():
 
-    if environ.get('TRAVIS') is not None:
+    if environ.get('CI') is not None:
         pattern = '*'  # in TRAVIS
     else:
         pattern = '*fridge'
-    print(pattern)
     d = Dataset(ieeg_file, pattern)
