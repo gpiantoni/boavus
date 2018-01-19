@@ -45,7 +45,7 @@ before_install:
  - echo -e FREESURFER_LICENSE > $LIB/freesurfer/license.txt
  - export FREESURFER_HOME=$LIB/freesurfer
  - source $FREESURFER_HOME/SetUpFreeSurfer.sh
- - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/bert -r
+ - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
 
 install: 
  # install requirements
