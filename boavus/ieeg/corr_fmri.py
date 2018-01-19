@@ -137,7 +137,7 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
             pattern = '*regions'
     d = Dataset(ieeg_file, pattern)
 
-    freesurfer_path = FREESURFER_PATH / d.subject
+    freesurfer_path = FREESURFER_PATH / ('sub-' + d.subject)
     fs = Freesurfer(freesurfer_path)
     ecog_val, labels = _read_ecog_val(d)
     elec = _read_elec(d)

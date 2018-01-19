@@ -5,9 +5,6 @@ def _remove_python3_from_PATH(path):
 
 
 ENVIRON = {
-    'FSLDIR': '/usr/share/fsl/5.0',
-    'FSLOUTPUTTYPE': 'NIFTI_GZ',
-    'PATH': '/usr/share/fsl/5.0/bin' + pathsep + _remove_python3_from_PATH(environ.get('PATH', '')),
-    'LD_LIBRARY_PATH': '/usr/lib/fsl/5.0' + pathsep + environ.get('LD_LIBRARY_PATH', ''),
+    'PATH': _remove_python3_from_PATH(environ.get('PATH', '')),
     }
 ENVIRON = {**environ, **ENVIRON}
