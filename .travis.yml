@@ -55,7 +55,7 @@ install:
  - pip install -e .
 
 script:
- - py.test -s --cov=boavus tests
+ - py.test --cov=boavus tests
 
 after_success:
  - ls tests/data/* -lR

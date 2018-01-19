@@ -1,0 +1,10 @@
+.cache/
+docs/build/
+docs/source/api/
+
+tests/data/
+
+.coverage
+htmlcov/
+
+dist/

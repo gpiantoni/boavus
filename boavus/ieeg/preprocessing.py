@@ -12,7 +12,7 @@ def preprocess_ecog(filename):
         if 'ommen' in filename.stem:
             pattern = '*fridge'
         else:
-            pattern = '*regions'
+            pattern = '*ct'
     self = Dataset(filename, pattern)
     s_freq = float(self.channels.tsv[0]['sampling_frequency'])
 
