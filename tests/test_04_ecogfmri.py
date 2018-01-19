@@ -11,4 +11,4 @@ def test_corr_ecogfmri():
     KERNEL_SIZES = [5, ]
 
     output = _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, BOAVUS_PATH, KERNEL_SIZES, to_plot=False)
-    assert output[0] == 0.004977927919656334
+    assert output[0] < 0.01

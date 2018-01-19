@@ -24,7 +24,3 @@ def test_simulate_anat():
 
 def test_simulate_fmri():
     simulate_bold(BIDS_PATH, task_fmri, T1_PATH)
-
-
-def test_read_fmri():
-    Task(task_fmri.get_filename(BIDS_PATH))
