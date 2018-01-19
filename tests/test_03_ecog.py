@@ -30,5 +30,6 @@ def test_ieeg_electrodes():
     elec_ct.acquisition = 'ctprojectedregions'
     elec_regions_file = elec_ct.get_filename(BIDS_PATH)
 
-    elec_ct_file.rename(elec_regions_file)
-    replace_underscore(elec_ct_file, 'coordframe.json').rename(replace_underscore(elec_regions_file, 'coordframe.json'))
+    copyfile(elec_ct_file, elec_regions_file)
+    copyfile(replace_underscore(elec_ct_file, 'coordframe.json'),
+             replace_underscore(elec_regions_file, 'coordframe.json'))

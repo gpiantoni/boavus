@@ -128,13 +128,10 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     mri = img.get_data()
     print('fmri done')
 
-    if environ.get('CI') is not None:
-        pattern = '*'  # in TRAVIS
+    if 'ommen' in ieeg_file.stem:
+        pattern = '*fridge'
     else:
-        if 'ommen' in ieeg_file.stem:
-            pattern = '*fridge'
-        else:
-            pattern = '*regions'
+        pattern = '*regions'
     d = Dataset(ieeg_file, pattern)
 
     freesurfer_path = FREESURFER_PATH / ('sub-' + d.subject)
