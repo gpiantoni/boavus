@@ -25,7 +25,7 @@ def test_ieeg_electrodes():
 
 def test_ieeg_dataset():
 
-    d = Dataset(ieeg_file, 'ct')
+    d = Dataset(ieeg_file, '*ct')
     data = d.read_data(begsam=10, endsam=20)
     events = d.read_events()
 
