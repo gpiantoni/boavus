@@ -1,11 +1,10 @@
 from functools import partial
-from os import environ
 
 from boavus.fmri.percent import percent_fmri
 from boavus.ieeg.dataset import Dataset
 from boavus.ieeg.preprocessing import preprocess_ecog
 from boavus.ieeg.percent import percent_ecog
-from wonambi.attr import Channels, Freesurfer
+from wonambi.attr import Freesurfer
 
 from numpy import ndindex, NaN, array, stack, isnan, arange, nansum, power, zeros
 from numpy.linalg import norm
@@ -39,15 +38,6 @@ def _read_ecog_val(d):
     elif MEASURE == 'zstat':
         ecog_stats = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1).statistic
     return ecog_stats, hfa_move.chan[0]
-
-
-def _read_elec(d):
-    """TODO: this should be in bidso"""
-    labels = [x['name'] for x in d.electrodes.electrodes.tsv]
-    mat = array([(float(x['x']), float(x['y']), float(x['z'])) for x in d.electrodes.electrodes.tsv])
-
-    chan = Channels(labels, mat)
-    return chan
 
 
 def _upsample(img_lowres):
@@ -137,12 +127,10 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     freesurfer_path = FREESURFER_PATH / ('sub-' + d.subject)
     fs = Freesurfer(freesurfer_path)
     ecog_val, labels = _read_ecog_val(d)
-    elec = _read_elec(d)
-    elec = elec(lambda x: x.label in labels)
     print(ecog_val)
     print('ecog done')
 
-    chan_xyz = elec.return_xyz()
+    chan_xyz = array(d.electrodes.get_xyz(labels))
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
     print('ndindex done')
