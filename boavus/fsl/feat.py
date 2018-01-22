@@ -47,8 +47,8 @@ def run_feat(FEAT_OUTPUT, task, dry_run=False):
     cmd = ['feat', str(subj_design)]
 
     if not dry_run:
-        # Popen(cmd, env=ENVIRON, preexec_fn=setpgrp)
-        run(cmd, env=ENVIRON)
+        Popen(cmd, env=ENVIRON, preexec_fn=setpgrp)
+        # run(cmd, env=ENVIRON)
 
     feat_path = bids_mkdir(FEAT_OUTPUT, task)
     return feat_path / replace_extension(task.filename.name, '.feat')
@@ -60,8 +60,8 @@ def prepare_design(FEAT_OUTPUT, task):
     events_fsl = feat_path / task.events.filename.name
     _write_events(task.events.filename, events_fsl)
 
-    anat_path = find_in_bids(task.filename, modality='anat', upwards=True)
-    anat_task = file_Core(anat_path / f'sub-{task.subject}_T1w.nii.gz')
+    anat_path = find_in_bids(task.filename, modality='T1w', extension='.nii.gz', upwards=True)
+    anat_task = file_Core(anat_path)
     run_reorient2std(anat_task.filename)  # TODO: this modifies the BIDS
     bids_mkdir(FEAT_OUTPUT, anat_task)
 

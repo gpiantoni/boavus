@@ -2,11 +2,14 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from logging import getLogger, StreamHandler, Formatter, INFO, DEBUG
 from pathlib import Path
 
+from warnings import filterwarnings
+
 from .fmri.percent import run_fmri_percent
 from .fsl.feat import run_fsl_feat
 from .ieeg.corr_fmri import run_ieeg_corrfmri
 
 
+filterwarnings('ignore', category=FutureWarning)
 lg = getLogger('boavus')
 
 STEPS = [
@@ -17,6 +20,20 @@ STEPS = [
 
 
 parser = ArgumentParser(description='Tools to analyze data structured as BIDS in Python', formatter_class=RawTextHelpFormatter)
+"""
+subparsers = parser.add_subparsers(title='subcommands', help='sub-command help')
+
+parser_a = subparsers.add_parser('fsl_feat', help='a help')
+parser_a.set_defaults(func='fsl_feat')
+arg_feat_dir = {'name':'--feat_dir', 'help':'The directory with FSL/feat'}
+
+parser_a.add_argument(**arg_feat_dir)
+
+parser_b = subparsers.add_parser('fmri_percent', help='a help')
+
+parser_c = subparsers.add_parser('ieeg_corrfmri', help='a help')
+
+"""
 parser.add_argument('bids_dir', help='The directory with the input dataset '
                     'formatted according to the BIDS standard.')
 parser.add_argument(
@@ -44,6 +61,8 @@ args = parser.parse_args()
 
 
 def main():
+    print(args)
+    return
 
     DATE_FORMAT = '%H:%M:%S'
     if args.log[:1].lower() == 'i':
@@ -51,7 +70,6 @@ def main():
         FORMAT = '{asctime:<10}{message}'
 
     elif args.log[:1].lower() == 'd':
-        print('cc')
         lg.setLevel(DEBUG)
         FORMAT = '{asctime:<10}{levelname:<10}{filename:<40}(l. {lineno: 6d})/ {funcName:<40}: {message}'
 

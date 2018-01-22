@@ -1,6 +1,7 @@
 from functools import partial
 from logging import getLogger
 from bidso.find import find_in_bids
+from bidso.utils import replace_underscore
 from bidso import Task
 
 from boavus.fmri.percent import percent_fmri
@@ -24,12 +25,10 @@ from scipy.stats import linregress
 lg = getLogger(__name__)
 
 MEASURE = 'zstat'
-DISTANCE_METRIC = 'inverse'
+DISTANCE_METRIC = 'gaussian'
 
 def run_ieeg_corrfmri(bids_dir, FEAT_PATH, FREESURFER_PATH, DERIVATIVES_PATH):
-    KERNEL_SIZES = [5, ]
-
-    results = DERIVATIVES_PATH / 'results.tsv'
+    KERNEL_SIZES = arange(1, 10, 0.25)
 
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
         ieeg = Task(ieeg_file)
@@ -38,6 +37,7 @@ def run_ieeg_corrfmri(bids_dir, FEAT_PATH, FREESURFER_PATH, DERIVATIVES_PATH):
 
         output = _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False)
 
+        results = DERIVATIVES_PATH / replace_underscore(ieeg_file, 'results.tsv')
         with results.open('w') as f:
             f.write(str(output))
 
