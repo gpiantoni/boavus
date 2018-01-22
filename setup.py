@@ -32,6 +32,7 @@ setup(
     packages=find_packages(exclude=('test', )),
     install_requires=[
         'nibabel',
+        'numpy',
         ],
     extras_require={
         'test': [  # to run tests
@@ -40,4 +41,9 @@ setup(
             'codecov',
             ],
         },
+    entry_points={
+        'console_scripts': [
+            'boavus=boavus.main:main',
+        ],
+    },
     )

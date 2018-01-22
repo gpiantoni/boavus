@@ -66,6 +66,7 @@ def _read_fmri_val(feat_path, output_dir, to_plot):
 
     return upsampled
 
+
 def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
 
     p_compute_gauss = partial(_compute_gauss, mri_shape=mri_shape, ndi=ndi, gauss_size=gauss_size)

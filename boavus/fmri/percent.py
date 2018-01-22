@@ -8,6 +8,16 @@ from bidso import file_Core
 from bidso.utils import bids_mkdir
 
 
+def run_fmri_percent(feat_dir, output_dir):
+    """
+    TODO
+    ----
+    Maybe this function could do in main.py
+    """
+    for feat_path in feat_dir.rglob('*.feat'):
+        compute_fmri_percent(feat_path, output_dir)
+
+
 def compute_fmri_percent(feat_path, output_dir):
 
     percent_nifti = percent_fmri(feat_path)
