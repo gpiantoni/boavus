@@ -31,15 +31,19 @@ def run_ieeg_corrfmri(bids_dir, FEAT_PATH, FREESURFER_PATH, DERIVATIVES_PATH):
     KERNEL_SIZES = arange(1, 10, 0.25)
 
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
-        ieeg = Task(ieeg_file)
-        feat_path = find_in_bids(FEAT_PATH, subject=ieeg.subject,
-                                 modality='bold', extension='.feat')
+        try:
+            ieeg = Task(ieeg_file)
+            feat_path = find_in_bids(FEAT_PATH, subject=ieeg.subject, task=ieeg.task,
+                                     modality='bold', extension='.feat')
 
-        output = _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False)
+            output = _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False)
 
-        results = DERIVATIVES_PATH / replace_underscore(ieeg_file, 'results.tsv')
-        with results.open('w') as f:
-            f.write(str(output))
+            results = DERIVATIVES_PATH / replace_underscore(ieeg_file, 'results.tsv')
+            with results.open('w') as f:
+                f.write(str(output))
+
+        except Exception as err:
+            lg.warning(err)
 
 
 def from_chan_to_mrifile(img, fs, xyz):

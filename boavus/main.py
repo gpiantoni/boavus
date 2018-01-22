@@ -7,6 +7,7 @@ from warnings import filterwarnings
 from .fmri.percent import run_fmri_percent
 from .fsl.feat import run_fsl_feat
 from .ieeg.corr_fmri import run_ieeg_corrfmri
+from .ieeg.electrodes import run_ieeg_electrodes
 
 
 filterwarnings('ignore', category=FutureWarning)
@@ -16,6 +17,7 @@ STEPS = [
     'fmri_percent',
     'fsl_feat',
     'ieeg_corrfmri',
+    'ieeg_electrodes',
     ]
 
 
@@ -40,6 +42,7 @@ parser.add_argument(
     'steps', nargs='+', choices=STEPS, metavar='step',
     help='fsl_feat: run feat (requires feat_dir)\n'
          'fmri_percent: compute the percent change (requires feat_dir, output_dir)\n'
+         'ieeg_electrodes: project electrodes to surface (requires bids_dir, freesurfer_dir)\n'
          'ieeg_corrfmri: find kernel size for iEEG based on fMRI (requires feat_dir, freesurfer_dir, output_dir)\n'
     )
 
@@ -62,7 +65,6 @@ args = parser.parse_args()
 
 def main():
     print(args)
-    return
 
     DATE_FORMAT = '%H:%M:%S'
     if args.log[:1].lower() == 'i':
@@ -100,6 +102,11 @@ def main():
             output_dir = _path(args.output_dir)
 
             run_ieeg_corrfmri(bids_dir, feat_dir, freesurfer_dir, output_dir)
+
+        if step == 'ieeg_electrodes':
+            freesurfer_dir = _path(args.freesurfer_dir)
+
+            run_ieeg_electrodes(bids_dir, freesurfer_dir)
 
 
 def _path(dirname):

@@ -1,7 +1,9 @@
 from json import dump
 from pathlib import Path
+from multiprocessing import Pool
 from numpy import array, median
 from bidso import Electrodes
+from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 
 from wonambi.attr.chan import Channels
@@ -10,23 +12,36 @@ from wonambi.attr import Freesurfer
 from .elec.project_elec import snap_to_surface
 
 
-def project_electrodes(elec, freesurfer_path):
-    fs = Freesurfer(freesurfer_path / ('sub-' + elec.subject))
+def run_ieeg_electrodes(bids_dir, freesurfer_dir):
+    args = []
+    for electrode_path in find_in_bids(bids_dir, generator=True, modality='electrodes', extension='.tsv'):
+        elec = Electrodes(electrode_path)
+        if elec.acquisition in ('clinical', 'experimental'):
+            fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
+            args.append((elec, fs))
 
-    xyz = array([(float(x['x']), float(x['y']), float(x['z'])) for x in elec.electrodes.tsv])
+    with Pool(processes=4) as p:
+        p.starmap(_parallel_elec, args)
 
+
+def _parallel_elec(elec, fs):
+    elec_proj = project_electrodes(elec, fs)
+    assign_regions(elec_proj, fs)
+
+
+def project_electrodes(elec, freesurfer):
+
+    xyz = array(elec.get_xyz())
     if elec.coordframe.json['iEEGCoordinateSystem'] == 'RAS':
         # convert from RAS to tkRAS
-        xyz -= fs.surface_ras_shift
+        xyz -= freesurfer.surface_ras_shift
 
-    chan = Channels(
-        [x['name'] for x in elec.electrodes.tsv],
-        xyz)
+    chan = Channels([x['name'] for x in elec.electrodes.tsv], xyz)
 
     if median(chan.return_xyz()[:, 0]) > 0:
-        surf = fs.read_brain().rh
+        surf = freesurfer.read_brain().rh
     else:
-        surf = fs.read_brain().lh
+        surf = freesurfer.read_brain().lh
 
     chan = snap_to_surface(surf, chan)
 
@@ -51,10 +66,8 @@ def project_electrodes(elec, freesurfer_path):
     return Electrodes(tsv_electrodes)
 
 
-def assign_regions(elec, freesurfer_path):
+def assign_regions(elec, freesurfer):
     tsv_electrodes = Path(elec.electrodes.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acq}regions_electrodes.tsv'
-
-    freesurfer = Freesurfer(freesurfer_path / f'sub-{elec.subject}')
 
     with tsv_electrodes.open('w') as f:
         f.write('name\tx\ty\tz\ttype\tsize\tmaterial\tregion\n')  # TODO: region is not in BEP010
