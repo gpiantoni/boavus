@@ -1,7 +1,10 @@
 from wonambi.trans import select, montage, math, timefrequency, concatenate
+from logging import getLogger
 from numpy import mean, std
 
 from boavus.ieeg.dataset import Dataset
+
+lg = getLogger(__name__)
 
 
 def preprocess_ecog(filename):

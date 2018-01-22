@@ -1,4 +1,7 @@
 from functools import partial
+from logging import getLogger
+from bidso.find import find_in_bids
+from bidso import Task
 
 from boavus.fmri.percent import percent_fmri
 from boavus.ieeg.dataset import Dataset
@@ -18,8 +21,25 @@ from multiprocessing import Pool
 from scipy.stats import norm as normdistr
 from scipy.stats import linregress
 
+lg = getLogger(__name__)
+
 MEASURE = 'zstat'
 DISTANCE_METRIC = 'inverse'
+
+def run_ieeg_corrfmri(bids_dir, FEAT_PATH, FREESURFER_PATH, DERIVATIVES_PATH):
+    KERNEL_SIZES = [5, ]
+
+    results = DERIVATIVES_PATH / 'results.tsv'
+
+    for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
+        ieeg = Task(ieeg_file)
+        feat_path = find_in_bids(FEAT_PATH, subject=ieeg.subject,
+                                 modality='bold', extension='.feat')
+
+        output = _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False)
+
+        with results.open('w') as f:
+            f.write(str(output))
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -75,7 +95,7 @@ def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
     ms = stack(all_m, axis=-1)
     MAX_STD = 3
     ms[ms.max(axis=-1) < normdistr.pdf(gauss_size * MAX_STD, scale=gauss_size), :] = NaN
-    print(ms.shape)
+    lg.debug(ms.shape)
     mq = ms / ms.sum(axis=-1)[..., None]
 
     return mq
@@ -112,12 +132,12 @@ def _compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
 
 def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
 
-    output_path = DERIVATIVES_PATH / 'corr_fmri_ecog'
+    output_path = DERIVATIVES_PATH
     output_path.mkdir(exist_ok=True)
 
     img = _read_fmri_val(feat_path, output_path, to_plot)
     mri = img.get_data()
-    print('fmri done')
+    lg.info('fmri done')
 
     if 'ommen' in ieeg_file.stem:
         pattern = '*fridge'
@@ -128,13 +148,13 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
     freesurfer_path = FREESURFER_PATH / ('sub-' + d.subject)
     fs = Freesurfer(freesurfer_path)
     ecog_val, labels = _read_ecog_val(d)
-    print(ecog_val)
-    print('ecog done')
+    lg.debug(ecog_val)
+    lg.info('ecog done')
 
     chan_xyz = array(d.electrodes.get_xyz(labels))
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
-    print('ndindex done')
+    lg.info('ndindex done')
 
     p_compute_each_kernel = partial(_compute_each_kernel, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
 
@@ -151,7 +171,7 @@ def _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES,
 
     img = _read_fmri_val(feat_path, output_path, to_plot)
     mri = img.get_data()
-    print('fmri done')
+    lg.debug('fmri done')
 
     d = Dataset(ieeg_file, '*fridge')
 
@@ -160,9 +180,9 @@ def _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES,
     ecog_val, labels = _read_ecog_val(d)
     elec = _read_elec(d)
     elec = elec(lambda x: x.label in labels)
-    print(len(elec.return_label()))
-    print(len(ecog_val))
-    print('ecog done')
+    lg.debug(len(elec.return_label()))
+    lg.debug(len(ecog_val))
+    lg.debug('ecog done')
 
     chan_xyz = elec.return_xyz()
     nd = array(list(ndindex(mri.shape)))

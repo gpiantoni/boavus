@@ -6,7 +6,7 @@ from subprocess import Popen, run
 
 from bidso import file_Core, Task
 from bidso.utils import bids_mkdir, replace_underscore, remove_underscore, read_tsv, replace_extension, remove_extension
-from bidso.find import find_nearest
+from bidso.find import find_in_bids
 
 from .misc import run_bet, run_reorient2std
 from ..utils import ENVIRON
@@ -60,7 +60,7 @@ def prepare_design(FEAT_OUTPUT, task):
     events_fsl = feat_path / task.events.filename.name
     _write_events(task.events.filename, events_fsl)
 
-    anat_path = find_nearest(task.filename, 'anat')
+    anat_path = find_in_bids(task.filename, modality='anat', upwards=True)
     anat_task = file_Core(anat_path / f'sub-{task.subject}_T1w.nii.gz')
     run_reorient2std(anat_task.filename)  # TODO: this modifies the BIDS
     bids_mkdir(FEAT_OUTPUT, anat_task)

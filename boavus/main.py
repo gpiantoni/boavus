@@ -4,13 +4,15 @@ from pathlib import Path
 
 from .fmri.percent import run_fmri_percent
 from .fsl.feat import run_fsl_feat
+from .ieeg.corr_fmri import run_ieeg_corrfmri
+
 
 lg = getLogger('boavus')
 
 STEPS = [
     'fmri_percent',
     'fsl_feat',
-    'fdsafas',
+    'ieeg_corrfmri',
     ]
 
 
@@ -21,19 +23,44 @@ parser.add_argument(
     'steps', nargs='+', choices=STEPS, metavar='step',
     help='fsl_feat: run feat (requires feat_dir)\n'
          'fmri_percent: compute the percent change (requires feat_dir, output_dir)\n'
-         'another_one: test')
+         'ieeg_corrfmri: find kernel size for iEEG based on fMRI (requires feat_dir, freesurfer_dir, output_dir)\n'
+    )
 
 parser.add_argument(
-    '-f', '--feat_dir',
+    '--feat_dir',
     help='The directory with FSL/feat')
+parser.add_argument(
+    '-f', '--freesurfer_dir',
+    help='The directory with Freesurfer')
 parser.add_argument(
     '-o', '--output_dir',
     help='The directory with custom output')
+parser.add_argument(
+    '-l', '--log', default='info',
+    help='Logging level: info (default), debug')
+
 
 args = parser.parse_args()
 
 
 def main():
+
+    DATE_FORMAT = '%H:%M:%S'
+    if args.log[:1].lower() == 'i':
+        lg.setLevel(INFO)
+        FORMAT = '{asctime:<10}{message}'
+
+    elif args.log[:1].lower() == 'd':
+        print('cc')
+        lg.setLevel(DEBUG)
+        FORMAT = '{asctime:<10}{levelname:<10}{filename:<40}(l. {lineno: 6d})/ {funcName:<40}: {message}'
+
+    formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT, style='{')
+    handler = StreamHandler()
+    handler.setFormatter(formatter)
+
+    lg.handlers = []
+    lg.addHandler(handler)
 
     print(args)
     bids_dir = _path(args.bids_dir)
@@ -49,27 +76,14 @@ def main():
             output_dir = _path(args.output_dir)
             run_fmri_percent(feat_dir, output_dir)
 
+        if step == 'ieeg_corrfmri':
+            feat_dir = _path(args.feat_dir)
+            freesurfer_dir = _path(args.freesurfer_dir)
+            output_dir = _path(args.output_dir)
+
+            run_ieeg_corrfmri(bids_dir, feat_dir, freesurfer_dir, output_dir)
+
 
 def _path(dirname):
     """Always use absolute paths, easier to control when working with FSL / Freesurfer"""
     return Path(dirname).resolve()
-
-
-if __name__ == '__main__':
-    DATE_FORMAT = '%H:%M:%S'
-    if args.log[:1].lower() == 'i':
-        lg.setLevel(INFO)
-        FORMAT = '{asctime:<10}{message}'
-
-    elif args.log[:1].lower() == 'd':
-        lg.setLevel(DEBUG)
-        FORMAT = '{asctime:<10}{levelname:<10}{filename:<40}(l. {lineno: 6d})/ {funcName:<40}: {message}'
-
-    formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT, style='{')
-    handler = StreamHandler()
-    handler.setFormatter(formatter)
-
-    lg.handlers = []
-    lg.addHandler(handler)
-
-    main()
