@@ -45,7 +45,7 @@ def project_electrodes(elec, freesurfer):
 
     chan = snap_to_surface(surf, chan)
 
-    tsv_electrodes = Path(elec.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acq}projected_electrodes.tsv'
+    tsv_electrodes = Path(elec.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acquisition}projected_electrodes.tsv'
 
     with tsv_electrodes.open('w') as f:
         f.write('name\tx\ty\tz\ttype\tsize\tmaterial\n')
@@ -67,7 +67,7 @@ def project_electrodes(elec, freesurfer):
 
 
 def assign_regions(elec, freesurfer):
-    tsv_electrodes = Path(elec.electrodes.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acq}regions_electrodes.tsv'
+    tsv_electrodes = Path(elec.electrodes.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acquisition}regions_electrodes.tsv'
 
     with tsv_electrodes.open('w') as f:
         f.write('name\tx\ty\tz\ttype\tsize\tmaterial\tregion\n')  # TODO: region is not in BEP010
