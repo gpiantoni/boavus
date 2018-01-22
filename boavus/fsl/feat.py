@@ -1,10 +1,11 @@
 from os import setpgrp
 from pathlib import Path
 from nibabel import load as niload
+from time import sleep
 from subprocess import Popen, run
 
-from bidso import file_Core
-from bidso.utils import bids_mkdir, replace_underscore, remove_underscore, read_tsv
+from bidso import file_Core, Task
+from bidso.utils import bids_mkdir, replace_underscore, remove_underscore, read_tsv, replace_extension, remove_extension
 from bidso.find import find_nearest
 
 from .misc import run_bet, run_reorient2std
@@ -19,6 +20,25 @@ EVENT_VALUE = {
 DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fsf'
 
 
+def run_fsl_feat(bids_dir, feat_dir):
+
+    feat_dir.mkdir(exist_ok=True)
+
+    feats = []
+    for fmri_path in bids_dir.rglob('*_bold.nii.gz'):
+        task = Task(fmri_path)
+        feat_path = run_feat(feat_dir, task)
+        print(feat_path)
+        feats.append(feat_path)
+
+    # wait for it to end
+    while True:
+        tsplots = [(x / 'tsplot' / 'tsplot_zstat1.png').exists() for x in feats]
+        if all(tsplots):
+            break
+        sleep(1)
+
+
 def run_feat(FEAT_OUTPUT, task, dry_run=False):
 
     run_reorient2std(task.filename)  # TODO: this modifies the BIDS
@@ -31,7 +51,7 @@ def run_feat(FEAT_OUTPUT, task, dry_run=False):
         run(cmd, env=ENVIRON)
 
     feat_path = bids_mkdir(FEAT_OUTPUT, task)
-    return feat_path / (remove_underscore(Path(task.filename).name) + '.feat')
+    return feat_path / replace_extension(task.filename.name, '.feat')
 
 
 def prepare_design(FEAT_OUTPUT, task):
@@ -55,7 +75,7 @@ def prepare_design(FEAT_OUTPUT, task):
     with DESIGN_TEMPLATE.open('r') as f:
         design = f.read()
 
-    output_dir = feat_path / remove_underscore(Path(task.filename).name)
+    output_dir = feat_path / remove_extension(Path(task.filename).name)
 
     design_values = {
         'XXX_OUTPUTDIR': str(output_dir),
