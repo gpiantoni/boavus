@@ -1,8 +1,11 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
+from logging import getLogger, StreamHandler, Formatter, INFO, DEBUG
 from pathlib import Path
 
 from .fmri.percent import run_fmri_percent
 from .fsl.feat import run_fsl_feat
+
+lg = getLogger('boavus')
 
 STEPS = [
     'fmri_percent',
@@ -53,4 +56,20 @@ def _path(dirname):
 
 
 if __name__ == '__main__':
+    DATE_FORMAT = '%H:%M:%S'
+    if args.log[:1].lower() == 'i':
+        lg.setLevel(INFO)
+        FORMAT = '{asctime:<10}{message}'
+
+    elif args.log[:1].lower() == 'd':
+        lg.setLevel(DEBUG)
+        FORMAT = '{asctime:<10}{levelname:<10}{filename:<40}(l. {lineno: 6d})/ {funcName:<40}: {message}'
+
+    formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT, style='{')
+    handler = StreamHandler()
+    handler.setFormatter(formatter)
+
+    lg.handlers = []
+    lg.addHandler(handler)
+
     main()
