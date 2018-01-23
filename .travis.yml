@@ -56,9 +56,9 @@ install:
 
 script:
  - py.test --cov=boavus tests
+ - ls tests/data/* -lR
 
 after_success:
- - ls tests/data/* -lR
  - codecov
 
 notifications:
