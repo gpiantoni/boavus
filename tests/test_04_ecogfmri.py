@@ -29,7 +29,7 @@ def test_main_ieeg_corrfmri_parameters():
 
     with PARAMETERS_JSON.open() as f:
         PARAMETERS = load(f)
-    PARAMETERS['kernel'] = [5, ]
+    PARAMETERS['kernels'] = [5, ]
     with PARAMETERS_JSON.open('w') as f:
         dump(PARAMETERS, f, indent='  ')
 
