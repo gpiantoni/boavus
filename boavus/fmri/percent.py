@@ -1,3 +1,4 @@
+from logging import getLogger
 from numpy import array_equal, errstate, loadtxt, NaN
 
 from nibabel import load as nload
@@ -5,16 +6,16 @@ from nibabel import save as nsave
 from nibabel import Nifti1Image
 
 from bidso import file_Core
+from bidso.find import find_in_bids
 from bidso.utils import bids_mkdir
+
+lg = getLogger(__name__)
 
 
 def run_fmri_percent(feat_dir, output_dir):
-    """
-    TODO
-    ----
-    Maybe this function could do in main.py
-    """
-    for feat_path in feat_dir.rglob('*.feat'):
+    for feat_path in find_in_bids(feat_dir, generator=True, extension='.feat'):
+        lg.debug(f'Reading {feat_path}')
+
         compute_fmri_percent(feat_path, output_dir)
 
 

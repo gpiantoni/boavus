@@ -1,4 +1,4 @@
-from argparse import ArgumentParser, RawTextHelpFormatter, RawDescriptionHelpFormatter
+from argparse import ArgumentParser, RawTextHelpFormatter
 from logging import getLogger, StreamHandler, Formatter, INFO, DEBUG
 from pathlib import Path
 
@@ -72,7 +72,10 @@ for m_k, m_v in args.items():
     list_functions = module.add_subparsers(title=f'Functions in {m_k} module')
 
     for f_k, f_v in m_v.items():
-        function = list_functions.add_parser(f_k, help=f_v.pop('help'))
+        function = list_functions.add_parser(f_k,
+                                             help=f_v['help'],  # when in module help
+                                             description=f_v['help'],  # when in the function help
+                                             formatter_class=RawTextHelpFormatter)
         function.set_defaults(function=f_k)
         function.add_argument('-l', '--log', default='info',
                               help='Logging level: info (default), debug')
@@ -97,10 +100,9 @@ for m_k, m_v in args.items():
                                       help='The directory with custom output')
 
 
-args = parser.parse_args()
+def main(arguments=None):
 
-
-def main():
+    args = parser.parse_args(arguments)
     print(args)
 
     DATE_FORMAT = '%H:%M:%S'
