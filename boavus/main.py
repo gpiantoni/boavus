@@ -9,7 +9,7 @@ from json import load, dump
 from importlib import import_module
 from logging import getLogger, StreamHandler, Formatter, INFO, DEBUG
 from pathlib import Path
-
+from pprint import pformat
 from warnings import filterwarnings
 
 filterwarnings('ignore', category=FutureWarning)
@@ -142,6 +142,8 @@ def main(arguments=None):
         if parameters_json.exists():
             with parameters_json.open() as f:
                 module.PARAMETERS.update(load(f))
+
+            lg.debug(pformat(module.PARAMETERS))
 
         else:
             with parameters_json.open('w') as f:

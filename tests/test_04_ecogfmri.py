@@ -49,4 +49,6 @@ def test_main_ieeg_corrfmri():
             str(BIDS_PATH),
             '--parameters',
             str(PARAMETERS_JSON),
+            '--log',
+            'debug',
             ])
