@@ -1,6 +1,6 @@
 from os import environ
 from json import load, dump
-from boavus.main import main
+from boavus.main import boavus
 
 from .paths import FREESURFER_PATH, BOAVUS_PATH, FEAT_PATH, BIDS_PATH
 
@@ -10,7 +10,7 @@ PARAMETERS_JSON = BOAVUS_PATH / 'ieeg_corrfmri.json'
 def test_main_ieeg_corrfmri_parameters():
     assert not PARAMETERS_JSON.exists()
 
-    main([
+    boavus([
         'ieeg',
         'corrfmri',
         '--feat_dir',
@@ -36,7 +36,7 @@ def test_main_ieeg_corrfmri_parameters():
 
 def test_main_ieeg_corrfmri():
     if environ.get('FSLDIR') is not None:
-        main([
+        boavus([
             'ieeg',
             'corrfmri',
             '--feat_dir',

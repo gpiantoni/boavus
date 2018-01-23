@@ -98,7 +98,7 @@ for m_k, m_v in args.items():
                                       help='The directory with custom output')
 
 
-def main(arguments=None):
+def boavus(arguments=None):
 
     # treat arguments as dict so we can remove keys as we go
     args = vars(parser.parse_args(arguments))

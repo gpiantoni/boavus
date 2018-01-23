@@ -43,7 +43,7 @@ setup(
         },
     entry_points={
         'console_scripts': [
-            'boavus=boavus.main:main',
+            'boavus=boavus.main:boavus',
         ],
     },
     )

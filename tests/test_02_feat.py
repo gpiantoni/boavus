@@ -1,6 +1,6 @@
 from os import environ
 
-from boavus.main import main
+from boavus.main import boavus
 
 from .paths import BIDS_PATH, FEAT_PATH
 
@@ -8,7 +8,7 @@ from .paths import BIDS_PATH, FEAT_PATH
 def test_main_fsl_feat():
 
     if environ.get('FSLDIR') is not None:
-        main([
+        boavus([
             'fsl',
             'feat',
             '--bids_dir',
