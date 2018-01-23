@@ -24,23 +24,30 @@ from scipy.stats import linregress
 
 lg = getLogger(__name__)
 
-PARAMETERS = {}
 
-MEASURE = 'zstat'
-DISTANCE_METRIC = 'gaussian'
+PARAMETERS = {
+    'kernels': list(range(1, 10)),
+    'measure': 'zstat',
+    'distance': 'gaussian',
+    'save_nifti': False,
+    }
 
-def main(bids_dir, FEAT_PATH, FREESURFER_PATH, DERIVATIVES_PATH):
-    KERNEL_SIZES = arange(1, 10, 0.25)
+
+def main(bids_dir, feat_dir, freesurfer_dir, output_dir):
 
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
         try:
             ieeg = Task(ieeg_file)
-            feat_path = find_in_bids(FEAT_PATH, subject=ieeg.subject, task=ieeg.task,
+            feat_path = find_in_bids(feat_dir, subject=ieeg.subject, task=ieeg.task,
                                      modality='bold', extension='.feat')
 
-            output = _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False)
+            output = _main_to_elec(ieeg_file, feat_path, freesurfer_dir, output_dir)
 
-            results = DERIVATIVES_PATH / replace_underscore(ieeg_file, 'results.tsv')
+            results = replace_underscore(ieeg.get_filename(output_dir),
+                                         PARAMETERS['measure'] + '_' + PARAMETERS['distance'] + '_results.tsv')
+            lg.debug(f'Saving results to {str(results)}')
+
+            results.parent.mkdir(exist_ok=True, parents=True)
             with results.open('w') as f:
                 f.write(str(output))
 
@@ -59,9 +66,9 @@ def from_mrifile_to_chan(img, fs, xyz):
 def _read_ecog_val(d):
     hfa_move, hfa_rest = preprocess_ecog(d.filename)
 
-    if MEASURE == 'percent':
+    if PARAMETERS['measure'] == 'percent':
         ecog_stats = percent_ecog(hfa_move, hfa_rest).data[0]
-    elif MEASURE == 'zstat':
+    elif PARAMETERS['measure'] == 'zstat':
         ecog_stats = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1).statistic
     return ecog_stats, hfa_move.chan[0]
 
@@ -80,14 +87,14 @@ def _upsample(img_lowres):
     return nifti
 
 
-def _read_fmri_val(feat_path, output_dir, to_plot):
-    if MEASURE == 'percent':
+def _read_fmri_val(feat_path, output_dir):
+    if PARAMETERS['measure'] == 'percent':
         img_lowres = percent_fmri(feat_path)
-    elif MEASURE == 'zstat':
+    elif PARAMETERS['measure'] == 'zstat':
         img_lowres = nload(str(feat_path / 'stats' / 'zstat1.nii.gz'))
 
     upsampled = _upsample(img_lowres)
-    if to_plot:
+    if PARAMETERS['save_nifti']:
         upsampled.to_filename(str(output_dir / 'upsampled.nii.gz'))
 
     return upsampled
@@ -112,14 +119,14 @@ def _compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
     for pos in chan_xyz:
         dist_chan = norm(ndi - pos, axis=1)
 
-        if DISTANCE_METRIC == 'gaussian':
+        if PARAMETERS['distance'] == 'gaussian':
             m = normdistr.pdf(dist_chan, scale=KERNEL)
 
-        elif DISTANCE_METRIC == 'sphere':
+        elif PARAMETERS['distance'] == 'sphere':
             m = zeros(dist_chan.shape)
             m[dist_chan <= KERNEL] = 1
 
-        elif DISTANCE_METRIC == 'inverse':
+        elif PARAMETERS['distance'] == 'inverse':
             m = power(dist_chan, -1 * KERNEL)
 
         m /= nansum(m)  # normalize so that the sum is 1
@@ -136,19 +143,16 @@ def _compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
     return lr.rvalue ** 2
 
 
-def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
+def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH):
 
     output_path = DERIVATIVES_PATH
     output_path.mkdir(exist_ok=True)
 
-    img = _read_fmri_val(feat_path, output_path, to_plot)
+    img = _read_fmri_val(feat_path, output_path)
     mri = img.get_data()
     lg.info('fmri done')
 
-    if 'ommen' in ieeg_file.stem:
-        pattern = '*fridge'
-    else:
-        pattern = '*regions'
+    pattern = '*regions'
     d = Dataset(ieeg_file, pattern)
 
     freesurfer_path = FREESURFER_PATH / ('sub-' + d.subject)
@@ -164,6 +168,7 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNE
 
     p_compute_each_kernel = partial(_compute_each_kernel, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
 
+    KERNEL_SIZES = PARAMETERS['kernels']
     with Pool() as p:
         r = p.map(p_compute_each_kernel, KERNEL_SIZES)
 

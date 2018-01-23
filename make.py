@@ -22,6 +22,7 @@ DATA_PATH = TEST_PATH / 'data'
 BIDS_PATH = DATA_PATH / 'bids'
 DERIVATIVES_PATH = DATA_PATH / 'derivatives'
 FEAT_PATH = DERIVATIVES_PATH / 'feat'
+BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
 
 
 parser = ArgumentParser(prog='make boavus',
@@ -45,6 +46,7 @@ if args.command == 'doc':
 
 elif args.command == 'test':
     rmtree(BIDS_PATH, ignore_errors=True)
+    rmtree(BOAVUS_PATH, ignore_errors=True)
     if environ.get('FSLDIR') is not None:
         rmtree(FEAT_PATH, ignore_errors=True)
 
@@ -61,3 +63,4 @@ elif args.command == 'clean':
     rmtree(BUILD_PATH)
     rmtree(API_PATH)
     rmtree(BIDS_PATH)
+    rmtree(BOAVUS_PATH, ignore_errors=True)

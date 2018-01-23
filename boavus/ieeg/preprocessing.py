@@ -8,10 +8,7 @@ lg = getLogger(__name__)
 
 
 def preprocess_ecog(filename):
-    if 'ommen' in filename.stem:
-        pattern = '*fridge'
-    else:
-        pattern = '*regions'
+    pattern = '*regions'
     self = Dataset(filename, pattern)
     s_freq = float(self.channels.tsv[0]['sampling_frequency'])
 
