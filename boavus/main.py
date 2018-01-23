@@ -1,24 +1,20 @@
+"""Complex but elegant approach to passing arguments and parameters.
+
+Make sure that the functions are organized in module/function.py. Each .py
+file needs a PARAMETERS dict and a main() function. The input of the main()
+function should also be specified in the args dictionary below.
+"""
 from argparse import ArgumentParser, RawTextHelpFormatter
+from json import load, dump
+from importlib import import_module
 from logging import getLogger, StreamHandler, Formatter, INFO, DEBUG
 from pathlib import Path
 
 from warnings import filterwarnings
 
-from .fmri.percent import run_fmri_percent
-from .fsl.feat import run_fsl_feat
-from .ieeg.corr_fmri import run_ieeg_corrfmri
-from .ieeg.electrodes import run_ieeg_electrodes
-
-
 filterwarnings('ignore', category=FutureWarning)
 lg = getLogger('boavus')
 
-STEPS = [
-    'fmri_percent',
-    'fsl_feat',
-    'ieeg_corrfmri',
-    'ieeg_electrodes',
-    ]
 
 args = dict(
     fsl=dict(
@@ -79,6 +75,8 @@ for m_k, m_v in args.items():
         function.set_defaults(function=f_k)
         function.add_argument('-l', '--log', default='info',
                               help='Logging level: info (default), debug')
+        function.add_argument('-p', '--parameters',
+                              help='json file containing the parameters. If it does not exist, it simply generates a json file with the default values and exits. If it exists, it runs the function with those parameters.')
 
         required = function.add_argument_group('required arguments')
 
@@ -102,15 +100,17 @@ for m_k, m_v in args.items():
 
 def main(arguments=None):
 
-    args = parser.parse_args(arguments)
-    print(args)
+    # treat arguments as dict so we can remove keys as we go
+    args = vars(parser.parse_args(arguments))
 
+    # log can be info or debug
     DATE_FORMAT = '%H:%M:%S'
-    if args.log[:1].lower() == 'i':
+    log_level = args.pop('log')
+    if log_level[:1].lower() == 'i':
         lg.setLevel(INFO)
         FORMAT = '{asctime:<10}{message}'
 
-    elif args.log[:1].lower() == 'd':
+    elif log_level[:1].lower() == 'd':
         lg.setLevel(DEBUG)
         FORMAT = '{asctime:<10}{levelname:<10}{filename:<40}(l. {lineno: 6d})/ {funcName:<40}: {message}'
 
@@ -121,33 +121,49 @@ def main(arguments=None):
     lg.handlers = []
     lg.addHandler(handler)
 
-    if args.module == 'fsl':
+    """
+    the user passes two arguments: a module and a function. A module is the
+    name of the folder and the function is the name of the .py file.
+    Each .py file contains one and ony one main() function, which is what is
+    called in general.
+    """
+    module = import_module('boavus.' + args.pop('module') + '.' + args.pop('function'))
 
-        if args.function == 'feat':
-            bids_dir = _path(args.bids_dir)
-            feat_dir = _path(args.feat_dir)
-            run_fsl_feat(bids_dir, feat_dir)
+    """
+    We also modify the parameters. If the user passes a json file that doesn't
+    exist, the program simply writes down the PARAMETERS for the specific .py
+    file and exits. If it does exist, then we load the parameters.
+    """
+    parameters_json = args.pop('parameters')
 
-    elif args.module == 'fmri':
+    if parameters_json is not None:
+        parameters_json = _path(parameters_json)
 
-        if args.function == 'percent':
-            feat_dir = _path(args.feat_dir)
-            output_dir = _path(args.output_dir)
-            run_fmri_percent(feat_dir, output_dir)
+        if parameters_json.exists():
+            with parameters_json.open() as f:
+                module.PARAMETERS.update(load(f))
 
-    elif args.module == 'ieeg':
+        else:
+            with parameters_json.open('w') as f:
+                dump(module.PARAMETERS, f, indent='  ')
+                lg.debug(f'Default parameters for {module.__name__} written to {str(parameters_json)}\n'
+                         'Modify the .json file and run again:\n'
+                         f'"{module.__name__.replace(".", " ")}" with the previous arguments (including "-p {str(parameters_json)}")')
 
-        if args.function == 'electrodes':
-            bids_dir = _path(args.bids_dir)
-            freesurfer_dir = _path(args.freesurfer_dir)
-            run_ieeg_electrodes(bids_dir, freesurfer_dir)
+                return
 
-        elif args.function == 'corrfmri':
-            bids_dir = _path(args.bids_dir)
-            feat_dir = _path(args.feat_dir)
-            freesurfer_dir = _path(args.freesurfer_dir)
-            output_dir = _path(args.output_dir)
-            run_ieeg_corrfmri(bids_dir, feat_dir, freesurfer_dir, output_dir)
+    """
+    Use the leftover arguments only
+    """
+    # this only works if all the arguments are paths
+    for k, v in args.items():
+        args[k] = _path(v)
+
+    """
+    Call the actual main function of the specified .py file
+    """
+    lg.debug(f'Calling main() from {module.__file__} with: ' + ', '.join(f'{k}={v}' for k, v in args.items()))
+    module.main(**args)
 
 
 def _path(dirname):

@@ -11,8 +11,9 @@ from wonambi.attr import Freesurfer
 
 from .elec.project_elec import snap_to_surface
 
+PARAMETERS = {}
 
-def run_ieeg_electrodes(bids_dir, freesurfer_dir):
+def main(bids_dir, freesurfer_dir):
     args = []
     for electrode_path in find_in_bids(bids_dir, generator=True, modality='electrodes', extension='.tsv'):
         elec = Electrodes(electrode_path)

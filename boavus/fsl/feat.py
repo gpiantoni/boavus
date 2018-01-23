@@ -11,6 +11,8 @@ from bidso.find import find_in_bids
 from .misc import run_bet, run_reorient2std
 from ..utils import ENVIRON
 
+PARAMETERS = {}
+
 
 EVENT_VALUE = {
     'move': 1,
@@ -20,7 +22,7 @@ EVENT_VALUE = {
 DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fsf'
 
 
-def run_fsl_feat(bids_dir, feat_dir):
+def main(bids_dir, feat_dir):
 
     feat_dir.mkdir(exist_ok=True)
 

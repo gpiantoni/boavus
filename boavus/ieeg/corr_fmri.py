@@ -24,10 +24,12 @@ from scipy.stats import linregress
 
 lg = getLogger(__name__)
 
+PARAMETERS = {}
+
 MEASURE = 'zstat'
 DISTANCE_METRIC = 'gaussian'
 
-def run_ieeg_corrfmri(bids_dir, FEAT_PATH, FREESURFER_PATH, DERIVATIVES_PATH):
+def main(bids_dir, FEAT_PATH, FREESURFER_PATH, DERIVATIVES_PATH):
     KERNEL_SIZES = arange(1, 10, 0.25)
 
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):

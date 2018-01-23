@@ -11,8 +11,12 @@ from bidso.utils import bids_mkdir
 
 lg = getLogger(__name__)
 
+PARAMETERS = {
+    }
 
-def run_fmri_percent(feat_dir, output_dir):
+
+def main(feat_dir, output_dir):
+
     for feat_path in find_in_bids(feat_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')
 
@@ -40,11 +44,6 @@ def percent_fmri(feat_path):
     -------
     instance of nibabel.Nifti1Image
         percent change as image
-
-
-    TODO
-    ----
-    this could be a method of Feat
     """
     design = read_design(feat_path)
 
