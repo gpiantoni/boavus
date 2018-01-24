@@ -59,7 +59,8 @@ before_script:
 
 install: 
  # install requirements
- - pip install nibabel  wonambi vispy
+ - pip install nibabel wonambi
+ - pip install pyqt5 vispy
  - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
  - pip install pytest pytest-cov codecov
  - pip install -e .
