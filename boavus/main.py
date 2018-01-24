@@ -46,6 +46,14 @@ args = dict(
                 'freesurfer_dir',
                 ]
             ),
+        plot_electrodes=dict(
+            help='plot electrodes onto the brain surface',
+            arguments=[
+                'bids_dir',
+                'freesurfer_dir',
+                'output_dir',
+                ]
+            ),
         corrfmri=dict(
             help='find best kernel size for iEEG electrodes based on fMRI',
             arguments=[

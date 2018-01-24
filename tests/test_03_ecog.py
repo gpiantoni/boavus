@@ -1,9 +1,10 @@
 from shutil import copyfile
 
+from boavus.main import boavus
 from boavus.ieeg.dataset import Dataset
 from boavus.ieeg.preprocessing import preprocess_ecog
 
-from .paths import BIDS_PATH, task_ieeg, elec_ct
+from .paths import BIDS_PATH, task_ieeg, elec_ct, FREESURFER_PATH, BOAVUS_PATH
 
 from bidso.utils import replace_underscore
 
@@ -33,3 +34,17 @@ def test_ieeg_dataset():
 def test_ieeg_preprocessing():
 
     preprocess_ecog(ieeg_file)
+
+
+def test_ieeg_plotelectrodes():
+
+    boavus([
+        'ieeg',
+        'plot_electrodes',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
+        ])

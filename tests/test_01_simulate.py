@@ -1,5 +1,4 @@
 from bidso.simulate import simulate_bold, simulate_ieeg, simulate_electrodes, simulate_anat
-from bidso import Task
 
 from .paths import BIDS_PATH, T1_PATH, task_ieeg, task_fmri, task_anat, elec_ct
 
