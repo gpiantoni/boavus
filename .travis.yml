@@ -15,11 +15,17 @@ cache:
    
 
 before_install:
+ # create display with large resolution
+ - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16"
+
+ # download fsl
  - sudo apt-get update
  - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
  - sudo apt-get -y update && sudo apt-get install -y -qq fsl-core
  - source /etc/fsl/fsl.sh
  - export FSLOUTPUTTYPE=NIFTI_GZ
+
+ # download freesurfer
  - mkdir $DERIVATIVES/freesurfer -p
  - wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
  - mkdir $LIB -p
@@ -47,9 +53,13 @@ before_install:
  - source $FREESURFER_HOME/SetUpFreeSurfer.sh
  - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
 
+
+before_script:
+  - "export DISPLAY=:99.0"
+
 install: 
  # install requirements
- - pip install nibabel  wonambi
+ - pip install nibabel  wonambi vispy
  - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
  - pip install pytest pytest-cov codecov
  - pip install -e .
