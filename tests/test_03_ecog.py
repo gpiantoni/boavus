@@ -36,7 +36,7 @@ def test_ieeg_preprocessing():
     preprocess_ecog(ieeg_file)
 
 
-def test_ieeg_plotelectrodes():
+def test_ieeg_plotelectrodes(qtbot):
 
     boavus([
         'ieeg',
