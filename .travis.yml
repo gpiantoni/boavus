@@ -1,76 +1,76 @@
 language: python
 
 python:
- - "3.6"
+  - "3.6"
 
 env:
   global:
-   - DOWNLOADS=$HOME/downloads
-   - LIB=$HOME/lib
-   - DERIVATIVES=tests/data/derivatives
+    - DOWNLOADS=$HOME/downloads
+    - LIB=$HOME/lib
+    - DERIVATIVES=tests/data/derivatives
 
 cache: 
- - directories:
-   - $HOME/.cache/pip
-   
+  - directories:
+    - $HOME/.cache/pip
+
 
 before_install:
- # create display with large resolution
- - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16"
+  # create display with large resolution
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16"
 
- # download fsl
- - sudo apt-get update
- - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
- - sudo apt-get -y update && sudo apt-get install -y -qq fsl-core
- - source /etc/fsl/fsl.sh
- - export FSLOUTPUTTYPE=NIFTI_GZ
+    # download fsl
+  - sudo apt-get update
+  - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
+  - sudo apt-get -y update && sudo apt-get install -y -qq fsl-core
+  - source /etc/fsl/fsl.sh
+  - export FSLOUTPUTTYPE=NIFTI_GZ
 
- # download freesurfer
- - mkdir $DERIVATIVES/freesurfer -p
- - wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
- - mkdir $LIB -p
- - tar 
-   -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
-   -C $LIB 
-   --exclude='freesurfer/trctrain' 
-   --exclude='freesurfer/subjects/fsaverage_sym' 
-   --exclude='freesurfer/subjects/fsaverage3' 
-   --exclude='freesurfer/subjects/fsaverage4'
-   --exclude='freesurfer/subjects/fsaverage5' 
-   --exclude='freesurfer/subjects/fsaverage6' 
-   --exclude='freesurfer/subjects/cvs_avg35' 
-   --exclude='freesurfer/subjects/cvs_avg35_inMNI152' 
-   --exclude='freesurfer/subjects/V1_average' 
-   --exclude='freesurfer/average/mult-comp-cor' 
-   --exclude='freesurfer/lib/cuda' 
-   --exclude='freesurfer/lib/qt' 
-   --exclude='freesurfer/lib/tcltktixblt'
-   --exclude='freesurfer/lib/vtk' 
-   --exclude='freesurfer/diffusion' 
-   freesurfer  ;
- - echo -e FREESURFER_LICENSE > $LIB/freesurfer/license.txt
- - export FREESURFER_HOME=$LIB/freesurfer
- - source $FREESURFER_HOME/SetUpFreeSurfer.sh
- - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
+    # download freesurfer
+  - mkdir $DERIVATIVES/freesurfer -p
+  - wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
+  - mkdir $LIB -p
+  - tar 
+    -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
+    -C $LIB 
+    --exclude='freesurfer/trctrain' 
+    --exclude='freesurfer/subjects/fsaverage_sym' 
+    --exclude='freesurfer/subjects/fsaverage3' 
+    --exclude='freesurfer/subjects/fsaverage4'
+    --exclude='freesurfer/subjects/fsaverage5' 
+    --exclude='freesurfer/subjects/fsaverage6' 
+    --exclude='freesurfer/subjects/cvs_avg35' 
+    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' 
+    --exclude='freesurfer/subjects/V1_average' 
+    --exclude='freesurfer/average/mult-comp-cor' 
+    --exclude='freesurfer/lib/cuda' 
+    --exclude='freesurfer/lib/qt' 
+    --exclude='freesurfer/lib/tcltktixblt'
+    --exclude='freesurfer/lib/vtk' 
+    --exclude='freesurfer/diffusion' 
+    freesurfer  ;
+  - echo -e FREESURFER_LICENSE > $LIB/freesurfer/license.txt
+  - export FREESURFER_HOME=$LIB/freesurfer
+  - source $FREESURFER_HOME/SetUpFreeSurfer.sh
+  - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
 
 
 before_script:
   - "export DISPLAY=:99.0"
 
 install: 
- # install requirements
- - pip install nibabel wonambi
- - pip install pyqt5 vispy
- - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
- - pip install pytest pytest-qt pytest-cov codecov
- - pip install -e .
+# install requirements
+  - pip install nibabel wonambi
+  - pip install pyqt5 vispy
+  - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
+  - pip install pytest pytest-qt pytest-cov codecov
+  - pip install -e .
 
 script:
- - py.test --cov=boavus tests
- - ls tests/data/* -lR
+  - py.test --cov=boavus tests
+  - ls tests/data/* -lR
 
 after_success:
- - codecov
+  - codecov
 
 notifications:
- email: false
+  email: false
