@@ -17,8 +17,18 @@ lg = getLogger('boavus')
 
 
 args = dict(
+    freesurfer=dict(
+        help='freesurfer functions',
+        reconall=dict(
+            help='run freesurfer recon-all',
+            arguments=[
+                'bids_dir',
+                'freesurfer_dir',
+                ],
+            ),
+        ),
     fsl=dict(
-        help='test fsl',
+        help='fsl functions',
         feat=dict(
             help='run FEAT using the events.tsv information',
             arguments=[
@@ -28,7 +38,7 @@ args = dict(
             ),
         ),
     fmri=dict(
-        help='test fmri',
+        help='fmri functions',
         percent=dict(
             help='compute percent change of the BOLD signal',
             arguments=[
@@ -38,7 +48,7 @@ args = dict(
             ),
         ),
     ieeg=dict(
-        help='test ieeg',
+        help='ieeg functions',
         project_electrodes=dict(
             help='project electrodes to brain surface',
             arguments=[

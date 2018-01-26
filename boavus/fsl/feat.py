@@ -5,7 +5,7 @@ from time import sleep
 from subprocess import Popen, run
 
 from bidso import file_Core, Task
-from bidso.utils import bids_mkdir, replace_underscore, remove_underscore, read_tsv, replace_extension, remove_extension
+from bidso.utils import bids_mkdir, replace_underscore, read_tsv, replace_extension, remove_extension
 from bidso.find import find_in_bids
 
 from .misc import run_bet, run_reorient2std
@@ -30,7 +30,6 @@ def main(bids_dir, feat_dir):
     for fmri_path in bids_dir.rglob('*_bold.nii.gz'):
         task = Task(fmri_path)
         feat_path = run_feat(feat_dir, task)
-        print(feat_path)
         feats.append(feat_path)
 
     # wait for it to end
