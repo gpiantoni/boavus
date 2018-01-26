@@ -1,5 +1,4 @@
 from json import dump
-from pathlib import Path
 from logging import getLogger
 from multiprocessing import Pool
 from numpy import array, median
@@ -15,7 +14,10 @@ from .elec.project_elec import snap_to_surface
 
 lg = getLogger(__name__)
 
-PARAMETERS = {}
+PARAMETERS = {
+    'acquisition':
+        ['clinical', 'experimental'],
+        }
 
 
 def main(bids_dir, freesurfer_dir):
