@@ -1,9 +1,12 @@
+from logging import getLogger
 from pathlib import Path
-from subprocess import run
+from subprocess import run, DEVNULL
 from os import environ
 from tempfile import mkdtemp
 
 from wonambi.attr import Channels
+
+lg = getLogger(__name__)
 
 
 FREESURFER_MATLAB = environ['FREESURFER_HOME'] + '/matlab'
@@ -49,15 +52,24 @@ def snap_to_surface(surf, chan, surf_path=None):
     chan_snapped_path = tmp_path / 'chan_snapped.csv'
     chan.export(str(chan_path))
 
-    run(['mris_fill', '-c', '-r', '1', str(pial), str(filled)])
+    lg.debug(f'Reading surface from {pial}')
+    if not filled.exists():
+        run(['mris_fill', '-c', '-r', '1', str(pial), str(filled)],
+            stdout=DEVNULL, stderr=DEVNULL)
 
-    cmd = ["make_outer_surface('" + str(filled) + "', 15, '" + str(outer) + "'); exit", ]
-    run(MATLAB_CMD + cmd, cwd=FREESURFER_MATLAB)
+    if not outer.exists():
+        cmd = ["make_outer_surface('" + str(filled) + "', 15, '" + str(outer) + "'); exit", ]
+        run(MATLAB_CMD + cmd, cwd=FREESURFER_MATLAB,
+            stdout=DEVNULL, stderr=DEVNULL)
 
-    run(['mris_smooth', '-nw', '-n', '60', str(outer), str(smooth)])
+    if not smooth.exists():
+        run(['mris_smooth', '-nw', '-n', '60', str(outer), str(smooth)],
+            stdout=DEVNULL, stderr=DEVNULL)
+        lg.debug(f'Writing smooth surface to {smooth}')
 
     cmd = ["snap_to_surface('" + str(smooth) + "', '" + str(chan_path) + "'); exit", ]
-    run(MATLAB_CMD + cmd, cwd=SNAP_PATH)
+    run(MATLAB_CMD + cmd, cwd=SNAP_PATH,
+        stdout=DEVNULL, stderr=DEVNULL)
 
     chan = Channels(str(chan_snapped_path))
     return chan

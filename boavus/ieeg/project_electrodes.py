@@ -1,7 +1,9 @@
 from json import dump
 from pathlib import Path
+from logging import getLogger
 from multiprocessing import Pool
 from numpy import array, median
+
 from bidso import Electrodes
 from bidso.find import find_in_bids, find_root
 from bidso.utils import replace_underscore
@@ -10,6 +12,8 @@ from wonambi.attr.chan import Channels
 from wonambi.attr import Freesurfer
 
 from .elec.project_elec import snap_to_surface
+
+lg = getLogger(__name__)
 
 PARAMETERS = {}
 
@@ -20,6 +24,7 @@ def main(bids_dir, freesurfer_dir):
         elec = Electrodes(electrode_path)
         if elec.acquisition in ('clinical', 'experimental'):
             fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
+
             args.append((elec, fs))
 
     with Pool(processes=4) as p:
@@ -27,6 +32,9 @@ def main(bids_dir, freesurfer_dir):
 
 
 def project_electrodes(elec, freesurfer):
+
+    bids_dir = find_root(elec.filename)
+    subj_dir = find_root(elec.filename, target='subject')
 
     xyz = array(elec.get_xyz())
     if elec.coordframe.json['iEEGCoordinateSystem'] == 'RAS':
@@ -40,12 +48,13 @@ def project_electrodes(elec, freesurfer):
     else:
         surf = freesurfer.read_brain().lh
 
-    subj_dir = find_root(elec.filename, target='subject')
     anat_dir = subj_dir / 'anat'
     chan = snap_to_surface(surf, chan, anat_dir)
 
     elec.acquisition += 'projected'
-    tsv_electrodes = elec.get_filename(Path(elec.filename).parent)
+    tsv_electrodes = elec.get_filename(bids_dir)
+
+    lg.debug(f'Writing snapped electrodes to {tsv_electrodes}')
 
     with tsv_electrodes.open('w') as f:
         f.write('name\tx\ty\tz\ttype\tsize\tmaterial\n')

@@ -1,9 +1,9 @@
 from json import dump
-from pathlib import Path
 from multiprocessing import Pool
 from numpy import array
+
 from bidso import Electrodes
-from bidso.find import find_in_bids
+from bidso.find import find_in_bids, find_root
 from bidso.utils import replace_underscore
 
 from wonambi.attr import Freesurfer
@@ -23,8 +23,9 @@ def main(bids_dir, freesurfer_dir):
 
 
 def assign_regions(elec, freesurfer):
+    bids_dir = find_root(elec.filename)
     elec.acquisition += 'regions'
-    tsv_electrodes = elec.get_filename(Path(elec.filename).parent)
+    tsv_electrodes = elec.get_filename(bids_dir)
 
     with tsv_electrodes.open('w') as f:
         f.write('name\tx\ty\tz\ttype\tsize\tmaterial\tregion\n')  # TODO: region is not in BEP010
