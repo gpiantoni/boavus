@@ -39,8 +39,15 @@ args = dict(
         ),
     ieeg=dict(
         help='test ieeg',
-        electrodes=dict(
-            help='project electrodes in fMRI and assign them regions',
+        project_electrodes=dict(
+            help='project electrodes to brain surface',
+            arguments=[
+                'bids_dir',
+                'freesurfer_dir',
+                ]
+            ),
+        assign_regions=dict(
+            help='assign electrodes to brain regions',
             arguments=[
                 'bids_dir',
                 'freesurfer_dir',
