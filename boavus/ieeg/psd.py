@@ -1,9 +1,12 @@
 from wonambi.trans import select, montage, math, timefrequency, concatenate
 from logging import getLogger
-from numpy import mean, std
-from numpy import array, log10
+from numpy import mean, std, array, log10
 import plotly.graph_objs as go
+from exportimages import export_plotly, Webdriver
 
+from bidso import Task
+from bidso.find import find_in_bids
+from bidso.utils import replace_extension
 from boavus.ieeg.dataset import Dataset
 from .percent import percent_ecog
 
@@ -18,6 +21,7 @@ PARAMETERS = {
         'off': '48',
         'minimalduration': 20,
         },
+    'regions': [],
     'reject': {
         'chan': {
             'threshold_std': 3,
@@ -33,7 +37,20 @@ PARAMETERS = {
         },
     }
 
-FREQ = (60, 90)
+
+def main(bids_dir, output_dir):
+
+    export_dir = output_dir / 'psd'
+    export_dir.mkdir(exist_ok=True, parents=True)
+    driver = Webdriver(export_dir)
+
+    for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
+        figs, all_chan = compute_frequency(ieeg_file)
+
+        for fig, chan in zip(figs, all_chan):
+            export_png = replace_extension(export_dir / Task(ieeg_file).get_filename(), '_' + chan + '.png')
+            lg.debug(f'plotting {export_png}')
+            export_plotly(fig, export_png, driver)
 
 
 def compute_frequency(filename):
@@ -44,6 +61,7 @@ def compute_frequency(filename):
 
     # it's compute here with all the electrodes (also the non active ones)
     ecog_stats = percent_ecog(hfa_move, hfa_rest)
+    all_chan = ecog_stats.chan[0]
 
     """
     hfa_move, hfa_rest = _select_active(hfa_move, hfa_rest)
@@ -51,11 +69,11 @@ def compute_frequency(filename):
     """
     active = ' (todo)'
     all_fig = []
-    for chan in ecog_stats.chan[0]:
+    for chan in all_chan:
         fig = plot_psd(chan, active, freq_move, freq_rest, ecog_stats)
         all_fig.append(fig)
 
-    return all_fig
+    return all_fig, all_chan
 
 
 def compute_freq(dat):
@@ -90,6 +108,7 @@ def compute_freq(dat):
 
 
 def plot_psd(chan, active, freq_move, freq_rest, perc):
+    FREQ = PARAMETERS['spectrogram']['frequency']
     mean_move = math(select(freq_move, freq=FREQ), operator_name='mean', axis='freq')(trial=0, chan=chan)
     mean_rest = math(select(freq_rest, freq=FREQ), operator_name='mean', axis='freq')(trial=0, chan=chan)
 

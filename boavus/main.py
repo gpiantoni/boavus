@@ -71,6 +71,13 @@ args = dict(
                 'output_dir',
                 ]
             ),
+        psd=dict(
+            help='compute psd for two conditions',
+            arguments=[
+                'bids_dir',
+                'output_dir',
+                ]
+            ),
         corrfmri=dict(
             help='find best kernel size for iEEG electrodes based on fMRI',
             arguments=[
