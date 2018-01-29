@@ -6,8 +6,8 @@ python:
 env:
   global:
     - DOWNLOADS=$HOME/downloads
-   - LIB=$HOME/lib
-   - DERIVATIVES=tests/data/derivatives
+    - LIB=$HOME/lib
+    - DERIVATIVES=tests/data/derivatives
 
 cache: 
  - directories:
