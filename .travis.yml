@@ -8,6 +8,7 @@ env:
     - DOWNLOADS=$HOME/downloads
     - LIB=$HOME/lib
     - DERIVATIVES=tests/data/derivatives
+    - INSTALL=$HOME/bin
 
 cache: 
  - directories:
@@ -58,6 +59,15 @@ before_install:
   - source $FREESURFER_HOME/SetUpFreeSurfer.sh
   - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
 
+  # geckodriver
+  - json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
+  - url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
+  - curl -s -L "$url" | tar -xz
+  - chmod +x geckodriver
+  - mkdir $INSTALL -p
+  - mv geckodriver $INSTALL
+  - export PATH=$INSTALL:$PATH
+
 install:
   - conda create -q -n test-environment  numpy scipy pyqt
   - source activate test-environment
@@ -65,6 +75,8 @@ install:
     # install requirements
   - pip install nibabel wonambi vispy
   - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
+  - pip install plotly
+  - pip install -e git+https://github.com/gpiantoni/exportimages.git#egg=exportimages  # this should be in pypi
   - pip install pytest pytest-qt pytest-cov codecov pytest-travis-fold
   - pip install -e .
 
