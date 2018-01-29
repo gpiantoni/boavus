@@ -65,7 +65,7 @@ install:
     # install requirements
   - pip install nibabel wonambi vispy
   - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
-  - pip install pytest pytest-qt pytest-cov codecov
+  - pip install pytest pytest-qt pytest-cov codecov pytest-travis-fold
   - pip install -e .
 
 before_script:
@@ -76,6 +76,7 @@ script:
   - python -c "import vispy; print(vispy.sys_info())"
   - py.test --cov=boavus tests
   - ls tests/data/* -lR
+  - cat tests/parameters/*
 
 after_success:
   - codecov
