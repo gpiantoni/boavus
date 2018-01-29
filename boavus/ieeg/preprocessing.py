@@ -6,16 +6,28 @@ from boavus.ieeg.dataset import Dataset
 
 lg = getLogger(__name__)
 
+PARAMETERS = {
+    'electrodes': {
+        'acquisition': '*regions',
+        },
+    'markers': {
+        'on': '49',
+        'off': '48',
+        'minimalduration': 20,
+        },
+    }
+
 
 def preprocess_ecog(filename):
-    pattern = '*regions'
-    self = Dataset(filename, pattern)
+    self = Dataset(filename, PARAMETERS['electrodes']['acquisition'])
     s_freq = float(self.channels.tsv[0]['sampling_frequency'])
 
-    if self.subject == 'bert':
-        move_times, rest_times = read_markers(self, 'move', 'rest')
-    else:
-        move_times, rest_times = read_markers(self)
+    move_times, rest_times = read_markers(
+        self,
+        markers_on=PARAMETERS['markers']['on'],
+        markers_off=PARAMETERS['markers']['off'],
+        minimalduration=PARAMETERS['markers']['minimalduration'],
+        )
     # convert to s_freq
     rest_times = [[int(x0 * s_freq) for x0 in x1] for x1 in rest_times]
     move_times = [[int(x0 * s_freq) for x0 in x1] for x1 in move_times]
@@ -89,11 +101,11 @@ def compute_freq(dat):
     return freq_t, freq_f
 
 
-def read_markers(d, marker_on='49', marker_off='48', min_duration=20):
+def read_markers(d, marker_on, marker_off, minimalduration):
     markers = d.read_events()
     move_start = [mrk['onset'] for mrk in markers if mrk['trial_type'] == marker_on]
     move_end = [mrk['onset'] + mrk['duration'] for mrk in markers if mrk['trial_type'] == marker_on]
 
-    rest_start = [mrk['onset'] for mrk in markers if mrk['trial_type'] == marker_off if mrk['duration'] > min_duration]
-    rest_end = [mrk['onset'] + mrk['duration'] for mrk in markers if mrk['trial_type'] == marker_off if mrk['duration'] > min_duration]
+    rest_start = [mrk['onset'] for mrk in markers if mrk['trial_type'] == marker_off if mrk['duration'] > minimalduration]
+    rest_end = [mrk['onset'] + mrk['duration'] for mrk in markers if mrk['trial_type'] == marker_off if mrk['duration'] > minimalduration]
     return (move_start, move_end), (rest_start, rest_end)
