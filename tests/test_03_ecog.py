@@ -13,7 +13,7 @@ ieeg_file = task_ieeg.get_filename(BIDS_PATH)
 
 
 def test_ieeg_projectelectrodes():
-    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_corrfmri.json'
+    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_projectelectrodes.json'
 
     boavus([
         'ieeg',
@@ -70,6 +70,21 @@ def test_ieeg_preprocessing():
 
 def test_ieeg_plotelectrodes(qtbot):
 
+    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_plotelectrodes.json'
+
+    boavus([
+        'ieeg',
+        'project_electrodes',
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
+        '-p',
+        str(PARAMETERS_JSON),
+        ])
+
+    update_parameters(PARAMETERS_JSON, acquisition='ctprojected')
+
     boavus([
         'ieeg',
         'plot_electrodes',
@@ -79,4 +94,6 @@ def test_ieeg_plotelectrodes(qtbot):
         str(FREESURFER_PATH),
         '--bids_dir',
         str(BIDS_PATH),
+        '-p',
+        str(PARAMETERS_JSON),
         ])

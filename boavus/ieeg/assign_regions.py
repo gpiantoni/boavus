@@ -8,15 +8,17 @@ from bidso.utils import replace_underscore
 
 from wonambi.attr import Freesurfer
 
-PARAMETERS = {}
+PARAMETERS = {
+    'acquisition': '*projected',
+    }
+
 
 def main(bids_dir, freesurfer_dir):
     args = []
-    for electrode_path in find_in_bids(bids_dir, generator=True, modality='electrodes', extension='.tsv'):
+    for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'):
         elec = Electrodes(electrode_path)
-        if elec.acquisition.endswith('projected') or elec.acquisition.endswith('ctmr'):
-            fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
-            args.append((elec, fs))
+        fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
+        args.append((elec, fs))
 
     with Pool(processes=4) as p:
         p.starmap(assign_regions, args)
