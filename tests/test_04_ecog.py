@@ -22,7 +22,7 @@ def test_ieeg_freq_percent():
     export_plotly(fig[0][0], output_dir / 'output.png')
 
 
-def test_ieeg_psd():
+def nottest_ieeg_psd():
 
     PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_psd.json'
 
