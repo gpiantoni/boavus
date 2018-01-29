@@ -24,8 +24,8 @@ def preprocess_ecog(filename):
 
     move_times, rest_times = read_markers(
         self,
-        markers_on=PARAMETERS['markers']['on'],
-        markers_off=PARAMETERS['markers']['off'],
+        marker_on=PARAMETERS['markers']['on'],
+        marker_off=PARAMETERS['markers']['off'],
         minimalduration=PARAMETERS['markers']['minimalduration'],
         )
     # convert to s_freq

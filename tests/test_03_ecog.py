@@ -1,19 +1,44 @@
 from shutil import copyfile
 
+from bidso.utils import replace_underscore
 from boavus.main import boavus
 from boavus.ieeg.dataset import Dataset
 from boavus.ieeg.preprocessing import preprocess_ecog
 
 from .paths import BIDS_PATH, task_ieeg, elec_ct, FREESURFER_PATH, BOAVUS_PATH
-
-from bidso.utils import replace_underscore
+from .utils import update_parameters
 
 
 ieeg_file = task_ieeg.get_filename(BIDS_PATH)
 
 
-def test_ieeg_electrodes():
-    # TODO: this function should project elec onto surface
+
+def test_ieeg_projectelectrodes():
+    PARAMETERS_JSON = BOAVUS_PATH / 'ieeg_corrfmri.json'
+
+    boavus([
+        'ieeg',
+        'project_electrodes',
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
+        '-p',
+        str(PARAMETERS_JSON),
+        ])
+
+    update_parameters(PARAMETERS_JSON, acquisition=['ct', ])
+
+    boavus([
+        'ieeg',
+        'project_electrodes',
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
+        '-p',
+        str(PARAMETERS_JSON),
+        ])
 
     elec_ct_file = elec_ct.get_filename(BIDS_PATH)
     elec_ct.acquisition = 'ctprojectedregions'

@@ -15,16 +15,18 @@ from .elec.project_elec import snap_to_surface
 lg = getLogger(__name__)
 
 PARAMETERS = {
-    'acquisition':
-        ['clinical', 'experimental'],
-        }
+    'acquisition': [
+        'clinical',
+        'experimental',
+        ],
+    }
 
 
 def main(bids_dir, freesurfer_dir):
     args = []
     for electrode_path in find_in_bids(bids_dir, generator=True, modality='electrodes', extension='.tsv'):
         elec = Electrodes(electrode_path)
-        if elec.acquisition in ('clinical', 'experimental'):
+        if elec.acquisition in PARAMETERS['acquisition']:
             fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
 
             args.append((elec, fs))
@@ -36,7 +38,6 @@ def main(bids_dir, freesurfer_dir):
 def project_electrodes(elec, freesurfer):
 
     bids_dir = find_root(elec.filename)
-    subj_dir = find_root(elec.filename, target='subject')
 
     xyz = array(elec.get_xyz())
     if elec.coordframe.json['iEEGCoordinateSystem'] == 'RAS':
@@ -50,7 +51,8 @@ def project_electrodes(elec, freesurfer):
     else:
         surf = freesurfer.read_brain().lh
 
-    anat_dir = subj_dir / 'anat'
+    anat_dir = find_in_bids(elec.filename, upwards=True, pattern='anat')
+    lg.debug(f'Saving surfaces in {anat_dir}')
     chan = snap_to_surface(surf, chan, anat_dir)
 
     elec.acquisition += 'projected'

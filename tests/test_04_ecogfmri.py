@@ -1,10 +1,10 @@
 from os import environ
-from json import load, dump
 from boavus.main import boavus
 
-from .paths import FREESURFER_PATH, BOAVUS_PATH, FEAT_PATH, BIDS_PATH
+from .paths import FREESURFER_PATH, BOAVUS_PATH, FEAT_PATH, BIDS_PATH, PARAMETERS_PATH
+from .utils import update_parameters
 
-PARAMETERS_JSON = BOAVUS_PATH / 'ieeg_corrfmri.json'
+PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_corrfmri.json'
 
 
 def test_main_ieeg_corrfmri_parameters():
@@ -25,13 +25,7 @@ def test_main_ieeg_corrfmri_parameters():
         str(PARAMETERS_JSON),
         ])
 
-    assert PARAMETERS_JSON.exists()
-
-    with PARAMETERS_JSON.open() as f:
-        PARAMETERS = load(f)
-    PARAMETERS['kernels'] = [5, ]
-    with PARAMETERS_JSON.open('w') as f:
-        dump(PARAMETERS, f, indent='  ')
+    update_parameters(PARAMETERS_JSON, kernel=[5, ])
 
 
 def test_main_ieeg_corrfmri():

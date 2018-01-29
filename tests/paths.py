@@ -1,4 +1,5 @@
 from pathlib import Path
+from shutil import rmtree
 from bidso import file_Core
 
 
@@ -14,6 +15,10 @@ FEAT_PATH = DERIVATIVES_PATH / 'feat'
 FEAT_PATH.mkdir(parents=True, exist_ok=True)
 BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
 BOAVUS_PATH.mkdir(parents=True, exist_ok=True)
+
+PARAMETERS_PATH = TEST_PATH / 'parameters'
+rmtree(PARAMETERS_PATH, ignore_errors=True)
+PARAMETERS_PATH.mkdir(parents=True, exist_ok=True)
 
 
 subject = 'bert'
