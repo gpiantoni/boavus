@@ -2,8 +2,6 @@ from shutil import copyfile, which
 
 from bidso.utils import replace_underscore
 from boavus.main import boavus
-from boavus.ieeg.dataset import Dataset
-from boavus.ieeg.preprocessing import preprocess_ecog
 
 from .paths import BIDS_PATH, task_ieeg, elec_ct, FREESURFER_PATH, BOAVUS_PATH, PARAMETERS_PATH, SIMULATE_PATH
 from .utils import update_parameters
@@ -56,16 +54,16 @@ def test_ieeg_projectelectrodes():
         copyfile(SIMULATE_PATH / elec_projected_file.name, elec_projected_file)
 
 
-def test_ieeg_dataset():
+def test_ieeg_assignregions():
 
-    d = Dataset(ieeg_file, '*ct')
-    data = d.read_data(begsam=10, endsam=20)
-    events = d.read_events()
-
-
-def test_ieeg_preprocessing():
-
-    preprocess_ecog(ieeg_file)
+    boavus([
+        'ieeg',
+        'assign_regions',
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
+        ])
 
 
 def test_ieeg_plotelectrodes(qtbot):
