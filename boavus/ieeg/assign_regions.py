@@ -10,6 +10,7 @@ from wonambi.attr import Freesurfer
 
 PARAMETERS = {
     'acquisition': '*projected',
+    'parallel': True,
     }
 
 
@@ -20,8 +21,12 @@ def main(bids_dir, freesurfer_dir):
         fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
         args.append((elec, fs))
 
-    with Pool(processes=4) as p:
-        p.starmap(assign_regions, args)
+    if PARAMETERS['parallel']:
+        with Pool(processes=4) as p:
+            p.starmap(assign_regions, args)
+    else:
+        for one_args in args:
+            assign_regions(*one_args)
 
 
 def assign_regions(elec, freesurfer):

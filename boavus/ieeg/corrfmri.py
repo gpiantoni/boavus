@@ -30,6 +30,7 @@ PARAMETERS = {
     'measure': 'zstat',
     'distance': 'gaussian',
     'save_nifti': False,
+    'parallel': True,
     }
 
 
@@ -166,11 +167,19 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH):
     ndi = from_mrifile_to_chan(img, fs, nd)
     lg.info('ndindex done')
 
-    p_compute_each_kernel = partial(_compute_each_kernel, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
+    if PARAMETERS['parallel']:
+        p_compute_each_kernel = partial(_compute_each_kernel, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
 
-    KERNEL_SIZES = PARAMETERS['kernels']
-    with Pool() as p:
-        r = p.map(p_compute_each_kernel, KERNEL_SIZES)
+        KERNEL_SIZES = PARAMETERS['kernels']
+        with Pool() as p:
+            r = p.map(p_compute_each_kernel, KERNEL_SIZES)
+
+    else:
+        r = []
+        for KERNEL in PARAMETERS['kernels']:
+            r.append(_compute_each_kernel(KERNEL, chan_xyz=chan_xyz, mri=mri,
+                                          ndi=ndi, ecog_val=ecog_val))
+
 
     return r
 

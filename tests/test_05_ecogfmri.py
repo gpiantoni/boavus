@@ -25,7 +25,7 @@ def test_main_ieeg_corrfmri_parameters():
         str(PARAMETERS_JSON),
         ])
 
-    update_parameters(PARAMETERS_JSON, kernel=[5, ])
+    update_parameters(PARAMETERS_JSON, kernels=[5, ], parallel=False)
 
 
 def test_main_ieeg_corrfmri():

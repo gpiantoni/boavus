@@ -19,6 +19,7 @@ PARAMETERS = {
         'clinical',
         'experimental',
         ],
+    'parallel': True,
     }
 
 
@@ -31,8 +32,12 @@ def main(bids_dir, freesurfer_dir):
 
             args.append((elec, fs))
 
-    with Pool(processes=4) as p:
-        p.starmap(project_electrodes, args)
+    if PARAMETERS['parallel']:
+        with Pool(processes=4) as p:
+            p.starmap(project_electrodes, args)
+    else:
+        for one_args in args:
+            project_electrodes(*one_args)
 
 
 def project_electrodes(elec, freesurfer):

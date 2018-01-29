@@ -24,7 +24,7 @@ def test_ieeg_projectelectrodes():
         str(PARAMETERS_JSON),
         ])
 
-    update_parameters(PARAMETERS_JSON, acquisition=['ct', ])
+    update_parameters(PARAMETERS_JSON, acquisition=['ct', ], parallel=False)
 
     if which('matlab') is not None:
 
@@ -55,6 +55,8 @@ def test_ieeg_projectelectrodes():
 
 
 def test_ieeg_assignregions():
+    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_assignregions.json'
+    update_parameters(PARAMETERS_JSON, parallel=False)
 
     boavus([
         'ieeg',
@@ -63,6 +65,8 @@ def test_ieeg_assignregions():
         str(FREESURFER_PATH),
         '--bids_dir',
         str(BIDS_PATH),
+        '-p',
+        str(PARAMETERS_JSON),
         ])
 
 
