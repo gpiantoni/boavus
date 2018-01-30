@@ -6,7 +6,7 @@ from bidso import Task
 
 from boavus.fmri.percent import percent_fmri
 from boavus.ieeg.dataset import Dataset
-from boavus.ieeg.preprocessing import preprocess_ecog
+from boavus.ieeg.psd import preprocess_ecog
 from boavus.ieeg.percent import percent_ecog
 from wonambi.attr import Freesurfer
 
