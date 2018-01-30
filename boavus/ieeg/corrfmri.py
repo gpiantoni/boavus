@@ -70,7 +70,6 @@ def _read_ecog_val(d):
     if PARAMETERS['measure'] == 'percent':
         ecog_stats = percent_ecog(hfa_move, hfa_rest).data[0]
     elif PARAMETERS['measure'] == 'zstat':
-        ecog_stats = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1).statistic
     return ecog_stats, hfa_move.chan[0]
 
 

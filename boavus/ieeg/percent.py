@@ -6,6 +6,11 @@ from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 
 
+PARAMETERS = {
+    'measure': 'percent',
+    }
+
+
 def main(output_dir):
 
     for hfa_move_file in find_in_bids(output_dir, modality='hfamove', extension='.pkl', generator=True):
@@ -15,11 +20,14 @@ def main(output_dir):
         with hfa_rest_file.open('rb') as f:
             hfa_rest = load(f)
 
-        ecog_stats = percent_ecog(hfa_move, hfa_rest)
+        if PARAMETERS['measure'] == 'percent':
+            ecog_stats = compute_percent(hfa_move, hfa_rest)
+        elif PARAMETERS['measure'] == 'zstat':
+            ecog_stats = compute_zstat(hfa_move, hfa_rest)
 
-        percent_file = replace_underscore(hfa_move_file, 'percent.tsv')
+        percent_file = replace_underscore(hfa_move_file, PARAMETERS['measure'] + '.tsv')
         with percent_file.open('w') as f:
-            f.write('channel\tpercentchange\n')
+            f.write(f'channel\t{PARAMETERS["measure"]}\n')
             for chan in ecog_stats.chan[0]:
                 f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\n')
 
@@ -40,7 +48,7 @@ def main(output_dir):
     """
 
 
-def percent_ecog(hfa_move, hfa_rest):
+def compute_percent(hfa_move, hfa_rest):
     x_move = math(hfa_move, operator_name='mean', axis='time')
     x_rest = math(hfa_rest, operator_name='mean', axis='time')
 
