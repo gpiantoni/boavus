@@ -7,7 +7,6 @@ from exportimages import export_plotly, Webdriver
 from bidso import Task
 from bidso.find import find_in_bids
 from bidso.utils import replace_extension
-from boavus.ieeg.dataset import Dataset
 from .percent import percent_ecog
 
 lg = getLogger(__name__)
@@ -211,65 +210,3 @@ def plot_psd(chan, active, freq_move, freq_rest, perc):
                 ), ]
         )
     return go.Figure(data=traces, layout=layout)
-
-
-def preprocess_ecog(filename):
-    self = Dataset(filename, PARAMETERS['electrodes']['acquisition'])
-    s_freq = float(self.channels.tsv[0]['sampling_frequency'])
-
-    move_times, rest_times = read_markers(
-        self,
-        marker_on=PARAMETERS['markers']['on'],
-        marker_off=PARAMETERS['markers']['off'],
-        minimalduration=PARAMETERS['markers']['minimalduration'],
-        )
-    # convert to s_freq
-    rest_times = [[int(x0 * s_freq) for x0 in x1] for x1 in rest_times]
-    move_times = [[int(x0 * s_freq) for x0 in x1] for x1 in move_times]
-    elec_names = [x['name'] for x in self.electrodes.electrodes.tsv]
-
-    data = self.read_data(begsam=rest_times[0][0], endsam=rest_times[1][-1])
-
-    data = select(data, chan=elec_names)
-    clean_labels = reject_channels(data)
-
-    data = self.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
-
-    dat_move = run_montage(self, move_times, clean_labels)
-    dat_rest = run_montage(self, rest_times, clean_labels)
-
-    if len(PARAMETERS['regions']) > 0:
-        elec = self.electrodes
-        labels_in_roi = [x['name'] for x in elec.electrodes.tsv if x['region'] in PARAMETERS['regions']]
-        clean_roi_labels = [label for label in clean_labels if label in labels_in_roi]
-    else:
-        clean_roi_labels = labels_in_roi = clean_labels
-
-    dat_move = select(dat_move, chan=clean_roi_labels)
-    dat_rest = select(dat_rest, chan=clean_roi_labels)
-
-    return dat_move, dat_rest
-
-
-def reject_channels(dat):
-    dat_std = math(dat, operator_name='std', axis='time')
-    THRESHOLD = PARAMETERS['reject']['chan']['threshold_std']
-    x = dat_std.data[0]
-    thres = [mean(x) + THRESHOLD * std(x)]
-    clean_labels = list(dat_std.chan[0][dat_std.data[0] < thres])
-    return clean_labels
-
-
-def run_montage(d, times, chan):
-    dat = d.read_data(begsam=times[0], endsam=times[1], chan=chan)
-    return montage(dat, ref_to_avg=True)
-
-
-def read_markers(d, marker_on, marker_off, minimalduration):
-    markers = d.read_events()
-    move_start = [mrk['onset'] for mrk in markers if mrk['trial_type'] == marker_on]
-    move_end = [mrk['onset'] + mrk['duration'] for mrk in markers if mrk['trial_type'] == marker_on]
-
-    rest_start = [mrk['onset'] for mrk in markers if mrk['trial_type'] == marker_off if mrk['duration'] > minimalduration]
-    rest_end = [mrk['onset'] + mrk['duration'] for mrk in markers if mrk['trial_type'] == marker_off if mrk['duration'] > minimalduration]
-    return (move_start, move_end), (rest_start, rest_end)

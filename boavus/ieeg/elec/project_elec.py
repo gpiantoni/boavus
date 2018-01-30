@@ -9,7 +9,6 @@ from wonambi.attr import Channels
 lg = getLogger(__name__)
 
 
-FREESURFER_MATLAB = environ['FREESURFER_HOME'] + '/matlab'
 SNAP_PATH = str(Path(__file__).resolve().parent / 'matlab')
 
 
@@ -39,6 +38,8 @@ def snap_to_surface(surf, chan, surf_path=None):
     that folder, but the intermediate steps for the channels
     are always stored in a temp folder.
     """
+    FREESURFER_MATLAB = environ['FREESURFER_HOME'] + '/matlab'
+
     tmp_path = Path(mkdtemp())
     if surf_path is None:
         surf_path = tmp_path

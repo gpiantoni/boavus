@@ -71,6 +71,13 @@ args = dict(
                 'output_dir',
                 ]
             ),
+        preprocessing=dict(
+            help='read in the data for move and rest',
+            arguments=[
+                'bids_dir',
+                'output_dir',
+                ]
+            ),
         psd=dict(
             help='compute psd for two conditions',
             arguments=[
