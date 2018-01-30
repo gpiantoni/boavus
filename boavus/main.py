@@ -84,6 +84,12 @@ args = dict(
                 'output_dir',
                 ]
             ),
+        percent=dict(
+            help='compute psd for two conditions',
+            arguments=[
+                'output_dir',
+                ]
+            ),
         corrfmri=dict(
             help='find best kernel size for iEEG electrodes based on fMRI',
             arguments=[
