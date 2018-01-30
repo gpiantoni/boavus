@@ -1,86 +1,48 @@
-from wonambi.trans import select, montage, math, timefrequency, concatenate
+from pickle import load, dump
+from wonambi.trans import select, math, timefrequency, concatenate
 from logging import getLogger
-from numpy import mean, std, array, log10
+from numpy import mean, array, log10
 import plotly.graph_objs as go
-from exportimages import export_plotly, Webdriver
 
-from bidso import Task
 from bidso.find import find_in_bids
-from bidso.utils import replace_extension
-from .percent import percent_ecog
+from bidso.utils import replace_underscore
 
 lg = getLogger(__name__)
 
 PARAMETERS = {
-    'electrodes': {
-        'acquisition': '*regions',
-        },
-    'markers': {
-        'on': '49',
-        'off': '48',
-        'minimalduration': 20,
-        },
-    'regions': [],
-    'reject': {
-        'chan': {
-            'threshold_std': 3,
-            },
-        },
-    'spectrogram': {
-        'duration': 1,
-        'taper': 'dpss',
-        'frequency': [
-            60,
-            90,
-            ],
-        },
+    'duration': 1,
+    'taper': 'dpss',
+    'frequency': [
+        60,
+        90,
+        ],
     }
 
 
-def main(bids_dir, output_dir):
+def main(output_dir):
 
-    export_dir = output_dir / 'psd'
-    export_dir.mkdir(exist_ok=True, parents=True)
-    driver = Webdriver(export_dir)
+    for cond in ('move', 'rest'):
+        for ieeg_file in find_in_bids(output_dir, modality=cond, extension='.pkl', generator=True):
+            with ieeg_file.open('rb') as f:
+                dat = load(f)
 
-    for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
-        figs, all_chan = compute_frequency(ieeg_file)
+            hfa, freq = compute_frequency(dat)
 
-        for fig, chan in zip(figs, all_chan):
-            export_png = replace_extension(export_dir / Task(ieeg_file).get_filename(), '_' + chan + '.png')
-            lg.debug(f'plotting {export_png}')
-            export_plotly(fig, export_png, driver)
+            output_file = replace_underscore(ieeg_file, 'hfa' + cond + '.pkl')
+            with output_file.open('wb') as f:
+                dump(hfa, f)
 
-
-def compute_frequency(filename):
-    dat_move, dat_rest = preprocess_ecog(filename)
-
-    hfa_move, freq_move = compute_freq(dat_move)
-    hfa_rest, freq_rest = compute_freq(dat_rest)
-
-    # it's compute here with all the electrodes (also the non active ones)
-    ecog_stats = percent_ecog(hfa_move, hfa_rest)
-    all_chan = ecog_stats.chan[0]
-
-    """
-    hfa_move, hfa_rest = _select_active(hfa_move, hfa_rest)
-    active_chan = hfa_move.chan[0]
-    """
-    active = ' (todo)'
-    all_fig = []
-    for chan in all_chan:
-        fig = plot_psd(chan, active, freq_move, freq_rest, ecog_stats)
-        all_fig.append(fig)
-
-    return all_fig, all_chan
+            output_file = replace_underscore(ieeg_file, 'freq' + cond + '.pkl')
+            with output_file.open('wb') as f:
+                dump(freq, f)
 
 
-def compute_freq(dat):
+def compute_frequency(dat):
     """Remove epochs which have very high activity in high-freq range, then
     average over time (only high-freq range) and ALL the frequencies."""
-    TAPER = PARAMETERS['spectrogram']['taper']
-    DURATION = PARAMETERS['spectrogram']['duration']
-    FREQ = PARAMETERS['spectrogram']['frequency']
+    TAPER = PARAMETERS['taper']
+    DURATION = PARAMETERS['duration']
+    FREQ = PARAMETERS['frequency']
 
     if TAPER == 'dpss':
         dat = timefrequency(dat, method='spectrogram', taper='dpss',
@@ -107,7 +69,7 @@ def compute_freq(dat):
 
 
 def plot_psd(chan, active, freq_move, freq_rest, perc):
-    FREQ = PARAMETERS['spectrogram']['frequency']
+    FREQ = PARAMETERS['frequency']
     mean_move = math(select(freq_move, freq=FREQ), operator_name='mean', axis='freq')(trial=0, chan=chan)
     mean_rest = math(select(freq_rest, freq=FREQ), operator_name='mean', axis='freq')(trial=0, chan=chan)
 

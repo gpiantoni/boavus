@@ -81,7 +81,6 @@ args = dict(
         psd=dict(
             help='compute psd for two conditions',
             arguments=[
-                'bids_dir',
                 'output_dir',
                 ]
             ),
