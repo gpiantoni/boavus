@@ -1,9 +1,10 @@
 from json import dump
-from pathlib import Path
+from logging import getLogger
 from multiprocessing import Pool
 from numpy import array, median
+
 from bidso import Electrodes
-from bidso.find import find_in_bids
+from bidso.find import find_in_bids, find_root
 from bidso.utils import replace_underscore
 
 from wonambi.attr.chan import Channels
@@ -11,26 +12,37 @@ from wonambi.attr import Freesurfer
 
 from .elec.project_elec import snap_to_surface
 
-PARAMETERS = {}
+lg = getLogger(__name__)
+
+PARAMETERS = {
+    'acquisition': [
+        'clinical',
+        'experimental',
+        ],
+    'parallel': True,
+    }
+
 
 def main(bids_dir, freesurfer_dir):
     args = []
     for electrode_path in find_in_bids(bids_dir, generator=True, modality='electrodes', extension='.tsv'):
         elec = Electrodes(electrode_path)
-        if elec.acquisition in ('clinical', 'experimental'):
+        if elec.acquisition in PARAMETERS['acquisition']:
             fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
+
             args.append((elec, fs))
 
-    with Pool(processes=4) as p:
-        p.starmap(_parallel_elec, args)
-
-
-def _parallel_elec(elec, fs):
-    elec_proj = project_electrodes(elec, fs)
-    assign_regions(elec_proj, fs)
+    if PARAMETERS['parallel']:
+        with Pool(processes=4) as p:
+            p.starmap(project_electrodes, args)
+    else:
+        for one_args in args:
+            project_electrodes(*one_args)
 
 
 def project_electrodes(elec, freesurfer):
+
+    bids_dir = find_root(elec.filename)
 
     xyz = array(elec.get_xyz())
     if elec.coordframe.json['iEEGCoordinateSystem'] == 'RAS':
@@ -44,9 +56,14 @@ def project_electrodes(elec, freesurfer):
     else:
         surf = freesurfer.read_brain().lh
 
-    chan = snap_to_surface(surf, chan)
+    anat_dir = find_in_bids(elec.filename, upwards=True, pattern='anat')
+    lg.debug(f'Saving surfaces in {anat_dir}')
+    chan = snap_to_surface(surf, chan, anat_dir)
 
-    tsv_electrodes = Path(elec.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acquisition}projected_electrodes.tsv'
+    elec.acquisition += 'projected'
+    tsv_electrodes = elec.get_filename(bids_dir)
+
+    lg.debug(f'Writing snapped electrodes to {tsv_electrodes}')
 
     with tsv_electrodes.open('w') as f:
         f.write('name\tx\ty\tz\ttype\tsize\tmaterial\n')
@@ -60,24 +77,6 @@ def project_electrodes(elec, freesurfer):
 
     elec.coordframe.json['iEEGCoordinateSystem'] = 'tkRAS'
     elec.coordframe.json['iEEGCoordinateProcessingDescripton'] += '; Dijkstra et al.'  # TODO: better description + remove None
-    new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
-    with new_json.open('w') as f:
-        dump(elec.coordframe.json, f, indent=2)
-
-    return Electrodes(tsv_electrodes)
-
-
-def assign_regions(elec, freesurfer):
-    tsv_electrodes = Path(elec.electrodes.filename).parent / f'sub-{elec.subject}_ses-{elec.session}_acq-{elec.acquisition}regions_electrodes.tsv'
-
-    with tsv_electrodes.open('w') as f:
-        f.write('name\tx\ty\tz\ttype\tsize\tmaterial\tregion\n')  # TODO: region is not in BEP010
-        for _tsv in elec.electrodes.tsv:
-            xyz = array([float(_tsv['x']), float(_tsv['y']), float(_tsv['z'])])
-            region = freesurfer.find_brain_region(xyz, exclude_regions=('White', 'WM', 'Unknown'))[0]
-            f.write(f'{_tsv["name"]}\t{_tsv["x"]}\t{_tsv["y"]}\t{_tsv["z"]}\t{_tsv["type"]}\t{_tsv["size"]}\t{_tsv["material"]}\t{region}\n')
-
-    elec.coordframe.json['iEEGCoordinateProcessingDescripton'] += '; Assign brain regions'  # TODO: better description + remove None
     new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
     with new_json.open('w') as f:
         dump(elec.coordframe.json, f, indent=2)

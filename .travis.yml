@@ -8,24 +8,30 @@ env:
     - DOWNLOADS=$HOME/downloads
     - LIB=$HOME/lib
     - DERIVATIVES=tests/data/derivatives
+    - INSTALL=$HOME/bin
 
 cache: 
-  - directories:
-    - $HOME/.cache/pip
-
+ - directories:
+   - $HOME/.cache/pip
 
 before_install:
-  # create display with large resolution
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16"
+  # install conda / python (opengl doesn't work with pip)
+  - sudo apt-get update -qq
+  - wget -q http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - chmod +x miniconda.sh
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
 
-    # download fsl
-  - sudo apt-get update
+    # install fsl
   - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
   - sudo apt-get -y update && sudo apt-get install -y -qq fsl-core
   - source /etc/fsl/fsl.sh
   - export FSLOUTPUTTYPE=NIFTI_GZ
 
-    # download freesurfer
+    # install freesurfer
   - mkdir $DERIVATIVES/freesurfer -p
   - wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
   - mkdir $LIB -p
@@ -47,27 +53,42 @@ before_install:
     --exclude='freesurfer/lib/tcltktixblt'
     --exclude='freesurfer/lib/vtk' 
     --exclude='freesurfer/diffusion' 
-    freesurfer  ;
+    freesurfer ;
   - echo -e FREESURFER_LICENSE > $LIB/freesurfer/license.txt
   - export FREESURFER_HOME=$LIB/freesurfer
   - source $FREESURFER_HOME/SetUpFreeSurfer.sh
   - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
 
+  # geckodriver
+  - json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
+  - url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
+  - curl -s -L "$url" | tar -xz
+  - chmod +x geckodriver
+  - mkdir $INSTALL -p
+  - mv geckodriver $INSTALL
+  - export PATH=$INSTALL:$PATH
 
-before_script:
-  - "export DISPLAY=:99.0"
+install:
+  - conda create -q -n test-environment  numpy scipy pyqt
+  - source activate test-environment
 
-install: 
-# install requirements
-  - pip install nibabel wonambi
-  - pip install pyqt5 vispy
+    # install requirements
+  - pip install nibabel wonambi vispy
   - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
-  - pip install pytest pytest-qt pytest-cov codecov
+  - pip install plotly
+  - pip install -e git+https://github.com/gpiantoni/exportimages.git#egg=exportimages  # this should be in pypi
+  - pip install pytest pytest-qt pytest-cov codecov pytest-travis-fold
   - pip install -e .
 
+before_script:
+  - export DISPLAY=:99.0;
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1400x900x24 -ac +extension GLX +render;
+
 script:
+  - python -c "import vispy; print(vispy.sys_info())"
   - py.test --cov=boavus tests
   - ls tests/data/* -lR
+  - cat tests/parameters/*
 
 after_success:
   - codecov
