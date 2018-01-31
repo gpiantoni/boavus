@@ -27,7 +27,7 @@ def main(output_dir):
         elif PARAMETERS['measure'] == 'zstat':
             ecog_stats = compute_zstat(hfa_move, hfa_rest)
 
-        percent_file = replace_underscore(hfa_move_file, PARAMETERS['measure'] + '.tsv')
+        percent_file = replace_underscore(hfa_move_file, 'compare.tsv')
         with percent_file.open('w') as f:
             f.write(f'channel\t{PARAMETERS["measure"]}\n')
             for chan in ecog_stats.chan[0]:

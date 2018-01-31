@@ -63,17 +63,6 @@ def from_mrifile_to_chan(img, fs, xyz):
     return apply_affine(img.affine, xyz) - fs.surface_ras_shift
 
 
-def _read_ecog_val(d):
-    hfa_move, hfa_rest = preprocess_ecog(d.filename)
-
-    if PARAMETERS['measure'] == 'percent':
-        ecog_stats = percent_ecog(hfa_move, hfa_rest).data[0]
-    elif PARAMETERS['measure'] == 'zstat':
-        ecog_stats = percent_ecog(hfa_move, hfa_rest).data[0]
-
-    return ecog_stats, hfa_move.chan[0]
-
-
 def _upsample(img_lowres):
     lowres = img_lowres.get_data()
     r = lowres.copy()

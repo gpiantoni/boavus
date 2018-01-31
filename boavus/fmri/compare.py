@@ -11,7 +11,9 @@ from bidso.utils import bids_mkdir
 
 lg = getLogger(__name__)
 
+
 PARAMETERS = {
+    'measure': 'percent',
     }
 
 
@@ -20,21 +22,17 @@ def main(feat_dir, output_dir):
     for feat_path in find_in_bids(feat_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')
 
-        compute_fmri_percent(feat_path, output_dir)
+        if PARAMETERS['measure'] == 'percent':
+            fmri_stat = compute_percent(feat_path)
+        elif PARAMETERS['measure'] == 'percent':
+            fmri_stat = compute_zstat(feat_path)
+
+        feat = file_Core(feat_path)
+        task_path = bids_mkdir(output_dir, feat) / (feat.filename.stem + '_measure.nii.gz')
+        nsave(fmri_stat, str(task_path))
 
 
-def compute_fmri_percent(feat_path, output_dir):
-
-    percent_nifti = percent_fmri(feat_path)
-    feat = file_Core(feat_path)
-    task_path = bids_mkdir(output_dir, feat) / (feat.filename.stem + '_percent.nii.gz')
-
-    nsave(percent_nifti, str(task_path))
-
-    return percent_nifti
-
-
-def percent_fmri(feat_path):
+def compute_percent(feat_path):
     """Calculate percent change for a task.
 
     Parameters
@@ -62,6 +60,10 @@ def percent_fmri(feat_path):
     perc[~mask] = NaN
 
     return Nifti1Image(perc, pe_mri.affine)
+
+
+def compute_zstat(feat_path):
+    return nload(str(feat_path / 'stats' / 'zstat1.nii.gz'))
 
 
 def read_design(feat_path):
