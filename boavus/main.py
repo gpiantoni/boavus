@@ -84,8 +84,8 @@ args = dict(
                 'output_dir',
                 ]
             ),
-        percent=dict(
-            help='compute psd for two conditions',
+        compare=dict(
+            help='compare the two conditions in percent change or zstat',
             arguments=[
                 'output_dir',
                 ]

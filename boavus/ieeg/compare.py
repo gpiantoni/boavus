@@ -1,4 +1,6 @@
 from pickle import load
+from scipy.stats import ttest_ind
+
 from wonambi.trans import math
 from wonambi.datatype import Data
 
@@ -56,3 +58,9 @@ def compute_percent(hfa_move, hfa_rest):
     data_perc = Data(perc, hfa_move.s_freq, chan=hfa_move.chan[0])
 
     return data_perc
+
+
+def compute_zstat(hfa_move, hfa_rest):
+    zstat = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1).statistic
+
+    return Data(zstat, hfa_move.s_freq, chan=hfa_move.chan[0])

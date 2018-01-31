@@ -46,6 +46,41 @@ def test_ieeg_preprocessing():
         ])
 
 
+def test_ieeg_compare_percent():
+
+    boavus([
+        'ieeg',
+        'compare',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        ])
+
+
+def test_ieeg_compare_zstat():
+
+    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_compare.json'
+
+    boavus([
+        'ieeg',
+        'compare',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--parameters',
+        str(PARAMETERS_JSON),
+        ])
+
+    update_parameters(PARAMETERS_JSON, measure='zstat')
+
+    boavus([
+        'ieeg',
+        'compare',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--parameters',
+        str(PARAMETERS_JSON),
+        ])
+
+
 def test_ieeg_psd():
 
     boavus([
