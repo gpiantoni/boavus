@@ -6,23 +6,31 @@ from .utils import update_parameters
 
 
 def test_fmri_percent():
-    if environ.get('FSLDIR') is not None:
-        boavus([
-            'fmri',
-            'compare',
-            '--feat_dir',
-            str(FEAT_PATH),
-            '--output_dir',
-            str(BOAVUS_PATH),
-            ])
+    if environ.get('FSLDIR') is None:
+        return
+
+    boavus([
+        'fmri',
+        'compare',
+        '--feat_dir',
+        str(FEAT_PATH),
+        '--output_dir',
+        str(BOAVUS_PATH),
+        ])
+
 
 def test_fmri_compare_zstat():
+
+    if environ.get('FSLDIR') is None:
+        return
 
     PARAMETERS_JSON = PARAMETERS_PATH / 'fmri_compare.json'
 
     boavus([
         'fmri',
         'compare',
+        '--feat_dir',
+        str(FEAT_PATH),
         '--output_dir',
         str(BOAVUS_PATH),
         '--parameters',
@@ -34,6 +42,8 @@ def test_fmri_compare_zstat():
     boavus([
         'fmri',
         'compare',
+        '--feat_dir',
+        str(FEAT_PATH),
         '--output_dir',
         str(BOAVUS_PATH),
         '--parameters',

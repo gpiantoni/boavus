@@ -39,7 +39,7 @@ args = dict(
         ),
     fmri=dict(
         help='fmri functions',
-        percent=dict(
+        compare=dict(
             help='compute percent change of the BOLD signal',
             arguments=[
                 'feat_dir',

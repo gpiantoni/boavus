@@ -24,7 +24,7 @@ def main(feat_dir, output_dir):
 
         if PARAMETERS['measure'] == 'percent':
             fmri_stat = compute_percent(feat_path)
-        elif PARAMETERS['measure'] == 'percent':
+        elif PARAMETERS['measure'] == 'zstat':
             fmri_stat = compute_zstat(feat_path)
 
         feat = file_Core(feat_path)
