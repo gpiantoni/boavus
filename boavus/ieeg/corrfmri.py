@@ -15,7 +15,6 @@ from numpy.linalg import norm
 from nibabel import Nifti1Image
 from nibabel.affines import apply_affine
 from numpy.linalg import inv
-from scipy.stats import ttest_ind
 from numpy import repeat, diag
 from nibabel import load as nload
 from multiprocessing import Pool
@@ -70,6 +69,8 @@ def _read_ecog_val(d):
     if PARAMETERS['measure'] == 'percent':
         ecog_stats = percent_ecog(hfa_move, hfa_rest).data[0]
     elif PARAMETERS['measure'] == 'zstat':
+        ecog_stats = percent_ecog(hfa_move, hfa_rest).data[0]
+
     return ecog_stats, hfa_move.chan[0]
 
 
@@ -98,20 +99,6 @@ def _read_fmri_val(feat_path, output_dir):
         upsampled.to_filename(str(output_dir / 'upsampled.nii.gz'))
 
     return upsampled
-
-
-def _compute_voxmap(chan_xyz, mri_shape, ndi, gauss_size):
-
-    p_compute_gauss = partial(_compute_gauss, mri_shape=mri_shape, ndi=ndi, gauss_size=gauss_size)
-    with Pool() as p:
-        all_m = p.map(p_compute_gauss, chan_xyz)
-    ms = stack(all_m, axis=-1)
-    MAX_STD = 3
-    ms[ms.max(axis=-1) < normdistr.pdf(gauss_size * MAX_STD, scale=gauss_size), :] = NaN
-    lg.debug(ms.shape)
-    mq = ms / ms.sum(axis=-1)[..., None]
-
-    return mq
 
 
 def _compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
@@ -179,58 +166,5 @@ def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH):
             r.append(_compute_each_kernel(KERNEL, chan_xyz=chan_xyz, mri=mri,
                                           ndi=ndi, ecog_val=ecog_val))
 
-
-    return r
-
-
-def _main(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH, KERNEL_SIZES, to_plot=False):
-
-    output_path = DERIVATIVES_PATH / 'corr_fmri_ecog'
-    output_path.mkdir(exist_ok=True)
-
-    img = _read_fmri_val(feat_path, output_path, to_plot)
-    mri = img.get_data()
-    lg.debug('fmri done')
-
-    d = Dataset(ieeg_file, '*fridge')
-
-    freesurfer_path = FREESURFER_PATH / d.subject
-    fs = Freesurfer(freesurfer_path)
-    ecog_val, labels = _read_ecog_val(d)
-    elec = _read_elec(d)
-    elec = elec(lambda x: x.label in labels)
-    lg.debug(len(elec.return_label()))
-    lg.debug(len(ecog_val))
-    lg.debug('ecog done')
-
-    chan_xyz = elec.return_xyz()
-    nd = array(list(ndindex(mri.shape)))
-    ndi = from_mrifile_to_chan(img, fs, nd)
-    print('ndindex done')
-
-    r = []
-
-    for gauss_size in KERNEL_SIZES:
-        print(gauss_size)
-        mq = _compute_voxmap(chan_xyz, mri.shape, ndi, gauss_size)
-        if to_plot:
-            t_val = arange(chan_xyz.shape[0])
-            nifti_data = (mq * t_val[None, None, None, :]).sum(axis=-1)
-            nifti = Nifti1Image(nifti_data, img.affine)
-            nifti.to_filename(str(DERIVATIVES_PATH / 'trans_example.nii.gz'))
-
-        m = (mq * ecog_val[None, None, None, :]).sum(axis=-1)
-        mask = (~isnan(mq[:, :, :, 0])) & (mri != 0)
-
-        if to_plot:
-            nifti_data = m.copy()
-            nifti_data[~mask] = NaN  # also exclude area outside of fmri
-            nifti = Nifti1Image(nifti_data, img.affine)
-            nifti.to_filename(str(DERIVATIVES_PATH / 'ecog_to_mri.nii.gz'))
-
-        lr = linregress(m[mask], mri[mask])
-        print(lr)
-
-        r.append(lr.rvalue ** 2)
 
     return r
