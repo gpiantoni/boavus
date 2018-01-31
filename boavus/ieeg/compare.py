@@ -29,7 +29,7 @@ def main(output_dir):
 
         percent_file = replace_underscore(hfa_move_file, 'compare.tsv')
         with percent_file.open('w') as f:
-            f.write(f'channel\t{PARAMETERS["measure"]}\n')
+            f.write('channel\tmeasure\n')
             for chan in ecog_stats.chan[0]:
                 f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\n')
 

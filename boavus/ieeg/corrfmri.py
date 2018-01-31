@@ -55,7 +55,7 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):
     fs = Freesurfer(freesurfer_path)
 
     labels = [x['channel'] for x in read_tsv(measure_ecog)]
-    ecog_val = array([float(x['percent']) for x in read_tsv(measure_ecog)])
+    ecog_val = array([float(x['measure']) for x in read_tsv(measure_ecog)])  # TODO
 
     electrodes = Electrodes(find_in_bids(bids_dir, subject=task_fmri.subject, acquisition='*regions', modality='electrodes', extension='.tsv'))
 
@@ -63,7 +63,7 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
 
-    results_dir = output_dir / 'corr_ieeg_fmri'
+    results_dir = output_dir / 'corr_ieeg_fmri_zstat'
     results_dir.mkdir(exist_ok=True, parents=True)
     results_tsv = results_dir / replace_underscore(task_fmri.get_filename(), PARAMETERS['distance'] + '.tsv')
     with results_tsv.open('w') as f:
