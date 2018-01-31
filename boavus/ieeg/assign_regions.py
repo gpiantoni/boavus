@@ -25,8 +25,8 @@ def main(bids_dir, freesurfer_dir):
         with Pool(processes=4) as p:
             p.starmap(assign_regions, args)
     else:
-        for one_args in args:
-            assign_regions(*one_args)
+        for arg in args:
+            assign_regions(*arg)
 
 
 def assign_regions(elec, freesurfer):

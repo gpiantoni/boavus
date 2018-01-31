@@ -1,23 +1,19 @@
-from functools import partial
 from logging import getLogger
-from bidso.find import find_in_bids
-from bidso.utils import replace_underscore
-
-from boavus.ieeg.dataset import Dataset
-from wonambi.attr import Freesurfer
-
-from numpy import ndindex, NaN, array, stack, isnan, arange, nansum, power, zeros
-from numpy.linalg import norm
-from nibabel import Nifti1Image
-from nibabel.affines import apply_affine
-from numpy.linalg import inv
-from numpy import repeat, diag
-from nibabel import load as nload
 from multiprocessing import Pool
+
+from numpy import ndindex, array, nansum, power, zeros, repeat, diag
+from numpy.linalg import norm, inv
 from scipy.stats import norm as normdistr
 from scipy.stats import linregress
-from bidso import Task, file_Core, Electrodes
-from bidso.utils import read_tsv
+from nibabel import Nifti1Image
+from nibabel.affines import apply_affine
+from nibabel import load as nload
+
+from wonambi.attr import Freesurfer
+
+from bidso import file_Core, Electrodes
+from bidso.find import find_in_bids
+from bidso.utils import read_tsv, replace_underscore
 
 lg = getLogger(__name__)
 
@@ -41,7 +37,7 @@ def main(bids_dir, freesurfer_dir, output_dir):
             p.starmap(save_corrfmri, args)
     else:
         for arg in args:
-            save_corrfmri(*args)
+            save_corrfmri(*arg)
 
 
 def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):

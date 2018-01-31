@@ -33,7 +33,7 @@ def main(output_dir):
             p.starmap(save_frequency, args)
     else:
         for arg in args:
-            save_frequency(*args)
+            save_frequency(*arg)
 
 
 def save_frequency(ieeg_file, cond):

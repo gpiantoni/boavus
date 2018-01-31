@@ -36,8 +36,8 @@ def main(bids_dir, freesurfer_dir):
         with Pool(processes=4) as p:
             p.starmap(project_electrodes, args)
     else:
-        for one_args in args:
-            project_electrodes(*one_args)
+        for arg in args:
+            project_electrodes(*arg)
 
 
 def project_electrodes(elec, freesurfer):
