@@ -94,7 +94,6 @@ args = dict(
             help='find best kernel size for iEEG electrodes based on fMRI',
             arguments=[
                 'bids_dir',
-                'feat_dir',
                 'freesurfer_dir',
                 'output_dir',
                 ]

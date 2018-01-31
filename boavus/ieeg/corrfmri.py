@@ -2,12 +2,8 @@ from functools import partial
 from logging import getLogger
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
-from bidso import Task
 
-from boavus.fmri.percent import percent_fmri
 from boavus.ieeg.dataset import Dataset
-from boavus.ieeg.preprocessing import preprocess_ecog
-from boavus.ieeg.percent import percent_ecog
 from wonambi.attr import Freesurfer
 
 from numpy import ndindex, NaN, array, stack, isnan, arange, nansum, power, zeros
@@ -20,39 +16,47 @@ from nibabel import load as nload
 from multiprocessing import Pool
 from scipy.stats import norm as normdistr
 from scipy.stats import linregress
+from bidso import Task, file_Core, Electrodes
+from bidso.utils import read_tsv
 
 lg = getLogger(__name__)
 
 
 PARAMETERS = {
     'kernels': list(range(1, 10)),
-    'measure': 'zstat',
     'distance': 'gaussian',
-    'save_nifti': False,
     'parallel': True,
     }
 
+def main(bids_dir, freesurfer_dir, output_dir):
+    for measure_nii in find_in_bids(output_dir, modality='measure', extension='.nii.gz', generator=True):
+        img = nload(str(measure_nii))
+        img = upsample_mri(img)
+        mri = img.get_data()
 
-def main(bids_dir, feat_dir, freesurfer_dir, output_dir):
+        task_fmri = file_Core(measure_nii)
+        measure_ecog = find_in_bids(output_dir, subject=task_fmri.subject, task=task_fmri.task, modality='measure', extension='.tsv')
+        freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
+        fs = Freesurfer(freesurfer_path)
 
-    for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
-        try:
-            ieeg = Task(ieeg_file)
-            feat_path = find_in_bids(feat_dir, subject=ieeg.subject, task=ieeg.task,
-                                     modality='bold', extension='.feat')
+        labels = [x['channel'] for x in read_tsv(measure_ecog)]
+        ecog_val = array([float(x['percent']) for x in read_tsv(measure_ecog)])
 
-            output = _main_to_elec(ieeg_file, feat_path, freesurfer_dir, output_dir)
+        electrodes = Electrodes(find_in_bids(bids_dir, subject=task_fmri.subject, acquisition='*regions', modality='electrodes', extension='.tsv'))
 
-            results = replace_underscore(ieeg.get_filename(output_dir),
-                                         PARAMETERS['measure'] + '_' + PARAMETERS['distance'] + '_results.tsv')
-            lg.debug(f'Saving results to {str(results)}')
+        chan_xyz = array(electrodes.get_xyz(labels))
+        nd = array(list(ndindex(mri.shape)))
+        ndi = from_mrifile_to_chan(img, fs, nd)
 
-            results.parent.mkdir(exist_ok=True, parents=True)
-            with results.open('w') as f:
-                f.write(str(output))
+        results_dir = output_dir / 'corr_ieeg_fmri'
+        results_dir.mkdir(exist_ok=True, parents=True)
+        results_tsv = results_dir / replace_underscore(task_fmri.get_filename(), PARAMETERS['distance'] + '.tsv')
+        with results_tsv.open('w') as f:
+            f.write('Kernel\tRsquared\n')
 
-        except Exception as err:
-            lg.warning(err)
+            for KERNEL in PARAMETERS['kernels']:
+                r = compute_each_kernel(KERNEL, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
+                f.write(f'{KERNEL}\t{r}\n')
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -63,7 +67,7 @@ def from_mrifile_to_chan(img, fs, xyz):
     return apply_affine(img.affine, xyz) - fs.surface_ras_shift
 
 
-def _upsample(img_lowres):
+def upsample_mri(img_lowres):
     lowres = img_lowres.get_data()
     r = lowres.copy()
     for i in range(3):
@@ -77,20 +81,7 @@ def _upsample(img_lowres):
     return nifti
 
 
-def _read_fmri_val(feat_path, output_dir):
-    if PARAMETERS['measure'] == 'percent':
-        img_lowres = percent_fmri(feat_path)
-    elif PARAMETERS['measure'] == 'zstat':
-        img_lowres = nload(str(feat_path / 'stats' / 'zstat1.nii.gz'))
-
-    upsampled = _upsample(img_lowres)
-    if PARAMETERS['save_nifti']:
-        upsampled.to_filename(str(output_dir / 'upsampled.nii.gz'))
-
-    return upsampled
-
-
-def _compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
+def compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
     fmri_val = []
     for pos in chan_xyz:
         dist_chan = norm(ndi - pos, axis=1)
@@ -108,52 +99,8 @@ def _compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
         m /= nansum(m)  # normalize so that the sum is 1
         m = m.reshape(mri.shape)
 
-        if output is not None:
-            nifti = Nifti1Image(m, affine)
-            nifti.to_filename(str(output))
-
         mq = m * mri
         fmri_val.append(nansum(mq))
 
     lr = linregress(ecog_val, array(fmri_val))
     return lr.rvalue ** 2
-
-
-def _main_to_elec(ieeg_file, feat_path, FREESURFER_PATH, DERIVATIVES_PATH):
-
-    output_path = DERIVATIVES_PATH
-    output_path.mkdir(exist_ok=True)
-
-    img = _read_fmri_val(feat_path, output_path)
-    mri = img.get_data()
-    lg.info('fmri done')
-
-    pattern = '*regions'
-    d = Dataset(ieeg_file, pattern)
-
-    freesurfer_path = FREESURFER_PATH / ('sub-' + d.subject)
-    fs = Freesurfer(freesurfer_path)
-    ecog_val, labels = _read_ecog_val(d)
-    lg.debug(ecog_val)
-    lg.info('ecog done')
-
-    chan_xyz = array(d.electrodes.get_xyz(labels))
-    nd = array(list(ndindex(mri.shape)))
-    ndi = from_mrifile_to_chan(img, fs, nd)
-    lg.info('ndindex done')
-
-    if PARAMETERS['parallel']:
-        p_compute_each_kernel = partial(_compute_each_kernel, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
-
-        KERNEL_SIZES = PARAMETERS['kernels']
-        with Pool() as p:
-            r = p.map(p_compute_each_kernel, KERNEL_SIZES)
-
-    else:
-        r = []
-        for KERNEL in PARAMETERS['kernels']:
-            r.append(_compute_each_kernel(KERNEL, chan_xyz=chan_xyz, mri=mri,
-                                          ndi=ndi, ecog_val=ecog_val))
-
-
-    return r

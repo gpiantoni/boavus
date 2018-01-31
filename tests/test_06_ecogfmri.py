@@ -7,14 +7,12 @@ from .utils import update_parameters
 PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_corrfmri.json'
 
 
-def test_main_ieeg_corrfmri_parameters():
-    assert not PARAMETERS_JSON.exists()
+def test_ieeg_corrfmri_parameters():
+
 
     boavus([
         'ieeg',
         'corrfmri',
-        '--feat_dir',
-        str(FEAT_PATH),
         '--output_dir',
         str(BOAVUS_PATH),
         '--freesurfer_dir',
@@ -25,24 +23,68 @@ def test_main_ieeg_corrfmri_parameters():
         str(PARAMETERS_JSON),
         ])
 
+
+def test_ieeg_corrfmri_gaussian():
+    if environ.get('FSLDIR') is None:
+        return
+
     update_parameters(PARAMETERS_JSON, kernels=[5, ], parallel=False)
 
+    boavus([
+        'ieeg',
+        'corrfmri',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
+        '--parameters',
+        str(PARAMETERS_JSON),
+        '--log',
+        'debug',
+        ])
 
-def test_main_ieeg_corrfmri():
-    if environ.get('FSLDIR') is not None:
-        boavus([
-            'ieeg',
-            'corrfmri',
-            '--feat_dir',
-            str(FEAT_PATH),
-            '--output_dir',
-            str(BOAVUS_PATH),
-            '--freesurfer_dir',
-            str(FREESURFER_PATH),
-            '--bids_dir',
-            str(BIDS_PATH),
-            '--parameters',
-            str(PARAMETERS_JSON),
-            '--log',
-            'debug',
-            ])
+
+def test_ieeg_corrfmri_sphere():
+    if environ.get('FSLDIR') is None:
+        return
+
+    update_parameters(PARAMETERS_JSON, distance='sphere')
+
+    boavus([
+        'ieeg',
+        'corrfmri',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
+        '--parameters',
+        str(PARAMETERS_JSON),
+        '--log',
+        'debug',
+        ])
+
+
+def test_ieeg_corrfmri_inverse():
+    if environ.get('FSLDIR') is None:
+        return
+
+    update_parameters(PARAMETERS_JSON, distance='inverse')
+
+    boavus([
+        'ieeg',
+        'corrfmri',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
+        '--parameters',
+        str(PARAMETERS_JSON),
+        '--log',
+        'debug',
+        ])
