@@ -1,6 +1,7 @@
 from pickle import load, dump
 from wonambi.trans import select, math, timefrequency, concatenate
 from logging import getLogger
+from multiprocessing import Pool
 from numpy import mean, array, log10
 import plotly.graph_objs as go
 
@@ -16,25 +17,38 @@ PARAMETERS = {
         60,
         90,
         ],
+    'parallel': True,
     }
 
 
 def main(output_dir):
 
+    args = []
     for cond in ('move', 'rest'):
         for ieeg_file in find_in_bids(output_dir, modality=cond, extension='.pkl', generator=True):
-            with ieeg_file.open('rb') as f:
-                dat = load(f)
+            args.append((ieeg_file, cond))
 
-            hfa, freq = compute_frequency(dat)
+    if PARAMETERS['parallel']:
+        with Pool() as p:
+            p.starmap(save_frequency, args)
+    else:
+        for arg in args:
+            save_frequency(*args)
 
-            output_file = replace_underscore(ieeg_file, 'hfa' + cond + '.pkl')
-            with output_file.open('wb') as f:
-                dump(hfa, f)
 
-            output_file = replace_underscore(ieeg_file, 'freq' + cond + '.pkl')
-            with output_file.open('wb') as f:
-                dump(freq, f)
+def save_frequency(ieeg_file, cond):
+    with ieeg_file.open('rb') as f:
+        dat = load(f)
+
+    hfa, freq = compute_frequency(dat)
+
+    output_file = replace_underscore(ieeg_file, 'hfa' + cond + '.pkl')
+    with output_file.open('wb') as f:
+        dump(hfa, f)
+
+    output_file = replace_underscore(ieeg_file, 'freq' + cond + '.pkl')
+    with output_file.open('wb') as f:
+        dump(freq, f)
 
 
 def compute_frequency(dat):

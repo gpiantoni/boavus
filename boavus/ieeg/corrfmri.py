@@ -28,35 +28,51 @@ PARAMETERS = {
     'parallel': True,
     }
 
+
 def main(bids_dir, freesurfer_dir, output_dir):
-    for measure_nii in find_in_bids(output_dir, modality='measure', extension='.nii.gz', generator=True):
-        img = nload(str(measure_nii))
-        img = upsample_mri(img)
-        mri = img.get_data()
+    args = []
+    for measure_nii in find_in_bids(output_dir, modality='compare', extension='.nii.gz', generator=True):
+        lg.debug(f'adding {measure_nii}')
+        args.append((measure_nii, bids_dir, freesurfer_dir, output_dir))
 
-        task_fmri = file_Core(measure_nii)
-        measure_ecog = find_in_bids(output_dir, subject=task_fmri.subject, task=task_fmri.task, modality='measure', extension='.tsv')
-        freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
-        fs = Freesurfer(freesurfer_path)
+    if PARAMETERS['parallel']:
+        with Pool() as p:
+            lg.debug('Starting pool')
+            p.starmap(save_corrfmri, args)
+    else:
+        for arg in args:
+            save_corrfmri(*args)
 
-        labels = [x['channel'] for x in read_tsv(measure_ecog)]
-        ecog_val = array([float(x['percent']) for x in read_tsv(measure_ecog)])
 
-        electrodes = Electrodes(find_in_bids(bids_dir, subject=task_fmri.subject, acquisition='*regions', modality='electrodes', extension='.tsv'))
+def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):
+    img = nload(str(measure_nii))
+    img = upsample_mri(img)
+    mri = img.get_data()
 
-        chan_xyz = array(electrodes.get_xyz(labels))
-        nd = array(list(ndindex(mri.shape)))
-        ndi = from_mrifile_to_chan(img, fs, nd)
+    task_fmri = file_Core(measure_nii)
+    measure_ecog = find_in_bids(output_dir, subject=task_fmri.subject, task=task_fmri.task, modality='compare', extension='.tsv')
+    freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
+    fs = Freesurfer(freesurfer_path)
 
-        results_dir = output_dir / 'corr_ieeg_fmri'
-        results_dir.mkdir(exist_ok=True, parents=True)
-        results_tsv = results_dir / replace_underscore(task_fmri.get_filename(), PARAMETERS['distance'] + '.tsv')
-        with results_tsv.open('w') as f:
-            f.write('Kernel\tRsquared\n')
+    labels = [x['channel'] for x in read_tsv(measure_ecog)]
+    ecog_val = array([float(x['percent']) for x in read_tsv(measure_ecog)])
 
-            for KERNEL in PARAMETERS['kernels']:
-                r = compute_each_kernel(KERNEL, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
-                f.write(f'{KERNEL}\t{r}\n')
+    electrodes = Electrodes(find_in_bids(bids_dir, subject=task_fmri.subject, acquisition='*regions', modality='electrodes', extension='.tsv'))
+
+    chan_xyz = array(electrodes.get_xyz(labels))
+    nd = array(list(ndindex(mri.shape)))
+    ndi = from_mrifile_to_chan(img, fs, nd)
+
+    results_dir = output_dir / 'corr_ieeg_fmri'
+    results_dir.mkdir(exist_ok=True, parents=True)
+    results_tsv = results_dir / replace_underscore(task_fmri.get_filename(), PARAMETERS['distance'] + '.tsv')
+    with results_tsv.open('w') as f:
+        f.write('Kernel\tRsquared\n')
+
+        for KERNEL in PARAMETERS['kernels']:
+            r = compute_each_kernel(KERNEL, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
+            f.write(f'{KERNEL}\t{r}\n')
+            f.flush()
 
 
 def from_chan_to_mrifile(img, fs, xyz):

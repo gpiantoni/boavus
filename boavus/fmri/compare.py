@@ -28,7 +28,7 @@ def main(feat_dir, output_dir):
             fmri_stat = compute_zstat(feat_path)
 
         feat = file_Core(feat_path)
-        task_path = bids_mkdir(output_dir, feat) / (feat.filename.stem + '_measure.nii.gz')
+        task_path = bids_mkdir(output_dir, feat) / (feat.filename.stem + '_compare.nii.gz')
         nsave(fmri_stat, str(task_path))
 
 

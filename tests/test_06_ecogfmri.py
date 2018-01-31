@@ -9,7 +9,6 @@ PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_corrfmri.json'
 
 def test_ieeg_corrfmri_parameters():
 
-
     boavus([
         'ieeg',
         'corrfmri',

@@ -41,7 +41,30 @@ def test_ieeg_preprocessing():
         str(BIDS_PATH),
         '--output_dir',
         str(BOAVUS_PATH),
-        '-p',
+        '--parameters',
+        str(PARAMETERS_JSON),
+        ])
+
+def test_ieeg_psd():
+    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_psd.json'
+
+    boavus([
+        'ieeg',
+        'psd',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--parameters',
+        str(PARAMETERS_JSON),
+        ])
+
+    update_parameters(PARAMETERS_JSON, parallel=False)
+
+    boavus([
+        'ieeg',
+        'psd',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--parameters',
         str(PARAMETERS_JSON),
         ])
 
@@ -81,11 +104,3 @@ def test_ieeg_compare_zstat():
         ])
 
 
-def test_ieeg_psd():
-
-    boavus([
-        'ieeg',
-        'psd',
-        '--output_dir',
-        str(BOAVUS_PATH),
-        ])
