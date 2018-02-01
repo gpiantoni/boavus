@@ -36,6 +36,13 @@ args = dict(
                 'feat_dir',
                 ],
             ),
+        coreg=dict(
+            help='coreg feat with freesurfer',
+            arguments=[
+                'feat_dir',
+                'freesurfer_dir',
+                ],
+            ),
         ),
     fmri=dict(
         help='fmri functions',

@@ -104,11 +104,3 @@ def _write_events(events_input, events_output):
     with events_output.open('w') as f:
         for event in tsv:
             f.write(f'{event["onset"]}\t{event["duration"]}\t{EVENT_VALUE[event["trial_type"]]}\n')
-
-
-def coreg_feat2freesurfer(feat_file, FREESURFER_PATH):
-    """This needs to be improved with object-oriented feat"""
-    cmd = ['reg-feat2anat', '--feat', str(feat_file), '--subject', feat_file.name.split('_')[0]]
-    run(cmd,
-        env={**ENVIRON, 'SUBJECTS_DIR': str(FREESURFER_PATH)},
-        cwd=str(feat_file.parent))

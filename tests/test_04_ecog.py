@@ -28,7 +28,7 @@ def test_ieeg_preprocessing():
         str(BIDS_PATH),
         '--output_dir',
         str(BOAVUS_PATH),
-        '-p',
+        '--parameters',
         str(PARAMETERS_JSON),
         ])
 

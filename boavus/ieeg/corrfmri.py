@@ -8,8 +8,10 @@ from scipy.stats import linregress
 from nibabel import Nifti1Image
 from nibabel.affines import apply_affine
 from nibabel import load as nload
+import plotly.graph_objs as go
 
 from wonambi.attr import Freesurfer
+from exportimages import export_plotly, Webdriver
 
 from bidso import file_Core, Electrodes
 from bidso.find import find_in_bids
@@ -34,10 +36,11 @@ def main(bids_dir, freesurfer_dir, output_dir):
     if PARAMETERS['parallel']:
         with Pool() as p:
             lg.debug('Starting pool')
-            p.starmap(save_corrfmri, args)
+            results = p.starmap(save_corrfmri, args)
     else:
-        for arg in args:
-            save_corrfmri(*arg)
+        results = [save_corrfmri(*arg) for arg in args]
+
+    plot_results(results, output_dir)
 
 
 def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):
@@ -69,6 +72,8 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):
             r = compute_each_kernel(KERNEL, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
             f.write(f'{KERNEL}\t{r}\n')
             f.flush()
+
+    return results_tsv
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -116,3 +121,33 @@ def compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
 
     lr = linregress(ecog_val, array(fmri_val))
     return lr.rvalue ** 2
+
+
+def plot_results(results_tsv, output_dir):
+    img_dir = output_dir / 'corr_ieeg_fmri_png'
+    img_dir.mkdir(exist_ok=True)
+
+    with Webdriver(output_dir) as d:
+        for one_tsv in results_tsv:
+
+            results = read_tsv(one_tsv)
+            k = [x['Kernel'] for x in results]
+            rsquared = [float(x['Rsquared']) for x in results]
+            traces = [{
+                'x': k,
+                'y': rsquared,
+                },
+                ]
+
+            layout = go.Layout(
+                xaxis=dict(
+                    title='mm'),
+                yaxis=dict(
+                    title='r<sup>2</sup>',
+                    rangemode='tozero',
+                ),
+            )
+
+            fig = go.Figure(data=traces, layout=layout)
+            output_png = img_dir / (one_tsv.stem + '.png')
+            export_plotly(fig, output_png, driver=d)
