@@ -19,6 +19,9 @@ from bidso.utils import read_tsv, replace_underscore
 
 lg = getLogger(__name__)
 
+ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
+PNG_DIR = 'corr_ieeg_fmri_png'
+
 
 PARAMETERS = {
     'kernels': list(range(1, 10)),
@@ -62,7 +65,7 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
 
-    results_dir = output_dir / 'corr_ieeg_fmri_zstat'
+    results_dir = output_dir / ZSTAT_DIR
     results_dir.mkdir(exist_ok=True, parents=True)
     results_tsv = results_dir / replace_underscore(task_fmri.get_filename(), PARAMETERS['distance'] + '.tsv')
     with results_tsv.open('w') as f:
@@ -124,10 +127,10 @@ def compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
 
 
 def plot_results(results_tsv, output_dir):
-    img_dir = output_dir / 'corr_ieeg_fmri_png'
+    img_dir = output_dir / PNG_DIR
     img_dir.mkdir(exist_ok=True)
 
-    with Webdriver(output_dir) as d:
+    with Webdriver(img_dir) as d:
         for one_tsv in results_tsv:
 
             results = read_tsv(one_tsv)
