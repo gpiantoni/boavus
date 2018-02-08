@@ -85,10 +85,11 @@ def test_ieeg_assignregions():
 def test_ieeg_plotelectrodes(qtbot):
 
     PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_plotelectrodes.json'
-
     boavus([
         'ieeg',
-        'project_electrodes',
+        'plot_electrodes',
+        '--output_dir',
+        str(BOAVUS_PATH),
         '--freesurfer_dir',
         str(FREESURFER_PATH),
         '--bids_dir',
