@@ -60,6 +60,7 @@ args = dict(
             arguments=[
                 'bids_dir',
                 'freesurfer_dir',
+                'analysis_dir',
                 ]
             ),
         assign_regions=dict(

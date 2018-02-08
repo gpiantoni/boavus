@@ -3,7 +3,15 @@ from shutil import copyfile, which
 from bidso.utils import replace_underscore
 from boavus.main import boavus
 
-from .paths import BIDS_PATH, task_ieeg, elec_ct, FREESURFER_PATH, BOAVUS_PATH, PARAMETERS_PATH, SIMULATE_PATH
+from .paths import (BIDS_PATH,
+                    task_ieeg,
+                    elec_ct,
+                    FREESURFER_PATH,
+                    BOAVUS_PATH,
+                    PARAMETERS_PATH,
+                    ANALYSIS_PATH,
+                    SIMULATE_PATH,
+                    )
 from .utils import update_parameters
 
 
@@ -20,11 +28,13 @@ def test_ieeg_projectelectrodes():
         str(FREESURFER_PATH),
         '--bids_dir',
         str(BIDS_PATH),
+        '--analysis_dir',
+        str(ANALYSIS_PATH),
         '-p',
         str(PARAMETERS_JSON),
         ])
 
-    update_parameters(PARAMETERS_JSON, acquisition=['ct', ], parallel=False)
+    update_parameters(PARAMETERS_JSON, acquisition='ct', parallel=False)
 
     if which('matlab') is not None:
 
@@ -36,6 +46,8 @@ def test_ieeg_projectelectrodes():
             str(FREESURFER_PATH),
             '--bids_dir',
             str(BIDS_PATH),
+            '--analysis_dir',
+            str(ANALYSIS_PATH),
             '-p',
             str(PARAMETERS_JSON),
             ])

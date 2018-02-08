@@ -14,23 +14,20 @@ from .elec.project_elec import snap_to_surface
 
 lg = getLogger(__name__)
 
+
 PARAMETERS = {
-    'acquisition': [
-        'clinical',
-        'experimental',
-        ],
+    'acquisition': 'clinical',
     'parallel': True,
     }
 
 
-def main(bids_dir, freesurfer_dir):
+def main(bids_dir, freesurfer_dir, analysis_dir):
     args = []
-    for electrode_path in find_in_bids(bids_dir, generator=True, modality='electrodes', extension='.tsv'):
+    for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'):
         elec = Electrodes(electrode_path)
-        if elec.acquisition in PARAMETERS['acquisition']:
-            fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
+        fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
 
-            args.append((elec, fs))
+        args.append((elec, fs, analysis_dir))
 
     if PARAMETERS['parallel']:
         with Pool(processes=4) as p:
@@ -40,7 +37,7 @@ def main(bids_dir, freesurfer_dir):
             project_electrodes(*arg)
 
 
-def project_electrodes(elec, freesurfer):
+def project_electrodes(elec, freesurfer, analysis_dir):
 
     bids_dir = find_root(elec.filename)
 
@@ -56,7 +53,8 @@ def project_electrodes(elec, freesurfer):
     else:
         surf = freesurfer.read_brain().lh
 
-    anat_dir = find_in_bids(elec.filename, upwards=True, pattern='anat')
+    anat_dir = analysis_dir / ('sub-' + elec.subject) / 'anat'
+    anat_dir.mkdir(exist_ok=True, parents=True)
     lg.debug(f'Saving surfaces in {anat_dir}')
     chan = snap_to_surface(surf, chan, anat_dir)
 
