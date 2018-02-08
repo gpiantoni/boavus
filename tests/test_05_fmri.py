@@ -1,7 +1,7 @@
 from os import environ
 from boavus.main import boavus
 
-from .paths import FEAT_PATH, PARAMETERS_PATH, ANALYSIS_PATH
+from .paths import PARAMETERS_PATH, ANALYSIS_PATH
 from .utils import update_parameters
 
 
@@ -12,8 +12,6 @@ def test_fmri_percent():
     boavus([
         'fmri',
         'compare',
-        '--feat_dir',
-        str(FEAT_PATH),
         '--analysis_dir',
         str(ANALYSIS_PATH),
         ])
@@ -29,8 +27,6 @@ def test_fmri_compare_zstat():
     boavus([
         'fmri',
         'compare',
-        '--feat_dir',
-        str(FEAT_PATH),
         '--analysis_dir',
         str(ANALYSIS_PATH),
         '--parameters',
@@ -42,8 +38,6 @@ def test_fmri_compare_zstat():
     boavus([
         'fmri',
         'compare',
-        '--feat_dir',
-        str(FEAT_PATH),
         '--analysis_dir',
         str(ANALYSIS_PATH),
         '--parameters',
