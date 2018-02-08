@@ -22,14 +22,14 @@ EVENT_VALUE = {
 DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fsf'
 
 
-def main(bids_dir, feat_dir):
+def main(bids_dir, analysis_dir):
 
-    feat_dir.mkdir(exist_ok=True)
+    analysis_dir.mkdir(exist_ok=True)
 
     feats = []
     for fmri_path in bids_dir.rglob('*_bold.nii.gz'):
         task = Task(fmri_path)
-        feat_path = run_feat(feat_dir, task)
+        feat_path = run_feat(analysis_dir, task)
         feats.append(feat_path)
 
     # wait for it to end

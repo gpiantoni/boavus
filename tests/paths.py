@@ -11,8 +11,8 @@ DERIVATIVES_PATH = DATA_PATH / 'derivatives'
 FREESURFER_PATH = DERIVATIVES_PATH / 'freesurfer'
 
 # addition to bidso/tests/paths.py
-FEAT_PATH = DERIVATIVES_PATH / 'feat'
-FEAT_PATH.mkdir(parents=True, exist_ok=True)
+ANALYSIS_PATH = DERIVATIVES_PATH / 'analysis'
+ANALYSIS_PATH.mkdir(parents=True, exist_ok=True)
 BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
 BOAVUS_PATH.mkdir(parents=True, exist_ok=True)
 

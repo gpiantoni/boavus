@@ -1,5 +1,5 @@
 from logging import getLogger
-from subprocess import Popen, run
+from subprocess import run
 
 from bidso.find import find_in_bids
 
@@ -9,9 +9,9 @@ lg = getLogger(__name__)
 
 PARAMETERS = {}
 
-def main(feat_dir, freesurfer_dir):
+def main(analysis_dir, freesurfer_dir):
 
-    for feat_path in find_in_bids(feat_dir, generator=True, extension='.feat'):
+    for feat_path in find_in_bids(analysis_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')
         coreg_feat2freesurfer(feat_path, freesurfer_dir)
 

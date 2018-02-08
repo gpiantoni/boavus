@@ -1,4 +1,5 @@
 from logging import getLogger
+from shutil import rmtree
 from numpy import array, median
 from bidso import Electrodes
 from bidso.find import find_in_bids
@@ -8,6 +9,8 @@ from wonambi.viz import Viz3
 
 lg = getLogger(__name__)
 
+ELECSURF_DIR = 'electrodes_on_surface'
+
 PARAMETERS = {
     'acquisition': '*ctmr',
     }
@@ -15,13 +18,17 @@ PARAMETERS = {
 
 def main(bids_dir, freesurfer_dir, output_dir):
 
+    img_dir = output_dir / ELECSURF_DIR
+    rmtree(img_dir, ignore_errors=True)
+    img_dir.mkdir(exist_ok=True, parents=True)
+
     for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'):
+        lg.debug(f'Reading electrodes from {electrode_path}')
         elec = Electrodes(electrode_path)
         fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
         v = plot_electrodes(elec, fs)
 
-        png_file = replace_underscore(elec.get_filename(output_dir), 'surfaceplot.png')
-        png_file.parent.mkdir(exist_ok=True, parents=True)
+        png_file = img_dir / replace_underscore(elec.get_filename(), 'surfaceplot.png')
         lg.debug(f'Saving electrode plot on {png_file}')
         v.save(png_file)
         v.close()

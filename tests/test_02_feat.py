@@ -2,7 +2,7 @@ from os import environ
 
 from boavus.main import boavus
 
-from .paths import BIDS_PATH, FEAT_PATH, FREESURFER_PATH
+from .paths import BIDS_PATH, ANALYSIS_PATH, FREESURFER_PATH
 
 
 def test_main_fsl_feat():
@@ -13,8 +13,8 @@ def test_main_fsl_feat():
             'feat',
             '--bids_dir',
             str(BIDS_PATH),
-            '--feat_dir',
-            str(FEAT_PATH),
+            '--analysis_dir',
+            str(ANALYSIS_PATH),
             ])
 
 
@@ -24,8 +24,8 @@ def test_main_fsl_coreg():
         boavus([
             'fsl',
             'coreg',
-            '--feat_dir',
-            str(FEAT_PATH),
+            '--analysis_dir',
+            str(ANALYSIS_PATH),
             '--freesurfer_dir',
             str(FREESURFER_PATH),
             ])

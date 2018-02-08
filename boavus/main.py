@@ -33,13 +33,13 @@ args = dict(
             help='run FEAT using the events.tsv information',
             arguments=[
                 'bids_dir',
-                'feat_dir',
+                'analysis_dir',
                 ],
             ),
         coreg=dict(
             help='coreg feat with freesurfer',
             arguments=[
-                'feat_dir',
+                'analysis_dir',
                 'freesurfer_dir',
                 ],
             ),
@@ -49,7 +49,6 @@ args = dict(
         compare=dict(
             help='compute percent change of the BOLD signal',
             arguments=[
-                'feat_dir',
                 'analysis_dir',
                 ]
             ),
@@ -139,10 +138,6 @@ for m_k, m_v in args.items():
             elif arg == 'freesurfer_dir':
                 required.add_argument('--freesurfer_dir', required=True,
                                       help='The directory with Freesurfer')
-
-            elif arg == 'feat_dir':
-                required.add_argument('--feat_dir', required=True,
-                                      help='The directory with FSL/feat')
 
             elif arg == 'analysis_dir':
                 required.add_argument('--analysis_dir', required=True,

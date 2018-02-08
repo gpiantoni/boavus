@@ -17,9 +17,9 @@ PARAMETERS = {
     }
 
 
-def main(feat_dir, analysis_dir):
+def main(analysis_dir):
 
-    for feat_path in find_in_bids(feat_dir, generator=True, extension='.feat'):
+    for feat_path in find_in_bids(analysis_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')
 
         if PARAMETERS['measure'] == 'percent':
