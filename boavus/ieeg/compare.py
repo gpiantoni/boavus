@@ -13,9 +13,9 @@ PARAMETERS = {
     }
 
 
-def main(output_dir):
+def main(analysis_dir):
 
-    for hfa_move_file in find_in_bids(output_dir, modality='hfamove', extension='.pkl', generator=True):
+    for hfa_move_file in find_in_bids(analysis_dir, modality='hfamove', extension='.pkl', generator=True):
         with hfa_move_file.open('rb') as f:
             hfa_move = load(f)
         hfa_rest_file = replace_underscore(hfa_move_file, 'hfarest.pkl')

@@ -21,11 +21,11 @@ PARAMETERS = {
     }
 
 
-def main(output_dir):
+def main(analysis_dir):
 
     args = []
     for cond in ('move', 'rest'):
-        for ieeg_file in find_in_bids(output_dir, modality=cond, extension='.pkl', generator=True):
+        for ieeg_file in find_in_bids(analysis_dir, modality=cond, extension='.pkl', generator=True):
             args.append((ieeg_file, cond))
 
     if PARAMETERS['parallel']:

@@ -17,7 +17,7 @@ PARAMETERS = {
     }
 
 
-def main(feat_dir, output_dir):
+def main(feat_dir, analysis_dir):
 
     for feat_path in find_in_bids(feat_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')
@@ -28,7 +28,7 @@ def main(feat_dir, output_dir):
             fmri_stat = compute_zstat(feat_path)
 
         feat = file_Core(feat_path)
-        task_path = bids_mkdir(output_dir, feat) / (feat.filename.stem + '_compare.nii.gz')
+        task_path = bids_mkdir(analysis_dir, feat) / (feat.filename.stem + '_compare.nii.gz')
         nsave(fmri_stat, str(task_path))
 
 

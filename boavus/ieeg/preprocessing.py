@@ -28,16 +28,16 @@ PARAMETERS = {
     }
 
 
-def main(bids_dir, output_dir):
+def main(bids_dir, analysis_dir):
 
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
         dat_move, dat_rest = preprocess_ecog(ieeg_file)
 
-        output_file = replace_extension(Task(ieeg_file).get_filename(output_dir), '_move.pkl')
+        output_file = replace_extension(Task(ieeg_file).get_filename(analysis_dir), '_move.pkl')
         output_file.parent.mkdir(exist_ok=True, parents=True)
         with output_file.open('wb') as f:
             dump(dat_move, f)
-        output_file = replace_extension(Task(ieeg_file).get_filename(output_dir), '_rest.pkl')
+        output_file = replace_extension(Task(ieeg_file).get_filename(analysis_dir), '_rest.pkl')
         with output_file.open('wb') as f:
             dump(dat_rest, f)
 

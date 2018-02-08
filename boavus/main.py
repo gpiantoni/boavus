@@ -50,7 +50,7 @@ args = dict(
             help='compute percent change of the BOLD signal',
             arguments=[
                 'feat_dir',
-                'output_dir',
+                'analysis_dir',
                 ]
             ),
         ),
@@ -82,19 +82,19 @@ args = dict(
             help='read in the data for move and rest',
             arguments=[
                 'bids_dir',
-                'output_dir',
+                'analysis_dir',
                 ]
             ),
         psd=dict(
             help='compute psd for two conditions',
             arguments=[
-                'output_dir',
+                'analysis_dir',
                 ]
             ),
         compare=dict(
             help='compare the two conditions in percent change or zstat',
             arguments=[
-                'output_dir',
+                'analysis_dir',
                 ]
             ),
         corrfmri=dict(
@@ -102,6 +102,7 @@ args = dict(
             arguments=[
                 'bids_dir',
                 'freesurfer_dir',
+                'analysis_dir',
                 'output_dir',
                 ]
             ),
@@ -142,6 +143,10 @@ for m_k, m_v in args.items():
             elif arg == 'feat_dir':
                 required.add_argument('--feat_dir', required=True,
                                       help='The directory with FSL/feat')
+
+            elif arg == 'analysis_dir':
+                required.add_argument('--output_dir', required=True,
+                                      help='The directory with preprocessed / analyzed data for each subject')
 
             elif arg == 'output_dir':
                 required.add_argument('--output_dir', required=True,

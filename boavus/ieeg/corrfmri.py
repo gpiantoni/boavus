@@ -1,5 +1,6 @@
 from logging import getLogger
 from multiprocessing import Pool
+from shutil import rmtree
 
 from numpy import ndindex, array, nansum, power, zeros, repeat, diag
 from numpy.linalg import norm, inv
@@ -30,11 +31,11 @@ PARAMETERS = {
     }
 
 
-def main(bids_dir, freesurfer_dir, output_dir):
+def main(bids_dir, freesurfer_dir, analysis_dir, output_dir):
     args = []
-    for measure_nii in find_in_bids(output_dir, modality='compare', extension='.nii.gz', generator=True):
+    for measure_nii in find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True):
         lg.debug(f'adding {measure_nii}')
-        args.append((measure_nii, bids_dir, freesurfer_dir, output_dir))
+        args.append((measure_nii, bids_dir, freesurfer_dir, analysis_dir, output_dir))
 
     if PARAMETERS['parallel']:
         with Pool() as p:
@@ -46,13 +47,13 @@ def main(bids_dir, freesurfer_dir, output_dir):
     plot_results(results, output_dir)
 
 
-def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):
+def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir, output_dir):
     img = nload(str(measure_nii))
     img = upsample_mri(img)
     mri = img.get_data()
 
     task_fmri = file_Core(measure_nii)
-    measure_ecog = find_in_bids(output_dir, subject=task_fmri.subject, task=task_fmri.task, modality='compare', extension='.tsv')
+    measure_ecog = find_in_bids(analysis_dir, subject=task_fmri.subject, task=task_fmri.task, modality='compare', extension='.tsv')
     freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
     fs = Freesurfer(freesurfer_path)
 
@@ -66,6 +67,7 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, output_dir):
     ndi = from_mrifile_to_chan(img, fs, nd)
 
     results_dir = output_dir / ZSTAT_DIR
+    rmtree(results_dir, ignore_errors=True)
     results_dir.mkdir(exist_ok=True, parents=True)
     results_tsv = results_dir / replace_underscore(task_fmri.get_filename(), PARAMETERS['distance'] + '.tsv')
     with results_tsv.open('w') as f:
@@ -128,6 +130,7 @@ def compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
 
 def plot_results(results_tsv, output_dir):
     img_dir = output_dir / PNG_DIR
+    rmtree(img_dir, ignore_errors=True)
     img_dir.mkdir(exist_ok=True)
 
     with Webdriver(img_dir) as d:

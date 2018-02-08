@@ -1,9 +1,12 @@
+from logging import getLogger
 from numpy import array, median
 from bidso import Electrodes
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 from wonambi.attr import Channels, Freesurfer
 from wonambi.viz import Viz3
+
+lg = getLogger(__name__)
 
 PARAMETERS = {
     'acquisition': '*ctmr',
@@ -19,6 +22,7 @@ def main(bids_dir, freesurfer_dir, output_dir):
 
         png_file = replace_underscore(elec.get_filename(output_dir), 'surfaceplot.png')
         png_file.parent.mkdir(exist_ok=True, parents=True)
+        lg.debug(f'Saving electrode plot on {png_file}')
         v.save(png_file)
         v.close()
 
