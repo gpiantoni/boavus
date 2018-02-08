@@ -145,7 +145,7 @@ for m_k, m_v in args.items():
                                       help='The directory with FSL/feat')
 
             elif arg == 'analysis_dir':
-                required.add_argument('--output_dir', required=True,
+                required.add_argument('--analysis_dir', required=True,
                                       help='The directory with preprocessed / analyzed data for each subject')
 
             elif arg == 'output_dir':
