@@ -15,64 +15,56 @@ cache:
    - $HOME/.cache/pip
 
 before_install:
-  # install conda / python (opengl doesn't work with pip)
-  - sudo apt-get update -qq
-  - wget -q http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - chmod +x miniconda.sh
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda info -a
-
-    # install fsl
-  - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
-  - sudo apt-get -y update && sudo apt-get install -y -qq fsl-core
-  - source /etc/fsl/fsl.sh
-  - export FSLOUTPUTTYPE=NIFTI_GZ
-
-    # install freesurfer
-  - mkdir $DERIVATIVES/freesurfer -p
-  - wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
-  - mkdir $LIB -p
-  - tar 
-    -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
-    -C $LIB 
-    --exclude='freesurfer/trctrain' 
-    --exclude='freesurfer/subjects/fsaverage_sym' 
-    --exclude='freesurfer/subjects/fsaverage3' 
-    --exclude='freesurfer/subjects/fsaverage4'
-    --exclude='freesurfer/subjects/fsaverage5' 
-    --exclude='freesurfer/subjects/fsaverage6' 
-    --exclude='freesurfer/subjects/cvs_avg35' 
-    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' 
-    --exclude='freesurfer/subjects/V1_average' 
-    --exclude='freesurfer/average/mult-comp-cor' 
-    --exclude='freesurfer/lib/cuda' 
-    --exclude='freesurfer/lib/qt' 
-    --exclude='freesurfer/lib/tcltktixblt'
-    --exclude='freesurfer/lib/vtk' 
-    --exclude='freesurfer/diffusion' 
-    freesurfer ;
-  - echo -e FREESURFER_LICENSE > $LIB/freesurfer/license.txt
-  - export FREESURFER_HOME=$LIB/freesurfer
-  - source $FREESURFER_HOME/SetUpFreeSurfer.sh
-  - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
-
-  # geckodriver
-  - json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
-  - url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
-  - curl -s -L "$url" | tar -xz
-  - chmod +x geckodriver
-  - mkdir $INSTALL -p
-  - mv geckodriver $INSTALL
-  - export PATH=$INSTALL:$PATH
+ #  - sudo apt-get update -qq
+ #
+ #    # install fsl
+ #  - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
+ #  - sudo apt-get -y update && sudo apt-get install -y -qq fsl-core
+ #  - source /etc/fsl/fsl.sh
+ #  - export FSLOUTPUTTYPE=NIFTI_GZ
+ #
+ #    # install freesurfer
+ #  - mkdir $DERIVATIVES/freesurfer -p
+ #  - wget -q --directory-prefix=$DOWNLOADS ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz ;
+ #  - mkdir $LIB -p
+ #  - tar 
+ #    -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz 
+ #    -C $LIB 
+ #    --exclude='freesurfer/trctrain' 
+ #    --exclude='freesurfer/subjects/fsaverage_sym' 
+ #    --exclude='freesurfer/subjects/fsaverage3' 
+ #    --exclude='freesurfer/subjects/fsaverage4'
+ #    --exclude='freesurfer/subjects/fsaverage5' 
+ #    --exclude='freesurfer/subjects/fsaverage6' 
+ #    --exclude='freesurfer/subjects/cvs_avg35' 
+ #    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' 
+ #    --exclude='freesurfer/subjects/V1_average' 
+ #    --exclude='freesurfer/average/mult-comp-cor' 
+ #    --exclude='freesurfer/lib/cuda' 
+ #    --exclude='freesurfer/lib/qt' 
+ #    --exclude='freesurfer/lib/tcltktixblt'
+ #    --exclude='freesurfer/lib/vtk' 
+ #    --exclude='freesurfer/diffusion' 
+ #    freesurfer ;
+ #  - echo -e FREESURFER_LICENSE > $LIB/freesurfer/license.txt
+ #  - export FREESURFER_HOME=$LIB/freesurfer
+ #  - source $FREESURFER_HOME/SetUpFreeSurfer.sh
+ #  - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
+ #
+ #  # geckodriver
+ #  - json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
+ #  - url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
+ #  - curl -s -L "$url" | tar -xz
+ #  - chmod +x geckodriver
+ #  - mkdir $INSTALL -p
+ #  - mv geckodriver $INSTALL
+ #  - export PATH=$INSTALL:$PATH
 
 install:
-  - conda create -q -n test-environment  numpy scipy pyqt
-  - source activate test-environment
 
-    # install requirements
+  # install requirements
+  - pip install numpy scipy
+  - pip install pyqt5==5.9.3  # opengl doesn't work with 5.10
   - pip install nibabel wonambi vispy
   - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
   - pip install plotly
