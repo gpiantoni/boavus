@@ -31,7 +31,12 @@ PARAMETERS = {
 def main(bids_dir, analysis_dir):
 
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
-        dat_move, dat_rest = preprocess_ecog(ieeg_file)
+        lg.debug(f'reading {ieeg_file}')
+        try:
+            dat_move, dat_rest = preprocess_ecog(ieeg_file)
+        except FileNotFoundError as err:
+            lg.warning(f'Skipping {ieeg_file.stem}: {err}')
+            continue
 
         output_file = replace_extension(Task(ieeg_file).get_filename(analysis_dir), '_move.pkl')
         output_file.parent.mkdir(exist_ok=True, parents=True)
@@ -61,6 +66,7 @@ def preprocess_ecog(filename):
 
     data = select(data, chan=elec_names)
     clean_labels = reject_channels(data)
+    lg.debug(f'Clean channels {len(clean_labels)} / {len(elec_names)}')
 
     data = self.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
 

@@ -27,6 +27,7 @@ PNG_DIR = 'corr_ieeg_fmri_png'
 PARAMETERS = {
     'kernels': list(range(1, 10)),
     'distance': 'gaussian',
+    'acquisition': '*regions',
     'parallel': True,
     }
 
@@ -60,7 +61,11 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir, output_di
     labels = [x['channel'] for x in read_tsv(measure_ecog)]
     ecog_val = array([float(x['measure']) for x in read_tsv(measure_ecog)])  # TODO
 
-    electrodes = Electrodes(find_in_bids(bids_dir, subject=task_fmri.subject, acquisition='*regions', modality='electrodes', extension='.tsv'))
+    try:
+        electrodes = Electrodes(find_in_bids(bids_dir, wildcard=False, subject=task_fmri.subject, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'))
+    except FileNotFoundError as err:
+        lg.debug(err)
+        return None
 
     chan_xyz = array(electrodes.get_xyz(labels))
     nd = array(list(ndindex(mri.shape)))
@@ -135,6 +140,8 @@ def plot_results(results_tsv, output_dir):
 
     with Webdriver(img_dir) as d:
         for one_tsv in results_tsv:
+            if one_tsv is None:
+                continue
 
             results = read_tsv(one_tsv)
             k = [x['Kernel'] for x in results]
