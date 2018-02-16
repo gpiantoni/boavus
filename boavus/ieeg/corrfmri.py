@@ -33,10 +33,15 @@ PARAMETERS = {
 
 
 def main(bids_dir, freesurfer_dir, analysis_dir, output_dir):
+
+    results_dir = output_dir / ZSTAT_DIR
+    rmtree(results_dir, ignore_errors=True)
+    results_dir.mkdir(exist_ok=True, parents=True)
+
     args = []
     for measure_nii in find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True):
         lg.debug(f'adding {measure_nii}')
-        args.append((measure_nii, bids_dir, freesurfer_dir, analysis_dir, output_dir))
+        args.append((measure_nii, bids_dir, freesurfer_dir, analysis_dir, results_dir))
 
     if PARAMETERS['parallel']:
         with Pool() as p:
@@ -48,7 +53,7 @@ def main(bids_dir, freesurfer_dir, analysis_dir, output_dir):
     plot_results(results, output_dir)
 
 
-def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir, output_dir):
+def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir, results_dir):
     img = nload(str(measure_nii))
     img = upsample_mri(img)
     mri = img.get_data()
@@ -71,9 +76,6 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir, output_di
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
 
-    results_dir = output_dir / ZSTAT_DIR
-    rmtree(results_dir, ignore_errors=True)
-    results_dir.mkdir(exist_ok=True, parents=True)
     results_tsv = results_dir / replace_underscore(task_fmri.get_filename(), PARAMETERS['distance'] + '.tsv')
     with results_tsv.open('w') as f:
         f.write('Kernel\tRsquared\n')
