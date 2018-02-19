@@ -1,7 +1,7 @@
 from functools import partial
 from itertools import product
 from logging import getLogger
-from multiprocessing import Pool
+from multiprocessing import Pool, Process
 
 from numpy import ndindex, array, nansum, power, zeros, repeat, diag
 from numpy.linalg import norm, inv
@@ -18,9 +18,6 @@ from bidso.utils import replace_underscore
 
 lg = getLogger(__name__)
 
-ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
-PNG_DIR = 'corr_ieeg_fmri_png'
-
 
 PARAMETERS = {
     'kernels': list(range(1, 10)),
@@ -32,17 +29,14 @@ PARAMETERS = {
 
 def main(bids_dir, freesurfer_dir, analysis_dir):
 
-    args = []
+    processes = []
     for measure_nii in find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True):
         lg.debug(f'adding {measure_nii}')
-        args.append((measure_nii, bids_dir, freesurfer_dir, analysis_dir))
+        processes.append(Process(target=save_corrfmri, args=(measure_nii, bids_dir, freesurfer_dir, analysis_dir),
+                                 daemon=False))  # make sure daemon is False, otherwise no children
 
-    if PARAMETERS['parallel']:
-        with Pool() as p:
-            lg.debug('Starting pool')
-            p.starmap(save_corrfmri, args)
-    else:
-        [save_corrfmri(*arg) for arg in args]
+    [p.start() for p in processes]
+    [p.join() for p in processes]
 
 
 def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir):
@@ -70,11 +64,11 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir):
     fmri_vals_list = compute_kernels(kernels, chan_xyz=chan_xyz, mri=mri, ndi=ndi)
     fmri_vals = array(fmri_vals_list).reshape(-1, len(kernels))
 
-    fmri_vals_tsv = replace_underscore(measure_nii, 'fmrivalues.tsv')
+    fmri_vals_tsv = replace_underscore(measure_nii, PARAMETERS['distance'] + 'elec.tsv')
     lg.debug(f'Saving {fmri_vals_tsv}')
 
     with fmri_vals_tsv.open('w') as f:
-        f.write('kernel\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
+        f.write('name\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
         for one_label, val_at_elec in zip(labels, fmri_vals):
             f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
 
