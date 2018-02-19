@@ -105,6 +105,14 @@ args = dict(
                 'analysis_dir',
                 ]
             ),
+        corrfmri=dict(
+            help='compare fMRI values at electrode locations to ECoG values',
+            arguments=[
+                'bids_dir',
+                'analysis_dir',
+                'output_dir',
+                ]
+            ),
         )
     )
 

@@ -6,7 +6,9 @@ from numpy import mean, std
 from bidso import Task
 from bidso.find import find_in_bids
 from bidso.utils import replace_extension
-from boavus.ieeg.dataset import Dataset
+
+from .ieeg.dataset import Dataset
+from ..bidso import find_labels_in_regions
 
 lg = getLogger(__name__)
 
@@ -73,12 +75,9 @@ def preprocess_ecog(filename):
     dat_move = run_montage(self, move_times, clean_labels)
     dat_rest = run_montage(self, rest_times, clean_labels)
 
-    if len(PARAMETERS['regions']) > 0:
-        elec = self.electrodes
-        labels_in_roi = [x['name'] for x in elec.electrodes.tsv if x['region'] in PARAMETERS['regions']]
-        clean_roi_labels = [label for label in clean_labels if label in labels_in_roi]
-    else:
-        clean_roi_labels = labels_in_roi = clean_labels
+    labels_in_roi = find_labels_in_regions(electrodes, PARAMETERS['regions'])
+
+    clean_roi_labels = [label for label in clean_labels if label in labels_in_roi]
 
     dat_move = select(dat_move, chan=clean_roi_labels)
     dat_rest = select(dat_rest, chan=clean_roi_labels)
