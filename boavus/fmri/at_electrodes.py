@@ -1,0 +1,134 @@
+from functools import partial
+from itertools import product
+from logging import getLogger
+from multiprocessing import Pool
+
+from numpy import ndindex, array, nansum, power, zeros, repeat, diag
+from numpy.linalg import norm, inv
+from scipy.stats import norm as normdistr
+from nibabel import Nifti1Image
+from nibabel.affines import apply_affine
+from nibabel import load as nload
+
+from wonambi.attr import Freesurfer
+
+from bidso import file_Core, Electrodes
+from bidso.find import find_in_bids
+from bidso.utils import replace_underscore
+
+lg = getLogger(__name__)
+
+ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
+PNG_DIR = 'corr_ieeg_fmri_png'
+
+
+PARAMETERS = {
+    'kernels': list(range(1, 10)),
+    'distance': 'gaussian',
+    'acquisition': '*regions',
+    'parallel': True,
+    }
+
+
+def main(bids_dir, freesurfer_dir, analysis_dir):
+
+    args = []
+    for measure_nii in find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True):
+        lg.debug(f'adding {measure_nii}')
+        args.append((measure_nii, bids_dir, freesurfer_dir, analysis_dir))
+
+    if PARAMETERS['parallel']:
+        with Pool() as p:
+            lg.debug('Starting pool')
+            p.starmap(save_corrfmri, args)
+    else:
+        [save_corrfmri(*arg) for arg in args]
+
+
+def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir):
+    img = nload(str(measure_nii))
+    img = upsample_mri(img)
+    mri = img.get_data()
+
+    task_fmri = file_Core(measure_nii)
+    freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
+    fs = Freesurfer(freesurfer_path)
+
+    try:
+        electrodes = Electrodes(find_in_bids(bids_dir, wildcard=False, subject=task_fmri.subject, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'))
+    except FileNotFoundError as err:
+        lg.debug(err)
+        return None
+
+    labels = electrodes.electrodes.get(map_lambda=lambda x: x['name'])
+    chan_xyz = array(electrodes.get_xyz())
+    nd = array(list(ndindex(mri.shape)))
+    ndi = from_mrifile_to_chan(img, fs, nd)
+
+    kernels = PARAMETERS['kernels']
+    lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{PARAMETERS["distance"]}" kernels')
+    fmri_vals_list = compute_kernels(kernels, chan_xyz=chan_xyz, mri=mri, ndi=ndi)
+    fmri_vals = array(fmri_vals_list).reshape(-1, len(kernels))
+
+    fmri_vals_tsv = replace_underscore(measure_nii, 'fmrivalues.tsv')
+    lg.debug(f'Saving {fmri_vals_tsv}')
+
+    with fmri_vals_tsv.open('w') as f:
+        f.write('kernel\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
+        for one_label, val_at_elec in zip(labels, fmri_vals):
+            f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
+
+
+def from_chan_to_mrifile(img, fs, xyz):
+    return apply_affine(inv(img.affine), xyz + fs.surface_ras_shift).astype(int)
+
+
+def from_mrifile_to_chan(img, fs, xyz):
+    return apply_affine(img.affine, xyz) - fs.surface_ras_shift
+
+
+def upsample_mri(img_lowres):
+    lowres = img_lowres.get_data()
+    r = lowres.copy()
+    for i in range(3):
+        r = repeat(r, 4, axis=i)
+
+    af = img_lowres.affine.copy()
+    af[:3, :3] /= 4
+    af[:3, -1] -= diag(af)[:3] * 1.5  # I think it's 4 / 2 - 1 / 2 (not sure about where to get the sign)
+
+    nifti = Nifti1Image(r, af)
+    return nifti
+
+
+def compute_kernels(kernels, chan_xyz, mri, ndi):
+    partial_compute_chan = partial(compute_chan, ndi=ndi, mri=mri)
+
+    args = product(chan_xyz, kernels)
+    if PARAMETERS['parallel']:
+        with Pool() as p:
+            fmri_val = p.starmap(partial_compute_chan, args)
+    else:
+        fmri_val = [partial_compute_chan(*arg) for arg in args]
+
+    return fmri_val
+
+
+def compute_chan(pos, KERNEL, ndi, mri):
+    dist_chan = norm(ndi - pos, axis=1)
+
+    if PARAMETERS['distance'] == 'gaussian':
+        m = normdistr.pdf(dist_chan, scale=KERNEL)
+
+    elif PARAMETERS['distance'] == 'sphere':
+        m = zeros(dist_chan.shape)
+        m[dist_chan <= KERNEL] = 1
+
+    elif PARAMETERS['distance'] == 'inverse':
+        m = power(dist_chan, -1 * KERNEL)
+
+    m /= nansum(m)  # normalize so that the sum is 1
+    m = m.reshape(mri.shape)
+
+    mq = m * mri
+    return nansum(mq)

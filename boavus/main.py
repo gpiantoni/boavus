@@ -52,6 +52,14 @@ args = dict(
                 'analysis_dir',
                 ]
             ),
+        at_electrodes=dict(
+            help='calculate fMRI values at electrode locations',
+            arguments=[
+                'bids_dir',
+                'freesurfer_dir',
+                'analysis_dir',
+                ]
+            ),
         ),
     ieeg=dict(
         help='ieeg functions',
@@ -95,15 +103,6 @@ args = dict(
             help='compare the two conditions in percent change or zstat',
             arguments=[
                 'analysis_dir',
-                ]
-            ),
-        corrfmri=dict(
-            help='find best kernel size for iEEG electrodes based on fMRI',
-            arguments=[
-                'bids_dir',
-                'freesurfer_dir',
-                'analysis_dir',
-                'output_dir',
                 ]
             ),
         )

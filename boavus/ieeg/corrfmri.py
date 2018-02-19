@@ -1,3 +1,5 @@
+from functools import partial
+from itertools import product
 from logging import getLogger
 from multiprocessing import Pool
 from shutil import rmtree
@@ -76,16 +78,30 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir, results_d
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
 
+    kernels = PARAMETERS['kernels']
+    fmri_vals = compute_kernels(kernels, chan_xyz=chan_xyz, mri=mri, ndi=ndi)
+    x = array(fmri_vals).reshape(-1, len(kernels))
+
+    fmri_vals_tsv = replace_underscore(measure_ecog, 'fmrivalues.tsv')
+    lg.debug(f'Saving {fmri_vals_tsv} with {len(electrodes.electrodes.tsv)} electrodes')
+
+    with fmri_vals_tsv.open('w') as f:
+        f.write('kernel\t' + '\t'.join(str(i) for i in kernels) + '\n')
+        for e, i in zip(electrodes.electrodes.tsv, x):
+            f.write(e['name'] + '\t' + '\t'.join(str(i0) for i0 in i) + '\n')
+    """
+
     results_tsv = results_dir / replace_underscore(task_fmri.get_filename(), PARAMETERS['distance'] + '.tsv')
     with results_tsv.open('w') as f:
         f.write('Kernel\tRsquared\n')
 
-        for KERNEL in PARAMETERS['kernels']:
-            r = compute_each_kernel(KERNEL, chan_xyz=chan_xyz, mri=mri, ndi=ndi, ecog_val=ecog_val)
             f.write(f'{KERNEL}\t{r}\n')
             f.flush()
 
+    lr = linregress(ecog_val, array(fmri_val))
+    return lr.rvalue ** 2
     return results_tsv
+    """
 
 
 def from_chan_to_mrifile(img, fs, xyz):
@@ -110,29 +126,35 @@ def upsample_mri(img_lowres):
     return nifti
 
 
-def compute_each_kernel(KERNEL, chan_xyz, mri, ndi, ecog_val, output=None):
+def compute_kernels(kernels, chan_xyz, mri, ndi):
+
     fmri_val = []
-    for pos in chan_xyz:
-        dist_chan = norm(ndi - pos, axis=1)
+    partial_compute_chan = partial(compute_chan, ndi=ndi, mri=mri)
 
-        if PARAMETERS['distance'] == 'gaussian':
-            m = normdistr.pdf(dist_chan, scale=KERNEL)
+    with Pool() as p:
+        fmri_val = p.starmap(partial_compute_chan, product(chan_xyz, kernels))
 
-        elif PARAMETERS['distance'] == 'sphere':
-            m = zeros(dist_chan.shape)
-            m[dist_chan <= KERNEL] = 1
+    return fmri_val
 
-        elif PARAMETERS['distance'] == 'inverse':
-            m = power(dist_chan, -1 * KERNEL)
 
-        m /= nansum(m)  # normalize so that the sum is 1
-        m = m.reshape(mri.shape)
+def compute_chan(pos, KERNEL, ndi, mri):
+    dist_chan = norm(ndi - pos, axis=1)
 
-        mq = m * mri
-        fmri_val.append(nansum(mq))
+    if PARAMETERS['distance'] == 'gaussian':
+        m = normdistr.pdf(dist_chan, scale=KERNEL)
 
-    lr = linregress(ecog_val, array(fmri_val))
-    return lr.rvalue ** 2
+    elif PARAMETERS['distance'] == 'sphere':
+        m = zeros(dist_chan.shape)
+        m[dist_chan <= KERNEL] = 1
+
+    elif PARAMETERS['distance'] == 'inverse':
+        m = power(dist_chan, -1 * KERNEL)
+
+    m /= nansum(m)  # normalize so that the sum is 1
+    m = m.reshape(mri.shape)
+
+    mq = m * mri
+    return nansum(mq)
 
 
 def plot_results(results_tsv, output_dir):
