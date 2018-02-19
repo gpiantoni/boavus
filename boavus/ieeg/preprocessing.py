@@ -7,7 +7,7 @@ from bidso import Task
 from bidso.find import find_in_bids
 from bidso.utils import replace_extension
 
-from .ieeg.dataset import Dataset
+from .dataset import Dataset
 from ..bidso import find_labels_in_regions
 
 lg = getLogger(__name__)

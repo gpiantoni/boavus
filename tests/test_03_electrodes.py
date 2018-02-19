@@ -32,6 +32,8 @@ def test_ieeg_projectelectrodes():
         str(ANALYSIS_PATH),
         '-p',
         str(PARAMETERS_JSON),
+        '--log',
+        'debug',
         ])
 
     update_parameters(PARAMETERS_JSON, acquisition='ct', parallel=False)
@@ -50,6 +52,8 @@ def test_ieeg_projectelectrodes():
             str(ANALYSIS_PATH),
             '-p',
             str(PARAMETERS_JSON),
+            '--log',
+            'debug',
             ])
 
     else:
@@ -79,6 +83,8 @@ def test_ieeg_assignregions():
         str(BIDS_PATH),
         '-p',
         str(PARAMETERS_JSON),
+        '--log',
+        'debug',
         ])
 
 
@@ -96,6 +102,8 @@ def test_ieeg_plotelectrodes(qtbot):
         str(BIDS_PATH),
         '-p',
         str(PARAMETERS_JSON),
+        '--log',
+        'debug',
         ])
 
     update_parameters(PARAMETERS_JSON, acquisition='ctprojected')
@@ -111,4 +119,6 @@ def test_ieeg_plotelectrodes(qtbot):
         str(BIDS_PATH),
         '-p',
         str(PARAMETERS_JSON),
+        '--log',
+        'debug',
         ])
