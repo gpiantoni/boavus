@@ -75,7 +75,7 @@ def preprocess_ecog(filename):
     dat_move = run_montage(self, move_times, clean_labels)
     dat_rest = run_montage(self, rest_times, clean_labels)
 
-    labels_in_roi = find_labels_in_regions(electrodes, PARAMETERS['regions'])
+    labels_in_roi = find_labels_in_regions(self.electrodes, PARAMETERS['regions'])
 
     clean_roi_labels = [label for label in clean_labels if label in labels_in_roi]
 
