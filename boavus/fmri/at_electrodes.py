@@ -1,7 +1,8 @@
 from functools import partial
 from itertools import product
 from logging import getLogger
-from multiprocessing import Pool, Process
+from math import ceil
+from multiprocessing import Pool, Process, cpu_count
 
 from numpy import ndindex, array, nansum, power, zeros, repeat, diag
 from numpy.linalg import norm, inv
@@ -28,18 +29,21 @@ PARAMETERS = {
 
 
 def main(bids_dir, freesurfer_dir, analysis_dir):
+    n_processes = len(list(find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True)))
 
     processes = []
     for measure_nii in find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True):
         lg.debug(f'adding {measure_nii}')
-        processes.append(Process(target=save_corrfmri, args=(measure_nii, bids_dir, freesurfer_dir, analysis_dir),
+        processes.append(Process(target=calc_fmri_at_elec,
+                                 args=(measure_nii, bids_dir, freesurfer_dir,
+                                       analysis_dir, ceil(cpu_count() / n_processes)),
                                  daemon=False))  # make sure daemon is False, otherwise no children
 
     [p.start() for p in processes]
     [p.join() for p in processes]
 
 
-def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir):
+def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu=None):
     img = nload(str(measure_nii))
     img = upsample_mri(img)
     mri = img.get_data()
@@ -61,7 +65,7 @@ def save_corrfmri(measure_nii, bids_dir, freesurfer_dir, analysis_dir):
 
     kernels = PARAMETERS['kernels']
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{PARAMETERS["distance"]}" kernels')
-    fmri_vals_list = compute_kernels(kernels, chan_xyz=chan_xyz, mri=mri, ndi=ndi)
+    fmri_vals_list = compute_kernels(kernels, chan_xyz, mri, ndi, n_cpu)
     fmri_vals = array(fmri_vals_list).reshape(-1, len(kernels))
 
     fmri_vals_tsv = replace_underscore(measure_nii, PARAMETERS['distance'] + 'elec.tsv')
@@ -95,12 +99,13 @@ def upsample_mri(img_lowres):
     return nifti
 
 
-def compute_kernels(kernels, chan_xyz, mri, ndi):
+def compute_kernels(kernels, chan_xyz, mri, ndi, n_cpu=None):
     partial_compute_chan = partial(compute_chan, ndi=ndi, mri=mri)
 
     args = product(chan_xyz, kernels)
     if PARAMETERS['parallel']:
-        with Pool() as p:
+        lg.debug(f'Number of CPU: {n_cpu}')
+        with Pool(n_cpu) as p:
             fmri_val = p.starmap(partial_compute_chan, args)
     else:
         fmri_val = [partial_compute_chan(*arg) for arg in args]
