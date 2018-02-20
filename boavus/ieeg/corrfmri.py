@@ -1,7 +1,7 @@
 from logging import getLogger
 from shutil import rmtree
 
-from numpy import array
+from numpy import argmax, array, polyfit
 from scipy.stats import linregress
 import plotly.graph_objs as go
 
@@ -22,6 +22,7 @@ PNG_DIR = 'corr_ieeg_fmri_png'
 PARAMETERS = {
     'acquisition': '*regions',
     'regions': [],
+    'plot': True,
     }
 
 
@@ -37,7 +38,8 @@ def main(bids_dir, analysis_dir, output_dir):
                                             bids_dir, analysis_dir, results_dir)
         results.append(one_result)
 
-    plot_results(results, output_dir)
+    if PARAMETERS['plot']:
+        plot_results(results, output_dir)
 
 
 def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir):
@@ -112,13 +114,65 @@ def plot_results(results_tsv, output_dir):
 
             layout = go.Layout(
                 xaxis=dict(
-                    title='mm'),
+                    title='mm',
+                    range=(min(k), max(k)),
+                    ),
                 yaxis=dict(
                     title='r<sup>2</sup>',
                     rangemode='tozero',
-                ),
-            )
+                    ),
+                )
 
             fig = go.Figure(data=traces, layout=layout)
             output_png = img_dir / (one_tsv.stem + '.png')
-            export_plotly(fig, output_png, driver=d)
+            # export_plotly(fig, output_png, driver=d)
+
+        # histogram
+        thumb_val = []
+        hand_val = []
+
+        for one_tsv in results_tsv:
+            vals = read_shape(one_tsv)
+            if vals[0] < 0:
+                if 'thumb' in one_tsv.stem:
+                    thumb_val.append(vals[1])
+                else:
+                    hand_val.append(vals[1])
+
+        xbins = dict(
+            start=-.5,
+            end=9,
+            size=1
+            )
+
+        traces = [
+            go.Histogram(
+                x=hand_val,
+                xbins=xbins,
+            ),
+            go.Histogram(
+                x=thumb_val,
+                xbins=xbins,
+            ),
+            ]
+        layout = go.Layout(
+            xaxis=dict(
+                title='mm',
+                range=(min(k), max(k)),
+                ),
+            yaxis=dict(
+                title='# tasks',
+                ),
+            )
+
+        fig = go.Figure(data=traces, layout=layout)
+        output_png = img_dir / 'histogram_handthumb.png'
+        export_plotly(fig, output_png, driver=d)
+
+
+def read_shape(one_tsv):
+    results = read_tsv(one_tsv)
+    k = [float(x['Kernel']) for x in results]
+    rsquared = [float(x['Rsquared']) for x in results]
+
+    return polyfit(k, rsquared, 2)[0], k[argmax(rsquared)]
