@@ -112,7 +112,12 @@ def plot_results(results_tsv, output_dir):
                 },
                 ]
 
+            if ('duiven' in one_tsv.stem) or ('ommen' in one_tsv.stem) or ('vledder' in one_tsv.stem):
+                title = 'high-density'
+            else:
+                title = 'clinical'
             layout = go.Layout(
+                title=title,
                 xaxis=dict(
                     title='mm',
                     range=(min(k), max(k)),
@@ -125,7 +130,7 @@ def plot_results(results_tsv, output_dir):
 
             fig = go.Figure(data=traces, layout=layout)
             output_png = img_dir / (one_tsv.stem + '.png')
-            # export_plotly(fig, output_png, driver=d)
+            export_plotly(fig, output_png, driver=d)
 
         # histogram
         thumb_val = []
@@ -149,12 +154,15 @@ def plot_results(results_tsv, output_dir):
             go.Histogram(
                 x=hand_val,
                 xbins=xbins,
+                name='hand',
             ),
             go.Histogram(
                 x=thumb_val,
                 xbins=xbins,
+                name='thumb',
             ),
             ]
+
         layout = go.Layout(
             xaxis=dict(
                 title='mm',
@@ -169,10 +177,98 @@ def plot_results(results_tsv, output_dir):
         output_png = img_dir / 'histogram_handthumb.png'
         export_plotly(fig, output_png, driver=d)
 
+        # histogram
+        thumb_val = []
+        hand_val = []
+
+        for one_tsv in results_tsv:
+            vals = read_shape(one_tsv)
+            if vals[0] < 0:
+                if ('duiven' in one_tsv.stem) or ('ommen' in one_tsv.stem) or ('vledder' in one_tsv.stem):
+                    thumb_val.append(vals[1])
+                else:
+                    hand_val.append(vals[1])
+
+        xbins = dict(
+            start=-.5,
+            end=9,
+            size=1
+            )
+
+        traces = [
+            go.Histogram(
+                x=hand_val,
+                xbins=xbins,
+                name='clinical',
+            ),
+            go.Histogram(
+                x=thumb_val,
+                xbins=xbins,
+                name='high density',
+            ),
+            ]
+        layout = go.Layout(
+            xaxis=dict(
+                title='mm',
+                range=(min(k), max(k)),
+                ),
+            yaxis=dict(
+                title='# tasks',
+                ),
+            )
+
+        fig = go.Figure(data=traces, layout=layout)
+        output_png = img_dir / 'histogram_gridtype.png'
+        export_plotly(fig, output_png, driver=d)
+
+        # histogram
+        thumb_val = []
+        hand_val = []
+
+        for one_tsv in results_tsv:
+            vals = read_shape(one_tsv)
+            if vals[0] < 0:
+                if ('duiven' in one_tsv.stem) or ('ommen' in one_tsv.stem) or ('vledder' in one_tsv.stem):
+                    thumb_val.append(vals[2])
+                else:
+                    hand_val.append(vals[2])
+
+        xbins = dict(
+            start=-.05,
+            end=1,
+            size=.1
+            )
+
+        traces = [
+            go.Histogram(
+                x=hand_val,
+                xbins=xbins,
+                name='clinical',
+            ),
+            go.Histogram(
+                x=thumb_val,
+                xbins=xbins,
+                name='high density',
+            ),
+            ]
+        layout = go.Layout(
+            xaxis=dict(
+                title='r<sup>2</sup>',
+                range=(0, 1),
+                ),
+            yaxis=dict(
+                title='# tasks',
+                ),
+            )
+
+        fig = go.Figure(data=traces, layout=layout)
+        output_png = img_dir / 'histogram_gridtype_rsquared.png'
+        export_plotly(fig, output_png, driver=d)
+
 
 def read_shape(one_tsv):
     results = read_tsv(one_tsv)
     k = [float(x['Kernel']) for x in results]
     rsquared = [float(x['Rsquared']) for x in results]
 
-    return polyfit(k, rsquared, 2)[0], k[argmax(rsquared)]
+    return polyfit(k, rsquared, 2)[0], k[argmax(rsquared)], max(rsquared)
