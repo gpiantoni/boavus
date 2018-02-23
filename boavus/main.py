@@ -83,6 +83,7 @@ args = dict(
             arguments=[
                 'bids_dir',
                 'freesurfer_dir',
+                'analysis_dir',  # optional, only necessary if PARAMETERS['measure'] is used
                 'output_dir',
                 ]
             ),

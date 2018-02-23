@@ -1,11 +1,15 @@
 from logging import getLogger
 from shutil import rmtree
 from numpy import array, median
+
 from bidso import Electrodes
 from bidso.find import find_in_bids
-from bidso.utils import replace_underscore
+from bidso.utils import replace_underscore, read_tsv
+
 from wonambi.attr import Channels, Freesurfer
 from wonambi.viz import Viz3
+
+from ..bidso import read_channels
 
 lg = getLogger(__name__)
 
@@ -13,10 +17,14 @@ ELECSURF_DIR = 'electrodes_on_surface'
 
 PARAMETERS = {
     'acquisition': '*ctmr',
+    'measure': {
+        'modality': '',
+        'column': '',
+        },
     }
 
 
-def main(bids_dir, freesurfer_dir, output_dir):
+def main(bids_dir, analysis_dir, freesurfer_dir, output_dir):
 
     img_dir = output_dir / ELECSURF_DIR
     rmtree(img_dir, ignore_errors=True)
@@ -26,7 +34,23 @@ def main(bids_dir, freesurfer_dir, output_dir):
         lg.debug(f'Reading electrodes from {electrode_path}')
         elec = Electrodes(electrode_path)
         fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
-        v = plot_electrodes(elec, fs)
+
+        labels = [x['name'] for x in elec.electrodes.tsv]
+        if PARAMETERS['measure']['modality'] != '':
+            ecog_file = find_in_bids(
+                analysis_dir,
+                subject=elec.subject,
+                modality=PARAMETERS['measure']['modality'],
+                extension='.tsv')
+            lg.debug(f'Reading {PARAMETERS["measure"]["column"]} from {ecog_file}')
+            ecog_tsv = read_tsv(ecog_file)
+
+            labels, vals = read_channels(ecog_tsv, labels, PARAMETERS['measure']['column'])
+
+        else:
+            vals = None
+
+        v = plot_electrodes(elec, fs, labels, vals)
 
         png_file = img_dir / replace_underscore(elec.get_filename(), 'surfaceplot.png')
         lg.debug(f'Saving electrode plot on {png_file}')
@@ -34,9 +58,8 @@ def main(bids_dir, freesurfer_dir, output_dir):
         v.close()
 
 
-def plot_electrodes(elec, freesurfer):
-    labels = [x['name'] for x in elec.electrodes.tsv]
-    xyz = array(elec.get_xyz())
+def plot_electrodes(elec, freesurfer, labels=None, values=None):
+    xyz = array(elec.get_xyz(labels))
 
     if elec.coordframe.json['iEEGCoordinateSystem'] == 'RAS':
         # convert from RAS to tkRAS
@@ -49,6 +72,6 @@ def plot_electrodes(elec, freesurfer):
         surf = freesurfer.read_brain().lh
     v = Viz3()
     v.add_surf(surf)
-    v.add_chan(chan)
+    v.add_chan(chan, values=values)
 
     return v
