@@ -9,12 +9,21 @@ from bidso.utils import replace_underscore
 
 
 PARAMETERS = {
+    'log': False,
     'measure': 'percent',
     }
 
 
 def main(analysis_dir):
+    """
+    TODO
+    ----
+    When computing hfa, you can:
+    1) log, then mean over frequency band
+    2) mean over frequency band, then log
 
+    We now use 2) but we should implement 1)
+    """
     for hfa_move_file in find_in_bids(analysis_dir, modality='hfamove', extension='.pkl', generator=True):
         with hfa_move_file.open('rb') as f:
             hfa_move = load(f)
@@ -22,32 +31,22 @@ def main(analysis_dir):
         with hfa_rest_file.open('rb') as f:
             hfa_rest = load(f)
 
+        if PARAMETERS['log']:
+            hfa_move = math(hfa_move, operator_name='log')
+            hfa_rest = math(hfa_rest, operator_name='log')
+
         if PARAMETERS['measure'] == 'percent':
             ecog_stats = compute_percent(hfa_move, hfa_rest)
         elif PARAMETERS['measure'] == 'zstat':
             ecog_stats = compute_zstat(hfa_move, hfa_rest)
 
+        pvalues = ttest_ind(hfa_move(trial=0), hfa_rest(trial=0), axis=1).pvalue
+
         percent_file = replace_underscore(hfa_move_file, 'compare.tsv')
         with percent_file.open('w') as f:
-            f.write('channel\tmeasure\n')
-            for chan in ecog_stats.chan[0]:
-                f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\n')
-
-    """
-    # it's compute here with all the electrodes (also the non active ones)
-    ecog_stats = percent_ecog(hfa_move, hfa_rest)
-    all_chan = ecog_stats.chan[0]
-
-    hfa_move, hfa_rest = _select_active(hfa_move, hfa_rest)
-    active_chan = hfa_move.chan[0]
-    active = ' (todo)'
-    all_fig = []
-    for chan in all_chan:
-        fig = plot_psd(chan, active, freq_move, freq_rest, ecog_stats)
-        all_fig.append(fig)
-
-    return all_fig, all_chan
-    """
+            f.write('channel\tmeasure\tpvalue\n')
+            for i, chan in enumerate(ecog_stats.chan[0]):
+                f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\t{pvalues[i]}\n')
 
 
 def compute_percent(hfa_move, hfa_rest):
@@ -61,6 +60,11 @@ def compute_percent(hfa_move, hfa_rest):
 
 
 def compute_zstat(hfa_move, hfa_rest):
+    """
+    TODO
+    ----
+    You can compute zstat by taking diff and then divide by standard deviation
+    """
     zstat = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1).statistic
 
     return Data(zstat, hfa_move.s_freq, chan=hfa_move.chan[0])
