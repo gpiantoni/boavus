@@ -17,6 +17,7 @@ PARAMETERS = {
         60,
         90,
         ],
+    'log': False,
     'parallel': True,
     }
 
@@ -73,7 +74,8 @@ def compute_frequency(dat):
         dat = concatenate(dat, axis='time')
         FREQ_SELECT = FREQ
 
-    # dat, lg = _remove_outliers(dat)
+    if PARAMETERS['log']:
+        dat = math(dat, operator_name='log')
 
     freq_f = math(dat, axis='time', operator_name='mean')
     dat = select(dat, freq=FREQ_SELECT)
