@@ -9,6 +9,7 @@ lg = getLogger(__name__)
 
 PARAMETERS = {}
 
+
 def main(analysis_dir, freesurfer_dir):
 
     for feat_path in find_in_bids(analysis_dir, generator=True, extension='.feat'):

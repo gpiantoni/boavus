@@ -21,6 +21,7 @@ lg = getLogger(__name__)
 
 
 PARAMETERS = {
+    'graymatter': True,
     'kernels': list(range(1, 10)),
     'distance': 'gaussian',
     'acquisition': '*regions',
@@ -63,6 +64,11 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
 
+    if PARAMETERS['graymatter']:
+        i_ndi = _select_graymatter(ndi, fs)
+        ndi = ndi[i_ndi, :]
+        mri = mri.flatten()[i_ndi]
+
     kernels = PARAMETERS['kernels']
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{PARAMETERS["distance"]}" kernels')
     fmri_vals_list = compute_kernels(kernels, chan_xyz, mri, ndi, n_cpu)
@@ -75,6 +81,22 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
         f.write('name\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
         for one_label, val_at_elec in zip(labels, fmri_vals):
             f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
+
+
+def _select_graymatter(ndi, fs):
+    ribbon = nload(str(fs.dir / 'mri' / 'ribbon.mgz'))
+    x = from_chan_to_mrifile(ribbon, fs, ndi)
+
+    r_mri = ribbon.get_data()
+
+    brain = zeros(x.shape[0], dtype=bool)
+    for i, i_x in enumerate(x):
+        try:
+            brain[i] = (r_mri[tuple(i_x)] == 42) or (r_mri[tuple(i_x)] == 3)
+        except IndexError:
+            continue
+
+    return brain
 
 
 def from_chan_to_mrifile(img, fs, xyz):
