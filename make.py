@@ -4,7 +4,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 from subprocess import run
 from shutil import rmtree
-from os import putenv, environ
+from os import putenv
 
 PROJECT = 'boavus'
 putenv('CI', 'true')  # make sure putenv is supported
@@ -21,7 +21,7 @@ TEST_PATH = BASE_PATH / 'tests'
 DATA_PATH = TEST_PATH / 'data'
 BIDS_PATH = DATA_PATH / 'bids'
 DERIVATIVES_PATH = DATA_PATH / 'derivatives'
-FEAT_PATH = DERIVATIVES_PATH / 'feat'
+ANALYSIS_PATH = DERIVATIVES_PATH / 'analysis'
 BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
 
 
@@ -46,9 +46,8 @@ if args.command == 'doc':
 
 elif args.command == 'test':
     rmtree(BIDS_PATH, ignore_errors=True)
+    rmtree(ANALYSIS_PATH, ignore_errors=True)
     rmtree(BOAVUS_PATH, ignore_errors=True)
-    if environ.get('FSLDIR') is not None:
-        rmtree(FEAT_PATH, ignore_errors=True)
 
     run([
         'py.test',
@@ -60,7 +59,8 @@ elif args.command == 'test':
         ])
 
 elif args.command == 'clean':
-    rmtree(BUILD_PATH)
-    rmtree(API_PATH)
-    rmtree(BIDS_PATH)
+    rmtree(BUILD_PATH, ignore_errors=True)
+    rmtree(API_PATH, ignore_errors=True)
+    rmtree(BIDS_PATH, ignore_errors=True)
+    rmtree(ANALYSIS_PATH, ignore_errors=True)
     rmtree(BOAVUS_PATH, ignore_errors=True)
