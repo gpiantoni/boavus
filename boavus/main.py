@@ -43,6 +43,14 @@ args = dict(
                 'freesurfer_dir',
                 ],
             ),
+        feat_on_surf=dict(
+            help='map feat values on freesurfer surface',
+            arguments=[
+                'analysis_dir',
+                'freesurfer_dir',
+                'output_dir',
+                ],
+            ),
         ),
     fmri=dict(
         help='fmri functions',
