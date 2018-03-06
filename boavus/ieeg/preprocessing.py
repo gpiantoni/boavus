@@ -65,8 +65,9 @@ def preprocess_ecog(filename):
     elec_names = [x['name'] for x in self.electrodes.electrodes.tsv]
 
     data = self.read_data(begsam=rest_times[0][0], endsam=rest_times[1][-1])
+    chan_with_elec = [x for x in elec_names if x in data.chan[0]]
 
-    data = select(data, chan=elec_names)
+    data = select(data, chan=chan_with_elec)
     clean_labels = reject_channels(data)
     lg.debug(f'Clean channels {len(clean_labels)} / {len(elec_names)}')
 
