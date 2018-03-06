@@ -90,3 +90,4 @@ def plot_surf(img_dir, freesurfer_dir, info):
     v = Viz3()
     v.add_surf(surf, values=surf_val, limits_c=(-6, 6))
     v.save(img_dir / (info['surf'].stem + '.png'))
+    v.close()
