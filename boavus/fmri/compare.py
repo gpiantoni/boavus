@@ -14,6 +14,7 @@ lg = getLogger(__name__)
 
 PARAMETERS = {
     'measure': 'percent',
+    'normalize_to_mean': False,
     }
 
 
@@ -46,14 +47,19 @@ def compute_percent(feat_path):
     design = read_design(feat_path)
 
     pe_mri = nload(str(feat_path / 'stats' / 'pe1.nii.gz'))
-    mean_mri = nload(str(feat_path / 'mean_func.nii.gz'))
-    array_equal(pe_mri.affine, mean_mri.affine)
 
     pe = pe_mri.get_data()
     pe[pe == 0] = NaN
-    mean_func = mean_mri.get_data()
-    with errstate(invalid='ignore'):
-        perc = pe / mean_func * 100 * design.ptp()
+    perc = pe * 100 * design.ptp()
+
+    if PARAMETERS['normalize_to_mean']:
+        """I'm not sure if this is necessary, but for sure it increases the level
+        of noise"""
+        mean_mri = nload(str(feat_path / 'mean_func.nii.gz'))
+        mean_func = mean_mri.get_data()
+        array_equal(pe_mri.affine, mean_mri.affine)
+        with errstate(invalid='ignore'):
+            perc /= mean_func
 
     mask_mri = nload(str(feat_path / 'mask.nii.gz'))
     mask = mask_mri.get_data().astype(bool)
