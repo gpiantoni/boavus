@@ -109,7 +109,6 @@ def test_ieeg_plotelectrodes(qtbot):
         ])
 
     update_parameters(PARAMETERS_JSON, acquisition='ctprojected')
-
     boavus([
         'ieeg',
         'plot_electrodes',

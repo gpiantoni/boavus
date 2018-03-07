@@ -1,6 +1,6 @@
 from boavus.main import boavus
 
-from .paths import BIDS_PATH, PARAMETERS_PATH, ANALYSIS_PATH
+from .paths import BIDS_PATH, PARAMETERS_PATH, ANALYSIS_PATH, FREESURFER_PATH, BOAVUS_PATH
 from .utils import update_parameters
 
 
@@ -79,26 +79,31 @@ def test_ieeg_compare_percent():
         ])
 
 
-def test_ieeg_compare_zstat():
+def test_ieeg_plotelectrodes_measure(qtbot):
+    # follows up on test_04_electrodes.py/test_ieeg_plotelectrodes
 
-    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_compare.json'
-
-    boavus([
-        'ieeg',
-        'compare',
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '--parameters',
-        str(PARAMETERS_JSON),
-        ])
-
-    update_parameters(PARAMETERS_JSON, measure='zstat')
+    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_plotelectrodes.json'
+    update_parameters(
+        PARAMETERS_JSON,
+        acquisition='ctprojectedregions',
+        measure=dict(
+            modality='compare',
+            column='measure',
+            ))
 
     boavus([
         'ieeg',
-        'compare',
+        'plot_electrodes',
+        '--output_dir',
+        str(BOAVUS_PATH),
+        '--freesurfer_dir',
+        str(FREESURFER_PATH),
+        '--bids_dir',
+        str(BIDS_PATH),
         '--analysis_dir',
         str(ANALYSIS_PATH),
-        '--parameters',
+        '-p',
         str(PARAMETERS_JSON),
+        '--log',
+        'debug',
         ])

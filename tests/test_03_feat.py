@@ -35,7 +35,7 @@ def test_main_fsl_coreg():
             ])
 
 
-def test_main_fsl_feattosurf():
+def test_main_fsl_feattosurf(qtbot):
 
     if environ.get('FSLDIR') is not None:
         boavus([
