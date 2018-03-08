@@ -34,9 +34,15 @@ def main(bids_dir, analysis_dir, output_dir):
 
     results = []
     for fmri_at_elec_file in find_in_bids(analysis_dir, generator=True, modality='*elec', extension='.tsv'):
-        one_result = compute_corr_ecog_fmri(file_Core(fmri_at_elec_file),
-                                            bids_dir, analysis_dir, results_dir)
-        results.append(one_result)
+        try:
+            one_result = compute_corr_ecog_fmri(file_Core(fmri_at_elec_file),
+                                                bids_dir, analysis_dir, results_dir)
+
+        except FileNotFoundError as err:
+            lg.warning(err)
+
+        else:
+            results.append(one_result)
 
     if PARAMETERS['plot']:
         plot_results(results, output_dir)
