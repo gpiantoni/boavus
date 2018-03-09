@@ -78,7 +78,7 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
     lg.debug(f'Saving {fmri_vals_tsv}')
 
     with fmri_vals_tsv.open('w') as f:
-        f.write('name\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
+        f.write('channel\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
         for one_label, val_at_elec in zip(labels, fmri_vals):
             f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
 

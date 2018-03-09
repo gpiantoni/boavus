@@ -74,7 +74,7 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir):
     ecog_tsv = list(filter(lambda x: x['channel'] in labels_in_roi, ecog_tsv))
     lg.debug(f'Using {len(ecog_tsv)}/{n_all_elec} electrodes in ROI')
 
-    KERNELS = [col for col in fmri_tsv[0] if col != 'name']
+    KERNELS = [col for col in fmri_tsv[0] if col != 'channel']
 
     results_tsv = results_dir / replace_underscore(fmri_file.get_filename(), fmri_file.modality + '.tsv')
     with results_tsv.open('w') as f:
