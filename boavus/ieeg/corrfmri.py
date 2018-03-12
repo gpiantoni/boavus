@@ -90,7 +90,7 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir):
 def compute_rsquared(ecog_tsv, fmri_tsv, KERNEL):
     fmri_vals = []
     for one_ecog in ecog_tsv:
-        one_val = [float(elec[KERNEL]) for elec in fmri_tsv if elec['name'] == one_ecog['channel']][0]
+        one_val = [float(elec[KERNEL]) for elec in fmri_tsv if elec['channel'] == one_ecog['channel']][0]
         fmri_vals.append(one_val)
 
     ecog_val = array([float(x['measure']) for x in ecog_tsv])
