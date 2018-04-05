@@ -30,6 +30,7 @@ task_ieeg = file_Core(
     modality='ieeg',
     task='block',
     run='00',
+    acquisition='clinical',
     extension='.bin',
     )
 task_fmri = file_Core(
