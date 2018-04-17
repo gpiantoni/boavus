@@ -1,7 +1,7 @@
 from pickle import load
-from numpy import NaN
+from numpy import ones, hstack, sign, array, NaN
 from numpy import concatenate as np_concatenate
-from scipy.stats import ttest_ind
+from scipy.stats import ttest_ind, pearsonr
 
 from wonambi.trans import math, concatenate, select
 from wonambi.datatype import Data
@@ -13,11 +13,11 @@ from bidso.utils import replace_underscore
 PARAMETERS = {
     'frequency': [
         65,
-        95,
+        95 + 1,  # 95 Hz included
         ],
     'baseline': True,
-    'method': '1b',
-    'measure': 'diff',
+    'method': 'dora',
+    'measure': 'dora_r2',
     }
 
 
@@ -39,8 +39,14 @@ def main(analysis_dir):
             ecog_stats = compute_diff(hfa_move, hfa_rest)
         elif PARAMETERS['measure'] == 'percent':
             ecog_stats = compute_percent(hfa_move, hfa_rest)
-        elif PARAMETERS['measure'] == 'zstat':
+        elif PARAMETERS['measure'] in ('zstat', 'dora_t'):  # identical
             ecog_stats = compute_zstat(hfa_move, hfa_rest)
+
+            if PARAMETERS['measure'] == 'dora_t':
+                ecog_stats.data[0] *= -1  # opposite sign in Dora's script
+
+        elif PARAMETERS['measure'] in ('dora_r2', 'dora_pv'):
+            ecog_stats = calc_dora_values(hfa_move, hfa_rest, PARAMETERS['measure'])
 
         # need to check pvalues
         if False:  # hfa_move.data[0].shape[1] > 1:
@@ -134,6 +140,13 @@ def merge(freq):
         # values per time point
         out = math(freq, operator_name='dB')
 
+    elif PARAMETERS['method'] == 'dora':
+        # identical to 3b, but use log instead of dB
+        freq = concatenate(freq, axis='time')
+        freq = math(freq, operator_name='log')
+        # values per time point
+        out = math(freq, operator_name='mean', axis='freq')
+
     return out
 
 
@@ -158,9 +171,28 @@ def compute_zstat(hfa_move, hfa_rest):
     ----
     You can compute zstat by taking diff and then divide by standard deviation
     """
-    zstat = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1).statistic
+    zstat = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1, equal_var=False).statistic
 
     return Data(zstat, hfa_move.s_freq, chan=hfa_move.chan[0])
+
+
+def calc_dora_values(hfa_move, hfa_rest, measure):
+    """This is the exact translation of Dora's Matlab code
+    """
+    ecog = hstack((hfa_move.data[0], hfa_rest.data[0]))
+    stim = hstack((ones(hfa_move.data[0].shape[1]), ones(hfa_rest.data[0].shape[1]) * 0))
+
+    val = []
+    for ecog_chan in ecog:
+        [r, p] = pearsonr(ecog_chan, stim)
+
+        if measure == 'dora_r2':
+            val.append(r ** 2 * sign(r))
+
+        elif measure == 'dora_pv':
+            val.append(p)
+
+    return Data(array(val), hfa_move.s_freq, chan=hfa_move.chan[0])
 
 
 def correct_baseline(freq_move, freq_rest):
