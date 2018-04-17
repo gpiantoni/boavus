@@ -1,3 +1,4 @@
+from json import dump
 from bidso.simulate import simulate_bold, simulate_ieeg, simulate_electrodes, simulate_anat
 
 from .paths import BIDS_PATH, T1_PATH, task_ieeg, task_fmri, task_anat, elec_ct
@@ -10,6 +11,15 @@ def test_simulate_root():
         f.write('participant_id\tage\tsex\n')
 
         f.write(f'{task_ieeg.subject}\t30\tF\n')
+
+    d = {
+        "Name": "Dataset with simulated data",
+        "BIDSVersion": "1.0.2",
+        "Authors": ["Giovanni Piantoni", ],
+        }
+
+    with (BIDS_PATH / 'dataset_description.json').open('w') as f:
+        dump(d, f, ensure_ascii=False, indent=' ')
 
 
 def test_simulate_ieeg():
