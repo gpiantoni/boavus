@@ -32,7 +32,7 @@ PARAMETERS = {
 
 def main(bids_dir, analysis_dir):
 
-    for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.bin', generator=True):
+    for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.eeg', generator=True):
         lg.debug(f'reading {ieeg_file}')
         try:
             dat_move, dat_rest = preprocess_ecog(ieeg_file)

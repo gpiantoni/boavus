@@ -54,7 +54,7 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
     fs = Freesurfer(freesurfer_path)
 
     try:
-        electrodes = Electrodes(find_in_bids(bids_dir, wildcard=False, subject=task_fmri.subject, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'))
+        electrodes = Electrodes(find_in_bids(bids_dir, subject=task_fmri.subject, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'))
     except FileNotFoundError as err:
         lg.debug(err)
         return None
