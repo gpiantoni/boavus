@@ -72,6 +72,7 @@ def preprocess_ecog(filename):
 
     # only channels with electrodes
     elec_names = [x['name'] for x in electrodes.electrodes.tsv]
+    elec_names = [x for x in elec_names if x in d.header['chan_name']]  # exclude elec location that have no corresponding channel
     data = d.read_data(chan=elec_names, begsam=rest_times[0][0], endsam=rest_times[1][-1])
 
     clean_labels = reject_channels(data)
