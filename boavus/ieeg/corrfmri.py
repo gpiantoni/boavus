@@ -53,7 +53,7 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir):
 
     electrodes_file = find_in_bids(
         bids_dir,
-        wildcard=False,
+        wildcard=True,
         subject=fmri_file.subject,
         acquisition=PARAMETERS['acquisition'],
         modality='electrodes',

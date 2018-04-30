@@ -75,7 +75,7 @@ def project_electrodes(elec, freesurfer, analysis_dir):
 
     elec.coordframe.json['iEEGCoordinateSystem'] = 'tkRAS'
     elec.coordframe.json['iEEGCoordinateProcessingDescripton'] += '; Dijkstra et al.'  # TODO: better description + remove None
-    new_json = replace_underscore(tsv_electrodes, 'coordframe.json')
+    new_json = replace_underscore(tsv_electrodes, 'coordsystem.json')
     with new_json.open('w') as f:
         dump(elec.coordframe.json, f, indent=2)
 
