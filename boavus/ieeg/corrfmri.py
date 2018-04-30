@@ -45,6 +45,8 @@ def main(bids_dir, analysis_dir, output_dir):
             results.append(one_result)
 
     if PARAMETERS['plot']:
+        if len(results) == 0:
+            lg.warning('No results were computed, skipping plot')
         plot_results(results, output_dir)
 
 
