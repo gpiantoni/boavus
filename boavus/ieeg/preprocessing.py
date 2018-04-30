@@ -2,12 +2,12 @@ from pickle import dump
 from wonambi.trans import select, montage, math
 from logging import getLogger
 from numpy import mean, std
+from wonambi import Dataset
 
-from bidso import Task
-from bidso.find import find_in_bids
+from bidso import Task, Electrodes
+from bidso.find import find_in_bids, find_root
 from bidso.utils import replace_extension
 
-from .dataset import Dataset
 from ..bidso import find_labels_in_regions
 
 lg = getLogger(__name__)
@@ -50,11 +50,18 @@ def main(bids_dir, analysis_dir):
 
 
 def preprocess_ecog(filename):
-    self = Dataset(filename, PARAMETERS['electrodes']['acquisition'])
-    s_freq = float(self.channels.tsv[0]['sampling_frequency'])
+    d = Dataset(filename, bids=True)
+    s_freq = d.header['s_freq']
+
+    # this might be in bids or in wonambi
+    bids_root = find_root(d.filename)
+    electrode_file = find_in_bids(bids_root, subject=d.dataset.task.subject,
+                                  acquisition=PARAMETERS['electrodes']['acquisition'],
+                                  modality='electrodes', extension='.tsv')
+    electrodes = Electrodes(electrode_file)
 
     move_times, rest_times = read_markers(
-        self,
+        d,
         marker_on=PARAMETERS['markers']['on'],
         marker_off=PARAMETERS['markers']['off'],
         minimalduration=PARAMETERS['markers']['minimalduration'],
@@ -62,21 +69,21 @@ def preprocess_ecog(filename):
     # convert to s_freq
     rest_times = [[int(x0 * s_freq) for x0 in x1] for x1 in rest_times]
     move_times = [[int(x0 * s_freq) for x0 in x1] for x1 in move_times]
-    elec_names = [x['name'] for x in self.electrodes.electrodes.tsv]
 
-    data = self.read_data(begsam=rest_times[0][0], endsam=rest_times[1][-1])
-    chan_with_elec = [x for x in elec_names if x in data.chan[0]]
+    # only channels with electrodes
+    elec_names = [x['name'] for x in electrodes.electrodes.tsv]
+    data = d.read_data(chan=elec_names, begsam=rest_times[0][0], endsam=rest_times[1][-1])
 
-    data = select(data, chan=chan_with_elec)
     clean_labels = reject_channels(data)
     lg.debug(f'Clean channels {len(clean_labels)} / {len(elec_names)}')
 
-    data = self.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
+    data = d.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
+    # TODO: notch filter
 
-    dat_move = run_montage(self, move_times, clean_labels)
-    dat_rest = run_montage(self, rest_times, clean_labels)
+    dat_move = run_montage(d, move_times, clean_labels)
+    dat_rest = run_montage(d, rest_times, clean_labels)
 
-    labels_in_roi = find_labels_in_regions(self.electrodes, PARAMETERS['regions'])
+    labels_in_roi = find_labels_in_regions(electrodes, PARAMETERS['regions'])
 
     clean_roi_labels = [label for label in clean_labels if label in labels_in_roi]
 
@@ -101,10 +108,10 @@ def run_montage(d, times, chan):
 
 
 def read_markers(d, marker_on, marker_off, minimalduration):
-    markers = d.read_events()
-    move_start = [mrk['onset'] for mrk in markers if mrk['trial_type'] == marker_on]
-    move_end = [mrk['onset'] + mrk['duration'] for mrk in markers if mrk['trial_type'] == marker_on]
+    markers = d.read_markers()
+    move_start = [mrk['start'] for mrk in markers if mrk['name'] == marker_on]
+    move_end = [mrk['end'] for mrk in markers if mrk['name'] == marker_on]
 
-    rest_start = [mrk['onset'] for mrk in markers if mrk['trial_type'] == marker_off if mrk['duration'] > minimalduration]
-    rest_end = [mrk['onset'] + mrk['duration'] for mrk in markers if mrk['trial_type'] == marker_off if mrk['duration'] > minimalduration]
+    rest_start = [mrk['start'] for mrk in markers if mrk['name'] == marker_off if (mrk['end'] - mrk['start']) > minimalduration]
+    rest_end = [mrk['end'] for mrk in markers if mrk['name'] == marker_off if (mrk['end'] - mrk['start']) > minimalduration]
     return (move_start, move_end), (rest_start, rest_end)
