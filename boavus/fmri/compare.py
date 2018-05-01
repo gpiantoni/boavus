@@ -27,6 +27,8 @@ def main(analysis_dir):
             fmri_stat = compute_percent(feat_path)
         elif PARAMETERS['measure'] == 'zstat':
             fmri_stat = compute_zstat(feat_path)
+        else:
+            raise ValueError(f'Unknown PARAMETER["measure"]: {PARAMETERS["measure"]}')
 
         feat = file_Core(feat_path)
         task_path = bids_mkdir(analysis_dir, feat) / (feat.filename.stem + '_compare.nii.gz')

@@ -1,7 +1,7 @@
 from logging import getLogger
 from shutil import rmtree
 
-from numpy import argmax, array, polyfit
+from numpy import argmax, array, polyfit, isnan, NaN
 from scipy.stats import linregress
 import plotly.graph_objs as go
 
@@ -47,7 +47,8 @@ def main(bids_dir, analysis_dir, output_dir):
     if PARAMETERS['plot']:
         if len(results) == 0:
             lg.warning('No results were computed, skipping plot')
-        plot_results(results, output_dir)
+        else:
+            plot_results(results, output_dir)
 
 
 def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir):
@@ -83,7 +84,10 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir):
         f.write('Kernel\tRsquared\n')
 
         for KERNEL in KERNELS:
-            r2 = compute_rsquared(ecog_tsv, fmri_tsv, KERNEL)
+            try:
+                r2 = compute_rsquared(ecog_tsv, fmri_tsv, KERNEL)
+            except Exception:
+                r2 = NaN
             f.write(f'{KERNEL}\t{r2}\n')
 
     return results_tsv
@@ -96,8 +100,11 @@ def compute_rsquared(ecog_tsv, fmri_tsv, KERNEL):
         fmri_vals.append(one_val)
 
     ecog_val = array([float(x['measure']) for x in ecog_tsv])
+    x = ecog_val
+    y = array(fmri_vals)
+    mask = ~isnan(x) & ~isnan(y)
 
-    lr = linregress(ecog_val, array(fmri_vals))
+    lr = linregress(x[mask], y[mask])
     return lr.rvalue ** 2
 
 

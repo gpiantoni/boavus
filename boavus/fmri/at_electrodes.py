@@ -4,7 +4,7 @@ from logging import getLogger
 from math import ceil
 from multiprocessing import Pool, Process, cpu_count
 
-from numpy import ndindex, array, nansum, power, zeros, repeat, diag
+from numpy import ndindex, array, nansum, power, zeros, repeat, diag, NaN, nanmean
 from numpy.linalg import norm, inv
 from scipy.stats import norm as normdistr
 from nibabel import Nifti1Image
@@ -26,6 +26,9 @@ PARAMETERS = {
     'distance': 'gaussian',
     'acquisition': '*regions',
     'parallel': True,
+    'fs_shift': -1,
+    'upsample': False,
+    'approach': True,
     }
 
 
@@ -37,7 +40,7 @@ def main(bids_dir, freesurfer_dir, analysis_dir):
         lg.debug(f'adding {measure_nii}')
         processes.append(Process(target=calc_fmri_at_elec,
                                  args=(measure_nii, bids_dir, freesurfer_dir,
-                                       analysis_dir, ceil(cpu_count() / n_processes)),
+                                       analysis_dir, ceil(cpu_count() / n_processes) - 1),
                                  daemon=False))  # make sure daemon is False, otherwise no children
 
     [p.start() for p in processes]
@@ -46,8 +49,10 @@ def main(bids_dir, freesurfer_dir, analysis_dir):
 
 def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu=None):
     img = nload(str(measure_nii))
-    img = upsample_mri(img)
+    if PARAMETERS['upsample']:
+        img = upsample_mri(img)
     mri = img.get_data()
+    mri[mri == 0] = NaN
 
     task_fmri = file_Core(measure_nii)
     freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
@@ -61,6 +66,10 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
 
     labels = electrodes.electrodes.get(map_lambda=lambda x: x['name'])
     chan_xyz = array(electrodes.get_xyz())
+    if task_fmri.subject == 'maan':
+        # convert from RAS to tkRAS
+        chan_xyz -= fs.surface_ras_shift
+
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
 
@@ -84,7 +93,11 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
 
 
 def _select_graymatter(ndi, fs):
-    ribbon = nload(str(fs.dir / 'mri' / 'ribbon.mgz'))
+    if PARAMETERS['upsample']:
+        ribbon_name = 'ribbon.mgz'
+    else:
+        ribbon_name = 'ribbon_feat.mgz'
+    ribbon = nload(str(fs.dir / 'mri' / ribbon_name))
     x = from_chan_to_mrifile(ribbon, fs, ndi)
 
     r_mri = ribbon.get_data()
@@ -100,11 +113,11 @@ def _select_graymatter(ndi, fs):
 
 
 def from_chan_to_mrifile(img, fs, xyz):
-    return apply_affine(inv(img.affine), xyz + fs.surface_ras_shift).astype(int)
+    return apply_affine(inv(img.affine), xyz + fs.surface_ras_shift * PARAMETERS['fs_shift']).astype(int)
 
 
 def from_mrifile_to_chan(img, fs, xyz):
-    return apply_affine(img.affine, xyz) - fs.surface_ras_shift
+    return apply_affine(img.affine, xyz) - fs.surface_ras_shift * PARAMETERS['fs_shift']
 
 
 def upsample_mri(img_lowres):
@@ -138,18 +151,25 @@ def compute_kernels(kernels, chan_xyz, mri, ndi, n_cpu=None):
 def compute_chan(pos, KERNEL, ndi, mri):
     dist_chan = norm(ndi - pos, axis=1)
 
-    if PARAMETERS['distance'] == 'gaussian':
-        m = normdistr.pdf(dist_chan, scale=KERNEL)
+    if PARAMETERS['approach']:
+        m = zeros(dist_chan.shape, dtype=bool)
+        m[dist_chan <= KERNEL] = True
+        m = m.reshape(mri.shape)
+        return nanmean(mri[m])
 
-    elif PARAMETERS['distance'] == 'sphere':
-        m = zeros(dist_chan.shape)
-        m[dist_chan <= KERNEL] = 1
+    else:
+        if PARAMETERS['distance'] == 'gaussian':
+            m = normdistr.pdf(dist_chan, scale=KERNEL)
 
-    elif PARAMETERS['distance'] == 'inverse':
-        m = power(dist_chan, -1 * KERNEL)
+        elif PARAMETERS['distance'] == 'sphere':
+            m = zeros(dist_chan.shape)
+            m[dist_chan <= KERNEL] = 1
 
-    m /= nansum(m)  # normalize so that the sum is 1
-    m = m.reshape(mri.shape)
+        elif PARAMETERS['distance'] == 'inverse':
+            m = power(dist_chan, -1 * KERNEL)
 
-    mq = m * mri
-    return nansum(mq)
+        m /= nansum(m)  # normalize so that the sum is 1
+        m = m.reshape(mri.shape)
+
+        mq = m * mri
+        return nansum(mq)
