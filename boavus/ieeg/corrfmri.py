@@ -119,7 +119,7 @@ def plot_results(results_tsv, output_dir):
                 continue
 
             results = read_tsv(one_tsv)
-            k = [x['Kernel'] for x in results]
+            k = [float(x['Kernel']) for x in results]
             rsquared = [float(x['Rsquared']) for x in results]
             traces = [{
                 'x': k,
