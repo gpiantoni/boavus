@@ -38,12 +38,11 @@ def main(bids_dir, freesurfer_dir, analysis_dir):
 
 
 def project_electrodes(elec, freesurfer, analysis_dir):
+    raise ValueError('fix coordinate system')
 
     bids_dir = find_root(elec.filename)
 
     xyz = array(elec.get_xyz())
-    if elec.coordframe.json['iEEGCoordinateSystem'] == 'RAS':
-        # convert from RAS to tkRAS
         xyz -= freesurfer.surface_ras_shift
 
     chan = Channels([x['name'] for x in elec.electrodes.tsv], xyz)
@@ -74,7 +73,7 @@ def project_electrodes(elec, freesurfer, analysis_dir):
             f.write(f'{_chan.label}\t{xyz}\t{elec_type}\t{size}\t{material}\n')
 
     elec.coordframe.json['iEEGCoordinateSystem'] = 'tkRAS'
-    elec.coordframe.json['iEEGCoordinateProcessingDescripton'] += '; Dijkstra et al.'  # TODO: better description + remove None
+    elec.coordframe.json['iEEGCoordinateProcessingDescription'] += '; Dijkstra et al.'  # TODO: better description + remove None
     new_json = replace_underscore(tsv_electrodes, 'coordsystem.json')
     with new_json.open('w') as f:
         dump(elec.coordframe.json, f, indent=2)

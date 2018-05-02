@@ -61,9 +61,8 @@ def main(bids_dir, analysis_dir, freesurfer_dir, output_dir):
 def plot_electrodes(elec, freesurfer, labels=None, values=None):
     xyz = array(elec.get_xyz(labels))
 
-    if elec.coordframe.json['iEEGCoordinateSystem'] == 'RAS':
-        # convert from RAS to tkRAS
-        xyz -= freesurfer.surface_ras_shift
+    # convert from RAS to tkRAS
+    xyz -= freesurfer.surface_ras_shift
 
     chan = Channels(labels, xyz)
     if median(chan.return_xyz()[:, 0]) > 0:

@@ -41,7 +41,7 @@ def assign_regions(elec, freesurfer):
             region = freesurfer.find_brain_region(xyz, exclude_regions=('White', 'WM', 'Unknown'))[0]
             f.write(f'{_tsv["name"]}\t{_tsv["x"]}\t{_tsv["y"]}\t{_tsv["z"]}\t{_tsv["type"]}\t{_tsv["size"]}\t{_tsv["material"]}\t{region}\n')
 
-    elec.coordframe.json['iEEGCoordinateProcessingDescripton'] += '; Assign brain regions'  # TODO: better description + remove None
+    elec.coordframe.json['iEEGCoordinateProcessingDescription'] += '; Assign brain regions'  # TODO: better description + remove None
     new_json = replace_underscore(tsv_electrodes, 'coordsystem.json')
     with new_json.open('w') as f:
         dump(elec.coordframe.json, f, indent=2)
