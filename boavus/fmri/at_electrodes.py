@@ -66,9 +66,6 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
 
     labels = electrodes.electrodes.get(map_lambda=lambda x: x['name'])
     chan_xyz = array(electrodes.get_xyz())
-    if task_fmri.subject == 'maan':
-        # convert from RAS to tkRAS
-        chan_xyz -= fs.surface_ras_shift
 
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, fs, nd)
