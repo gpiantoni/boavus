@@ -16,8 +16,8 @@ PARAMETERS = {
         95 + 1,  # 95 Hz included
         ],
     'baseline': True,
-    'method': 'dora',
-    'measure': 'dora_r2',
+    'method': '3b',
+    'measure': 'percent',
     }
 
 
