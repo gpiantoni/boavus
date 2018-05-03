@@ -1,4 +1,4 @@
-from boavus.main import boavus
+from boavus import boavus
 
 from .paths import BOAVUS_PATH, ANALYSIS_PATH, BIDS_PATH, PARAMETERS_PATH
 from .utils import update_parameters

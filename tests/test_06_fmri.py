@@ -1,5 +1,5 @@
 from os import environ
-from boavus.main import boavus
+from boavus import boavus
 
 from .paths import PARAMETERS_PATH, BIDS_PATH, ANALYSIS_PATH, FREESURFER_PATH
 from .utils import update_parameters

@@ -1,4 +1,4 @@
-from boavus.main import boavus
+from boavus import boavus
 
 from .paths import BIDS_PATH, PARAMETERS_PATH, ANALYSIS_PATH, FREESURFER_PATH, BOAVUS_PATH
 from .utils import update_parameters

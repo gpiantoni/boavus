@@ -1,7 +1,7 @@
 from shutil import copyfile, which
 
 from bidso.utils import replace_underscore
-from boavus.main import boavus
+from boavus import boavus
 
 from .paths import (BIDS_PATH,
                     task_ieeg,

@@ -1,6 +1,6 @@
 from os import environ
 
-from boavus.main import boavus
+from boavus import boavus
 
 from .paths import BIDS_PATH, ANALYSIS_PATH, FREESURFER_PATH, BOAVUS_PATH
 
