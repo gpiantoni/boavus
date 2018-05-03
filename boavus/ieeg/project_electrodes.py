@@ -43,7 +43,7 @@ def project_electrodes(elec, freesurfer, analysis_dir):
     bids_dir = find_root(elec.filename)
 
     xyz = array(elec.get_xyz())
-        xyz -= freesurfer.surface_ras_shift
+    xyz -= freesurfer.surface_ras_shift
 
     chan = Channels([x['name'] for x in elec.electrodes.tsv], xyz)
 
