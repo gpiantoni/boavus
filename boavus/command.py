@@ -22,8 +22,8 @@ args = dict(
         reconall=dict(
             help='run freesurfer recon-all',
             arguments=[
-                ('bids_dir', True, 'doc'),
-                ('freesurfer_dir', True, 'doc'),
+                ('bids_dir', True, None),
+                ('freesurfer_dir', True, None),
                 ],
             ),
         ),
@@ -32,23 +32,23 @@ args = dict(
         feat=dict(
             help='run FEAT using the events.tsv information',
             arguments=[
-                ('bids_dir', True, 'doc'),
-                ('analysis_dir', True, 'doc'),
+                ('bids_dir', True, None),
+                ('analysis_dir', True, None),
                 ],
             ),
         coreg=dict(
             help='coreg feat with freesurfer',
             arguments=[
-                ('analysis_dir', True, 'doc'),
-                ('freesurfer_dir', True, 'doc'),
+                ('analysis_dir', True, None),
+                ('freesurfer_dir', True, None),
                 ],
             ),
         feat_on_surf=dict(
             help='map feat values on freesurfer surface',
             arguments=[
-                ('analysis_dir', True, 'doc'),
-                ('freesurfer_dir', True, 'doc'),
-                ('output_dir', True, 'doc'),
+                ('analysis_dir', True, None),
+                ('freesurfer_dir', True, None),
+                ('output_dir', True, None),
                 ],
             ),
         ),
@@ -57,15 +57,15 @@ args = dict(
         compare=dict(
             help='compute percent change of the BOLD signal',
             arguments=[
-                ('analysis_dir', True, 'doc'),
+                ('analysis_dir', True, None),
                 ]
             ),
         at_electrodes=dict(
-            help='calculate fMRI values at electrode locations',
+            help='Calculate the (weighted) average of fMRI values at electrode locations',
             arguments=[
-                ('bids_dir', True, 'doc'),
-                ('freesurfer_dir', True, 'doc'),
-                ('analysis_dir', True, 'doc'),
+                ('bids_dir', True, None),
+                ('analysis_dir', True, None),
+                ('freesurfer_dir', False, 'only necessary if you include gray matter'),
                 ]
             ),
         ),
@@ -74,52 +74,52 @@ args = dict(
         project_electrodes=dict(
             help='project electrodes to brain surface',
             arguments=[
-                ('bids_dir', True, 'doc'),
-                ('freesurfer_dir', True, 'doc'),
-                ('analysis_dir', True, 'doc'),
+                ('bids_dir', True, None),
+                ('freesurfer_dir', True, None),
+                ('analysis_dir', True, None),
                 ]
             ),
         assign_regions=dict(
             help='assign electrodes to brain regions',
             arguments=[
-                ('bids_dir', True, 'doc'),
-                ('freesurfer_dir', True, 'doc'),
+                ('bids_dir', True, None),
+                ('freesurfer_dir', True, None),
                 ]
             ),
         plot_electrodes=dict(
             help='plot electrodes onto the brain surface',
             arguments=[
-                ('bids_dir', True, 'doc'),
-                ('freesurfer_dir', True, 'doc'),
+                ('bids_dir', True, None),
+                ('freesurfer_dir', True, None),
                 ('analysis_dir', False, 'only necessary if PARAMETERS["measure"] is used'),
-                ('output_dir', True, 'doc'),
+                ('output_dir', True, None),
                 ]
             ),
         preprocessing=dict(
             help='read in the data for move and rest',
             arguments=[
-                ('bids_dir', True, 'doc'),
-                ('analysis_dir', True, 'doc'),
+                ('bids_dir', True, None),
+                ('analysis_dir', True, None),
                 ]
             ),
         psd=dict(
             help='compute psd for two conditions',
             arguments=[
-                ('analysis_dir', True, 'doc'),
+                ('analysis_dir', True, None),
                 ]
             ),
         compare=dict(
             help='compare the two conditions in percent change or zstat',
             arguments=[
-                ('analysis_dir', True, 'doc'),
+                ('analysis_dir', True, None),
                 ]
             ),
         corrfmri=dict(
             help='compare fMRI values at electrode locations to ECoG values',
             arguments=[
-                ('bids_dir', True, 'doc'),
-                ('analysis_dir', True, 'doc'),
-                ('output_dir', True, 'doc'),
+                ('bids_dir', True, None),
+                ('analysis_dir', True, None),
+                ('output_dir', True, None),
                 ]
             ),
         )
@@ -147,18 +147,24 @@ for m_k, m_v in args.items():
 
         folders_arg = function.add_argument_group('folders arguments')
         FOLDERS_DOC = {
-            'bids_dir': 'test',
-            'freesurfer_dir': 'The directory with the Freesurfer',
+            'bids_dir': 'The directory with the raw data organized in the BIDS format',
+            'freesurfer_dir': 'The directory with Freesurfer',
             'analysis_dir': 'The directory with preprocessed / analyzed data for each subject',
             'output_dir': 'The directory with custom output',
             }
 
         for directory, required, doc in f_v['arguments']:
 
+            help_str = FOLDERS_DOC[directory]
+            if not required:
+                help_str = '(optional) ' + help_str
+            if doc is not None:
+                help_str += ' (' + doc + ')'
+
             folders_arg.add_argument(
                 '--' + directory,
                 required=required,
-                help=FOLDERS_DOC[directory] + ' (' + doc + ')',
+                help=help_str,
                 )
 
 
