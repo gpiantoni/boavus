@@ -4,7 +4,7 @@ from logging import getLogger
 from math import ceil
 from multiprocessing import Pool, Process, cpu_count
 
-from numpy import ndindex, array, nansum, power, zeros, repeat, diag, NaN, nanmean
+from numpy import ndindex, array, sum, power, zeros, repeat, diag, NaN, nanmean, isfinite, nansum
 from numpy.linalg import norm, inv
 from scipy.stats import norm as normdistr
 from nibabel import Nifti1Image
@@ -26,7 +26,6 @@ PARAMETERS = {
     'distance': 'gaussian',
     'acquisition': '*regions',
     'parallel': True,
-    'fs_shift': -1,
     'upsample': False,
     'approach': True,
     }
@@ -55,8 +54,6 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
     mri[mri == 0] = NaN
 
     task_fmri = file_Core(measure_nii)
-    freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
-    fs = Freesurfer(freesurfer_path)
 
     try:
         electrodes = Electrodes(find_in_bids(bids_dir, subject=task_fmri.subject, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'))
@@ -68,9 +65,11 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
     chan_xyz = array(electrodes.get_xyz())
 
     nd = array(list(ndindex(mri.shape)))
-    ndi = from_mrifile_to_chan(img, fs, nd)
+    ndi = from_mrifile_to_chan(img, nd)
 
     if PARAMETERS['graymatter']:
+        freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
+        fs = Freesurfer(freesurfer_path)
         i_ndi = _select_graymatter(ndi, fs)
         ndi = ndi[i_ndi, :]
         mri = mri.flatten()[i_ndi]
@@ -95,7 +94,7 @@ def _select_graymatter(ndi, fs):
     else:
         ribbon_name = 'ribbon_feat.mgz'
     ribbon = nload(str(fs.dir / 'mri' / ribbon_name))
-    x = from_chan_to_mrifile(ribbon, fs, ndi)
+    x = from_chan_to_mrifile(ribbon, ndi)
 
     r_mri = ribbon.get_data()
 
@@ -109,12 +108,12 @@ def _select_graymatter(ndi, fs):
     return brain
 
 
-def from_chan_to_mrifile(img, fs, xyz):
-    return apply_affine(inv(img.affine), xyz + fs.surface_ras_shift * PARAMETERS['fs_shift']).astype(int)
+def from_chan_to_mrifile(img, xyz):
+    return apply_affine(inv(img.affine), xyz).astype(int)
 
 
-def from_mrifile_to_chan(img, fs, xyz):
-    return apply_affine(img.affine, xyz) - fs.surface_ras_shift * PARAMETERS['fs_shift']
+def from_mrifile_to_chan(img, xyz):
+    return apply_affine(img.affine, xyz)
 
 
 def upsample_mri(img_lowres):
@@ -165,8 +164,8 @@ def compute_chan(pos, KERNEL, ndi, mri):
         elif PARAMETERS['distance'] == 'inverse':
             m = power(dist_chan, -1 * KERNEL)
 
-        m /= nansum(m)  # normalize so that the sum is 1
         m = m.reshape(mri.shape)
+        m /= sum(m[isfinite(mri)])  # normalize so that the sum of the finite numbers is 1
 
         mq = m * mri
         return nansum(mq)
