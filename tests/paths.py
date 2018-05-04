@@ -29,16 +29,16 @@ task_ieeg = file_Core(
     session='day02',
     modality='ieeg',
     task='block',
-    run='00',
+    run='1',
     acquisition='clinical',
-    extension='.bin',
+    extension='.eeg',
     )
 task_fmri = file_Core(
     subject=subject,
     session='day01',
     modality='bold',
     task='block',
-    run='00',
+    run='1',
     extension='.nii.gz',
     )
 task_anat = file_Core(

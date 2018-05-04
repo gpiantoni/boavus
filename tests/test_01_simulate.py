@@ -14,7 +14,7 @@ def test_simulate_root():
 
     d = {
         "Name": "Dataset with simulated data",
-        "BIDSVersion": "1.0.2",
+        "BIDSVersion": "1.1",
         "Authors": ["Giovanni Piantoni", ],
         }
 

@@ -19,6 +19,7 @@ ieeg_file = task_ieeg.get_filename(BIDS_PATH)
 
 
 def test_ieeg_projectelectrodes():
+
     PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_projectelectrodes.json'
 
     boavus([
@@ -38,7 +39,7 @@ def test_ieeg_projectelectrodes():
 
     update_parameters(PARAMETERS_JSON, acquisition='ct', parallel=False)
 
-    if which('matlab') is not None:
+    if False and which('matlab') is not None:
 
         # requires matlab
         boavus([
@@ -62,9 +63,9 @@ def test_ieeg_projectelectrodes():
         elec_ct.acquisition = 'ctprojected'
         elec_projected_file = elec_ct.get_filename(BIDS_PATH)
 
-        # copy previous coordframe.json
-        copyfile(replace_underscore(elec_ct_file, 'coordframe.json'),
-                 replace_underscore(elec_projected_file, 'coordframe.json'))
+        # copy previous coordsystem.json
+        copyfile(replace_underscore(elec_ct_file, 'coordsystem.json'),
+                 replace_underscore(elec_projected_file, 'coordsystem.json'))
 
         # copy precomputed regions
         copyfile(SIMULATE_PATH / elec_projected_file.name, elec_projected_file)
