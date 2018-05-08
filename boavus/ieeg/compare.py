@@ -41,7 +41,6 @@ def main(analysis_dir):
             ecog_stats = compute_percent(hfa_move, hfa_rest)
         elif PARAMETERS['measure'] in ('zstat', 'dora_t'):  # identical
             ecog_stats = compute_zstat(hfa_move, hfa_rest)
-
             if PARAMETERS['measure'] == 'dora_t':
                 ecog_stats.data[0] *= -1  # opposite sign in Dora's script
 
