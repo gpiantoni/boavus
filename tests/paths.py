@@ -45,6 +45,7 @@ task_anat = file_Core(
     subject=subject,
     session='day01',
     modality='T1w',
+    acquisition='wholebrain',
     extension='.nii.gz',
     )
 elec_ct = file_Core(
