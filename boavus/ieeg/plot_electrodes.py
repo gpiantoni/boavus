@@ -35,7 +35,7 @@ def main(bids_dir, analysis_dir, freesurfer_dir, output_dir):
         elec = Electrodes(electrode_path)
         fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
 
-        labels = [x['name'] for x in elec.electrodes.tsv]
+        labels = None
         if PARAMETERS['measure']['modality'] != '':
             ecog_file = find_in_bids(
                 analysis_dir,
@@ -59,6 +59,8 @@ def main(bids_dir, analysis_dir, freesurfer_dir, output_dir):
 
 
 def plot_electrodes(elec, freesurfer, labels=None, values=None):
+    if labels is None:
+        labels = [x['name'] for x in elec.electrodes.tsv]
     xyz = array(elec.get_xyz(labels))
 
     # convert from RAS to tkRAS
@@ -70,7 +72,7 @@ def plot_electrodes(elec, freesurfer, labels=None, values=None):
     else:
         surf = freesurfer.read_brain().lh
     v = Viz3()
-    v.add_surf(surf)
     v.add_chan(chan, values=values)
+    v.add_surf(surf, alpha=0.5)
 
     return v

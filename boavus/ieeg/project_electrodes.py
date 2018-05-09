@@ -38,7 +38,6 @@ def main(bids_dir, freesurfer_dir, analysis_dir):
 
 
 def project_electrodes(elec, freesurfer, analysis_dir):
-    raise ValueError('fix coordinate system')
 
     bids_dir = find_root(elec.filename)
 

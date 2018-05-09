@@ -39,7 +39,7 @@ def test_ieeg_projectelectrodes():
 
     update_parameters(PARAMETERS_JSON, acquisition='ct', parallel=False)
 
-    if False and which('matlab') is not None:
+    if which('matlab') is not None:
 
         # requires matlab
         boavus([
