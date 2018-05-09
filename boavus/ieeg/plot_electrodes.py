@@ -45,6 +45,7 @@ def main(bids_dir, analysis_dir, freesurfer_dir, output_dir):
             lg.debug(f'Reading {PARAMETERS["measure"]["column"]} from {ecog_file}')
             ecog_tsv = read_tsv(ecog_file)
 
+            labels = [x['name'] for x in elec.electrodes.tsv]
             labels, vals = read_channels(ecog_tsv, labels, PARAMETERS['measure']['column'])
 
         else:
