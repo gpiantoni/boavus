@@ -79,6 +79,10 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir, n_cpu
     fmri_vals_list = compute_kernels(kernels, chan_xyz, mri, ndi, n_cpu)
     fmri_vals = array(fmri_vals_list).reshape(-1, len(kernels))
 
+    # TODO: it might be better to create a separate folder
+    for old_tsv in measure_nii.parent.glob(replace_underscore(measure_nii.name, '*.tsv')):
+            old_tsv.unlink()
+
     fmri_vals_tsv = replace_underscore(measure_nii, PARAMETERS['distance'] + 'elec.tsv')
     lg.debug(f'Saving {fmri_vals_tsv}')
 
