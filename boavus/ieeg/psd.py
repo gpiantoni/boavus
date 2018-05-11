@@ -1,16 +1,18 @@
 from pickle import load, dump
-from wonambi.trans import select, math, timefrequency, concatenate
 from logging import getLogger
 from multiprocessing import Pool
-from numpy import mean, array, log10
-import plotly.graph_objs as go
+from numpy import empty
+from scipy.signal import welch
 
+from wonambi.trans import timefrequency
+from wonambi.datatype import ChanFreq
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 
 lg = getLogger(__name__)
 
 PARAMETERS = {
+    'method': 'spectrogram',
     'duration': 1,
     'taper': 'dpss',
     'halfbandwidth': 2,
@@ -37,7 +39,10 @@ def save_frequency(ieeg_file, cond):
     with ieeg_file.open('rb') as f:
         dat = load(f)
 
-    freq = compute_frequency(dat)
+    if PARAMETERS['method'] == 'spectrogram':
+        freq = compute_frequency(dat)
+    elif PARAMETERS['method'] == 'dh2012':
+        freq = compute_welch_dh2012(dat)
 
     output_file = replace_underscore(ieeg_file, 'freq' + cond + '.pkl')
     with output_file.open('wb') as f:
@@ -57,3 +62,23 @@ def compute_frequency(dat):
         )
 
     return dat
+
+
+def compute_welch_dh2012(data):
+    NPERSEG = 102
+    NFFT = 512
+
+    freq = ChanFreq()
+    freq.s_freq = data.s_freq
+    freq.start_time = data.start_time
+    freq.axis['chan'] = data.axis['chan']
+    freq.axis['freq'] = empty(data.number_of('trial'), dtype='O')
+    freq.data = empty(data.number_of('trial'), dtype='O')
+
+    for i, x in enumerate(data.data):
+        [f, Pxx] = welch(x, window='hamming', fs=data.s_freq, nperseg=NPERSEG,
+                         nfft=NFFT, noverlap=0, detrend=False)
+        freq.freq[i] = f
+        freq.data[i] = Pxx
+
+    return freq
