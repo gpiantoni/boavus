@@ -1,12 +1,15 @@
 from logging import getLogger
 from pathlib import Path
-from subprocess import run, DEVNULL
+from subprocess import run, PIPE
 from tempfile import TemporaryDirectory
 
 from nibabel import Nifti1Image
 from nibabel import load as niload
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.morphology import binary_closing
+
+from ..utils import check_subprocess
+
 
 PARAMETERS = {
     'gaussian_filter': 1,
@@ -27,29 +30,32 @@ def fill_surface(surf_in, surf_smooth):
         vol_filled = tmpdir / 'filled.nii.gz'
         surf_filled = tmpdir / 'filled.surf'
 
-        run([
+        p = run([
             'mris_fill',
             '-c', '-r', '1',
             str(surf_in),
             str(vol_file),
-            ], stdout=DEVNULL, stderr=DEVNULL)
+            ], stdout=PIPE, stderr=PIPE)
+        check_subprocess(p, lg)
 
         _close_volume(vol_file, vol_filled)
 
-        run([
+        p = run([
             'mri_tessellate',
             str(vol_filled),
             '1',
             str(surf_filled),
-            ], stdout=DEVNULL, stderr=DEVNULL)
+            ], stdout=PIPE, stderr=PIPE)
+        check_subprocess(p, lg)
 
-        run([
+        p = run([
             'mris_smooth',
             '-nw',
             '-n', str(PARAMETERS['smooth_iteration']),
             str(surf_filled),
             str(surf_smooth)
-            ], stdout=DEVNULL, stderr=DEVNULL)
+            ], stdout=PIPE, stderr=PIPE)
+        check_subprocess(p, lg)
 
 
 def _close_volume(vol_file, filled):

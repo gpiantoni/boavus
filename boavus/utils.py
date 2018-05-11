@@ -8,3 +8,8 @@ ENVIRON = {
     'PATH': _remove_python3_from_PATH(environ.get('PATH', '')),
     }
 ENVIRON = {**environ, **ENVIRON}
+
+
+def check_subprocess(p, lg):
+    if p.returncode:
+        raise RuntimeError(f'Command \'{" ".join(p.args)}\' failed:\n---stdout---\n{p.stdout.decode()}------------\n---stderr---\n{p.stderr.decode()}------------')
