@@ -47,6 +47,8 @@ before_install:
     --exclude='freesurfer/diffusion' 
     freesurfer ;
   - echo -e FREESURFER_LICENSE > $LIB/freesurfer/license.txt
+  - ls -l $LIB/freesurfer
+  - md5sum $LIB/freesurfer/license.txt
   - export FREESURFER_HOME=$LIB/freesurfer
   - source $FREESURFER_HOME/SetUpFreeSurfer.sh
   - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
