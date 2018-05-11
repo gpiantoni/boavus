@@ -10,6 +10,6 @@ ENVIRON = {
 ENVIRON = {**environ, **ENVIRON}
 
 
-def check_subprocess(p, lg):
+def check_subprocess(p):
     if p.returncode:
         raise RuntimeError(f'Command \'{" ".join(p.args)}\' failed:\n---stdout---\n{p.stdout.decode()}------------\n---stderr---\n{p.stderr.decode()}------------')

@@ -23,7 +23,7 @@ lg = getLogger(__name__)
 def fill_surface(surf_in, surf_smooth):
 
     with TemporaryDirectory() as tmpdir:
-        print(tmpdir)
+        lg.debug(f'Temporary Directory for fill_surface: {tmpdir}')
         tmpdir = Path(tmpdir)
 
         vol_file = tmpdir / 'vol.mgz'
@@ -36,7 +36,7 @@ def fill_surface(surf_in, surf_smooth):
             str(surf_in),
             str(vol_file),
             ], stdout=PIPE, stderr=PIPE)
-        check_subprocess(p, lg)
+        check_subprocess(p)
 
         _close_volume(vol_file, vol_filled)
 
@@ -46,7 +46,7 @@ def fill_surface(surf_in, surf_smooth):
             '1',
             str(surf_filled),
             ], stdout=PIPE, stderr=PIPE)
-        check_subprocess(p, lg)
+        check_subprocess(p)
 
         p = run([
             'mris_smooth',
@@ -55,7 +55,7 @@ def fill_surface(surf_in, surf_smooth):
             str(surf_filled),
             str(surf_smooth)
             ], stdout=PIPE, stderr=PIPE)
-        check_subprocess(p, lg)
+        check_subprocess(p)
 
 
 def _close_volume(vol_file, filled):
