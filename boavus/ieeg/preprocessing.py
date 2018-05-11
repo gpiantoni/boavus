@@ -1,5 +1,5 @@
 from pickle import dump
-from wonambi.trans import select, montage, math
+from wonambi.trans import select, montage, math, filter_
 from logging import getLogger
 from numpy import mean, std
 from wonambi import Dataset
@@ -74,12 +74,13 @@ def preprocess_ecog(filename):
     elec_names = [x['name'] for x in electrodes.electrodes.tsv]
     elec_names = [x for x in elec_names if x in d.header['chan_name']]  # exclude elec location that have no corresponding channel
     data = d.read_data(chan=elec_names, begsam=rest_times[0][0], endsam=rest_times[1][-1])
+    data = filter_(data, ftype='notch')
 
     clean_labels = reject_channels(data)
     lg.debug(f'Clean channels {len(clean_labels)} / {len(elec_names)}')
 
     data = d.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
-    # TODO: notch filter
+    data = filter_(data, ftype='notch')
 
     dat_move = run_montage(d, move_times, clean_labels)
     dat_rest = run_montage(d, rest_times, clean_labels)
