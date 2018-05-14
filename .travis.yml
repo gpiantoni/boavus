@@ -48,7 +48,6 @@ before_install:
     freesurfer ;
   - echo -e $FREESURFER_LICENSE > $LIB/freesurfer/license.txt
   - ls -l $LIB/freesurfer
-  - md5sum $LIB/freesurfer/license.txt
   - export FREESURFER_HOME=$LIB/freesurfer
   - source $FREESURFER_HOME/SetUpFreeSurfer.sh
   - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
@@ -68,8 +67,7 @@ install:
   # install requirements
   - pip install numpy scipy
   - pip install pyqt5==5.9.2  # opengl doesn't work with 5.10
-  - pip install nibabel vispy
-  - pip install -e git+https://github.com/wonambi-python/wonambi.git@bids#egg=wonambi
+  - pip install nibabel vispy wonambi
   - pip install -e git+https://github.com/gpiantoni/bidso.git#egg=bidso  # this should be in pypi
   - pip install plotly
   - pip install -e git+https://github.com/gpiantoni/exportimages.git#egg=exportimages  # this should be in pypi
