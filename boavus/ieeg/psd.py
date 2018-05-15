@@ -1,11 +1,11 @@
 from pickle import load, dump
 from logging import getLogger
 from multiprocessing import Pool
-from numpy import empty
+from numpy import empty, array
 from scipy.signal import welch
 
 from wonambi.trans import timefrequency
-from wonambi.datatype import ChanFreq
+from wonambi.datatype import ChanTimeFreq
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 
@@ -68,17 +68,19 @@ def compute_welch_dh2012(data):
     NPERSEG = 102
     NFFT = 512
 
-    freq = ChanFreq()
+    freq = ChanTimeFreq()
     freq.s_freq = data.s_freq
     freq.start_time = data.start_time
     freq.axis['chan'] = data.axis['chan']
     freq.axis['freq'] = empty(data.number_of('trial'), dtype='O')
+    freq.axis['time'] = empty(data.number_of('trial'), dtype='O')
     freq.data = empty(data.number_of('trial'), dtype='O')
 
     for i, x in enumerate(data.data):
         [f, Pxx] = welch(x, window='hamming', fs=data.s_freq, nperseg=NPERSEG,
                          nfft=NFFT, noverlap=0, detrend=False)
         freq.freq[i] = f
-        freq.data[i] = Pxx
+        freq.time[i] = array([i, ], dtype='float')
+        freq.data[i] = Pxx[:, None, :]
 
     return freq
