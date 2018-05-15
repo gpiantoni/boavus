@@ -100,9 +100,10 @@ def compute_rsquared(ecog_tsv, fmri_tsv, KERNEL):
         fmri_vals.append(one_val)
 
     ecog_val = array([float(x['measure']) for x in ecog_tsv])
+    p_val = array([float(x['pvalue']) for x in ecog_tsv])
     x = ecog_val
     y = array(fmri_vals)
-    mask = ~isnan(x) & ~isnan(y)
+    mask = ~isnan(x) & ~isnan(y) & (p_val <= 0.05)
 
     lr = linregress(x[mask], y[mask])
     return lr.rvalue ** 2
