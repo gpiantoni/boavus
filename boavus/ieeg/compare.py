@@ -16,8 +16,8 @@ PARAMETERS = {
         95 + 1,  # 95 Hz included
         ],
     'baseline': True,
-    'method': '3b',
-    'measure': 'percent',
+    'method': 'dora',
+    'measure': 'dora_r2',
     }
 
 
@@ -44,12 +44,12 @@ def main(analysis_dir):
             if PARAMETERS['measure'] == 'dora_t':
                 ecog_stats.data[0] *= -1  # opposite sign in Dora's script
 
-        elif PARAMETERS['measure'] in ('dora_r2', 'dora_pv'):
+        elif PARAMETERS['measure'] == 'dora_r2':
             ecog_stats = calc_dora_values(hfa_move, hfa_rest, PARAMETERS['measure'])
 
         # need to check pvalues
-        if False:  # hfa_move.data[0].shape[1] > 1:
-            pvalues = ttest_ind(hfa_move(trial=0), hfa_rest(trial=0), axis=1).pvalue
+        if True:
+            pvalues = calc_dora_values(hfa_move, hfa_rest, 'dora_pv')
         else:
             pvalues = [NaN, ] * ecog_stats.number_of('chan')[0]
 
@@ -57,7 +57,7 @@ def main(analysis_dir):
         with percent_file.open('w') as f:
             f.write('channel\tmeasure\tpvalue\n')
             for i, chan in enumerate(ecog_stats.chan[0]):
-                f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\t{pvalues[i]}\n')
+                f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\t{pvalues(trial=0, chan=chan)}\n')
 
 
 def merge(freq):
