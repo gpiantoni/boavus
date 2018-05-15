@@ -1,8 +1,9 @@
 from pickle import dump
 from wonambi.trans import select, montage, math, filter_
 from logging import getLogger
-from numpy import mean, std
+from numpy import mean, std, empty
 from wonambi import Dataset
+from wonambi.trans.select import _create_subepochs
 
 from bidso import Task, Electrodes
 from bidso.find import find_in_bids, find_root
@@ -92,6 +93,9 @@ def preprocess_ecog(filename):
     dat_move = select(dat_move, chan=clean_roi_labels)
     dat_rest = select(dat_rest, chan=clean_roi_labels)
 
+    dat_move = make_segments(dat_move)
+    dat_rest = make_segments(dat_rest)
+
     return dat_move, dat_rest
 
 
@@ -117,3 +121,23 @@ def read_markers(d, marker_on, marker_off, minimalduration):
     rest_start = [mrk['start'] for mrk in markers if mrk['name'] == marker_off if (mrk['end'] - mrk['start']) > minimalduration]
     rest_end = [mrk['end'] for mrk in markers if mrk['name'] == marker_off if (mrk['end'] - mrk['start']) > minimalduration]
     return (move_start, move_end), (rest_start, rest_end)
+
+
+def make_segments(dat):
+    trials = []
+    for d in dat.data:
+        v = _create_subepochs(d, 1023, 1023)
+        for i in range(v.shape[1]):
+            trials.append(v[:, i, :])
+
+    out = dat._copy(axis=False)
+    out.data = empty(len(trials), dtype='O')
+    out.axis['chan'] = empty(len(trials), dtype='O')
+    out.axis['time'] = empty(len(trials), dtype='O')
+
+    for i, trial in enumerate(trials):
+        out.data[i] = trial
+        out.axis['time'][i] = dat.axis['time'][0]
+        out.axis['chan'][i] = dat.axis['chan'][0]
+
+    return dat
