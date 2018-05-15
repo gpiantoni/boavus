@@ -140,4 +140,4 @@ def make_segments(dat):
         out.axis['time'][i] = dat.axis['time'][0]
         out.axis['chan'][i] = dat.axis['chan'][0]
 
-    return dat
+    return out
