@@ -13,23 +13,6 @@ from ..bidso import find_labels_in_regions
 
 lg = getLogger(__name__)
 
-PARAMETERS = {
-    'electrodes': {
-        'acquisition': '*regions',
-        },
-    'markers': {
-        'on': '49',
-        'off': '48',
-        'minimalduration': 20,
-        },
-    'regions': [],
-    'reject': {
-        'chan': {
-            'threshold_std': 3,
-            },
-        },
-    }
-
 
 def main(bids_dir, analysis_dir=None,
          acquisition='*regions', markers_on='49', markers_off='48',
@@ -59,7 +42,8 @@ def main(bids_dir, analysis_dir=None,
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.eeg', generator=True):
         lg.debug(f'reading {ieeg_file}')
         try:
-            dat_move, dat_rest = preprocess_ecog(ieeg_file)
+            dat_move, dat_rest = preprocess_ecog(ieeg_file, acquisition,
+                markers_on, markers_off, minimalduration, regions, reject_chan_thresh)
         except FileNotFoundError as err:
             lg.warning(f'Skipping {ieeg_file.stem}: {err}')
             continue
@@ -73,22 +57,23 @@ def main(bids_dir, analysis_dir=None,
             dump(dat_rest, f)
 
 
-def preprocess_ecog(filename):
+def preprocess_ecog(filename, acquisition, markers_on, markers_off,
+                    minimalduration, regions, reject_chan_thresh):
     d = Dataset(filename, bids=True)
     s_freq = d.header['s_freq']
 
     # this might be in bids or in wonambi
     bids_root = find_root(d.filename)
     electrode_file = find_in_bids(bids_root, subject=d.dataset.task.subject,
-                                  acquisition=PARAMETERS['electrodes']['acquisition'],
+                                  acquisition=acquisition,
                                   modality='electrodes', extension='.tsv')
     electrodes = Electrodes(electrode_file)
 
     move_times, rest_times = read_markers(
         d,
-        marker_on=PARAMETERS['markers']['on'],
-        marker_off=PARAMETERS['markers']['off'],
-        minimalduration=PARAMETERS['markers']['minimalduration'],
+        marker_on=markers_on,
+        marker_off=markers_off,
+        minimalduration=minimalduration,
         )
     # convert to s_freq
     rest_times = [[int(x0 * s_freq) for x0 in x1] for x1 in rest_times]
@@ -100,7 +85,7 @@ def preprocess_ecog(filename):
     data = d.read_data(chan=elec_names, begsam=rest_times[0][0], endsam=rest_times[1][-1])
     data = filter_(data, ftype='notch')
 
-    clean_labels = reject_channels(data)
+    clean_labels = reject_channels(data, reject_chan_thresh)
     lg.debug(f'Clean channels {len(clean_labels)} / {len(elec_names)}')
 
     data = d.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
@@ -109,7 +94,7 @@ def preprocess_ecog(filename):
     dat_move = run_montage(d, move_times, clean_labels)
     dat_rest = run_montage(d, rest_times, clean_labels)
 
-    labels_in_roi = find_labels_in_regions(electrodes, PARAMETERS['regions'])
+    labels_in_roi = find_labels_in_regions(electrodes, regions)
 
     clean_roi_labels = [label for label in clean_labels if label in labels_in_roi]
 
@@ -122,9 +107,9 @@ def preprocess_ecog(filename):
     return dat_move, dat_rest
 
 
-def reject_channels(dat):
+def reject_channels(dat, reject_chan_thresh):
     dat_std = math(dat, operator_name='std', axis='time')
-    THRESHOLD = PARAMETERS['reject']['chan']['threshold_std']
+    THRESHOLD = reject_chan_thresh
     x = dat_std.data[0]
     thres = [mean(x) + THRESHOLD * std(x)]
     clean_labels = list(dat_std.chan[0][dat_std.data[0] < thres])

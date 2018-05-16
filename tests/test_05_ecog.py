@@ -4,68 +4,26 @@ from .paths import BIDS_PATH, PARAMETERS_PATH, ANALYSIS_PATH, FREESURFER_PATH, B
 from .utils import update_parameters
 
 
-PARAMETERS = {
-    'markers': {
-        'on': 'move',
-        'off': 'rest',
-        'minimalduration': 20
-        },
-    'regions': [
-        'ctx-lh-supramarginal',
-        'ctx-rh-superiorfrontal',
-        ],
-    }
-
-
 def test_ieeg_preprocessing():
 
-    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_preprocessing.json'
-
     boavus([
         'ieeg',
         'preprocessing',
-        '--bids_dir',
-        str(BIDS_PATH),
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '--parameters',
-        str(PARAMETERS_JSON),
+        '--bids_dir', str(BIDS_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--markers_on', 'move',
+        '--markers_off', 'rest',
         ])
 
-    update_parameters(PARAMETERS_JSON, **PARAMETERS)
-
-    boavus([
-        'ieeg',
-        'preprocessing',
-        '--bids_dir',
-        str(BIDS_PATH),
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '--parameters',
-        str(PARAMETERS_JSON),
-        ])
 
 def test_ieeg_psd():
-    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_psd.json'
 
     boavus([
         'ieeg',
         'psd',
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '--parameters',
-        str(PARAMETERS_JSON),
-        ])
-
-    update_parameters(PARAMETERS_JSON, parallel=False)
-
-    boavus([
-        'ieeg',
-        'psd',
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '--parameters',
-        str(PARAMETERS_JSON),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
         ])
 
 
@@ -74,12 +32,12 @@ def test_ieeg_compare_percent():
     boavus([
         'ieeg',
         'compare',
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
         ])
 
 
-def test_ieeg_plotelectrodes_measure(qtbot):
+def notest_ieeg_plotelectrodes_measure(qtbot):
     # follows up on test_04_electrodes.py/test_ieeg_plotelectrodes
 
     PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_plotelectrodes.json'
@@ -102,8 +60,5 @@ def test_ieeg_plotelectrodes_measure(qtbot):
         str(BIDS_PATH),
         '--analysis_dir',
         str(ANALYSIS_PATH),
-        '-p',
-        str(PARAMETERS_JSON),
-        '--log',
-        'debug',
+        '--log', 'debug',
         ])
