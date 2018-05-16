@@ -14,6 +14,13 @@ from warnings import filterwarnings
 filterwarnings('ignore', category=FutureWarning)
 lg = getLogger('boavus')
 
+FOLDERS_DOC = {
+    'bids_dir': 'The directory with the raw data organized in the BIDS format',
+    'freesurfer_dir': 'The directory with Freesurfer',
+    'analysis_dir': 'The directory with preprocessed / analyzed data for each subject',
+    'output_dir': 'The directory with custom output',
+    }
+
 
 def __main__():
     import boavus
@@ -59,13 +66,6 @@ def add_to_parser(function, main_f):
 
     sign = signature(main_f)
 
-    FOLDERS_DOC = {
-        'bids_dir': 'The directory with the raw data organized in the BIDS format',
-        'freesurfer_dir': 'The directory with Freesurfer',
-        'analysis_dir': 'The directory with preprocessed / analyzed data for each subject',
-        'output_dir': 'The directory with custom output',
-        }
-
     folders_arg = function.add_argument_group('folders arguments')
     optionals_arg = function.add_argument_group('optional arguments')
 
@@ -74,17 +74,27 @@ def add_to_parser(function, main_f):
             one_arg = folders_arg
             help_str = FOLDERS_DOC[name]
             metavar = name.upper()
+            action = None
+            const = None
+
+        elif args[name][0] == 'bool':
+            one_arg = optionals_arg
+            help_str = args[name][1]
+            metavar = None
+            action = 'store_const'
+            const = not param.default
 
         else:
             one_arg = optionals_arg
             help_str = args[name][1]
             metavar = f'"{param.default}"'
+            action = None
+            const = None
 
         if param.default == param.empty:
             required = True
         else:
             required = False
-
         if not required and args[name][0] == 'path':
             help_str = '(optional) ' + help_str
 
@@ -93,6 +103,8 @@ def add_to_parser(function, main_f):
             required=required,
             help=help_str,
             metavar=metavar,
+            action=action,
+            const=const,
             default=param.default,
             )
 
@@ -135,7 +147,8 @@ def boavus(arguments=None):
     """
     # this only works if all the arguments are paths
     for k, v in args.items():
-        args[k] = _path(v)
+        if k.endswith('_dir'):
+            args[k] = _path(v)
 
     """
     Call the actual main function of the specified .py file
