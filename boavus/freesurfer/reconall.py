@@ -10,6 +10,16 @@ PARAMETERS = {}
 
 
 def main(bids_dir, freesurfer_dir):
+    """
+    run freesurfer recon-all
+
+    Parameters
+    ----------
+    bids_dir : path
+
+    freesurfer_dir : path
+
+    """
 
     for mri_path in find_in_bids(bids_dir, generator=True, modality='T1w', extension='.nii.gz'):
         task = file_Core(mri_path)

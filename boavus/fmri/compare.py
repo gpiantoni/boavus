@@ -19,6 +19,14 @@ PARAMETERS = {
 
 
 def main(analysis_dir):
+    """
+    compute percent change of the BOLD signal
+
+    Parameters
+    ----------
+    analysis_dir : path
+
+    """
 
     for feat_path in find_in_bids(analysis_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')

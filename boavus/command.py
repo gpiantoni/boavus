@@ -1,174 +1,105 @@
 """Complex but elegant approach to passing arguments and parameters.
 
-Make sure that the functions are organized in module/function.py. Each .py
-file needs a PARAMETERS dict and a main() function. The input of the main()
-function should also be specified in the args dictionary below.
+Make sure that the functions are organized in module/function.py.
 """
+
+from inspect import signature, getdoc
+from collections import defaultdict
 from argparse import ArgumentParser, RawTextHelpFormatter
-from json import load, dump
 from importlib import import_module
 from logging import getLogger, StreamHandler, Formatter, INFO, DEBUG
 from pathlib import Path
-from pprint import pformat
 from warnings import filterwarnings
 
 filterwarnings('ignore', category=FutureWarning)
 lg = getLogger('boavus')
 
 
-args = dict(
-    freesurfer=dict(
-        help='freesurfer functions',
-        reconall=dict(
-            help='run freesurfer recon-all',
-            arguments=[
-                ('bids_dir', True, None),
-                ('freesurfer_dir', True, None),
-                ],
-            ),
-        ),
-    fsl=dict(
-        help='fsl functions',
-        feat=dict(
-            help='run FEAT using the events.tsv information',
-            arguments=[
-                ('bids_dir', True, None),
-                ('analysis_dir', True, None),
-                ],
-            ),
-        coreg=dict(
-            help='coreg feat with freesurfer',
-            arguments=[
-                ('analysis_dir', True, None),
-                ('freesurfer_dir', True, None),
-                ],
-            ),
-        feat_on_surf=dict(
-            help='map feat values on freesurfer surface',
-            arguments=[
-                ('analysis_dir', True, None),
-                ('freesurfer_dir', True, None),
-                ('output_dir', True, None),
-                ],
-            ),
-        ),
-    fmri=dict(
-        help='fmri functions',
-        compare=dict(
-            help='compute percent change of the BOLD signal',
-            arguments=[
-                ('analysis_dir', True, None),
-                ]
-            ),
-        at_electrodes=dict(
-            help='Calculate the (weighted) average of fMRI values at electrode locations',
-            arguments=[
-                ('bids_dir', True, None),
-                ('analysis_dir', True, None),
-                ('freesurfer_dir', False, 'only necessary if you include gray matter'),
-                ]
-            ),
-        ),
-    ieeg=dict(
-        help='ieeg functions',
-        project_electrodes=dict(
-            help='project electrodes to brain surface',
-            arguments=[
-                ('bids_dir', True, None),
-                ('freesurfer_dir', True, None),
-                ('analysis_dir', True, None),
-                ]
-            ),
-        assign_regions=dict(
-            help='assign electrodes to brain regions',
-            arguments=[
-                ('bids_dir', True, None),
-                ('freesurfer_dir', True, None),
-                ]
-            ),
-        plot_electrodes=dict(
-            help='plot electrodes onto the brain surface',
-            arguments=[
-                ('bids_dir', True, None),
-                ('freesurfer_dir', True, None),
-                ('analysis_dir', False, 'only necessary if PARAMETERS["measure"] is used'),
-                ('output_dir', True, None),
-                ]
-            ),
-        preprocessing=dict(
-            help='read in the data for move and rest',
-            arguments=[
-                ('bids_dir', True, None),
-                ('analysis_dir', True, None),
-                ]
-            ),
-        psd=dict(
-            help='compute psd for two conditions',
-            arguments=[
-                ('analysis_dir', True, None),
-                ]
-            ),
-        compare=dict(
-            help='compare the two conditions in percent change or zstat',
-            arguments=[
-                ('analysis_dir', True, None),
-                ]
-            ),
-        corrfmri=dict(
-            help='compare fMRI values at electrode locations to ECoG values',
-            arguments=[
-                ('bids_dir', True, None),
-                ('analysis_dir', True, None),
-                ('output_dir', True, None),
-                ]
-            ),
-        )
-    )
+def __main__():
+    import boavus
+    all_mod = defaultdict(dict)
+    for one in sorted(Path(boavus.__path__[0]).rglob('*.py')):
+        mod = import_module(str(one.relative_to('/home/giovanni/tools/boavus/')).replace('/', '.')[:-3])
+        if hasattr(mod, 'main'):
+            mod_name = one.stem
+            grp_name = one.parent.stem
+            all_mod[grp_name][mod_name] = mod.main
 
+    parser = ArgumentParser(description='Tools to analyze data structured as BIDS in Python', formatter_class=RawTextHelpFormatter)
+    list_modules = parser.add_subparsers(title='Modules', help='Modules containing the functions')
 
-parser = ArgumentParser(description='Tools to analyze data structured as BIDS in Python', formatter_class=RawTextHelpFormatter)
-list_modules = parser.add_subparsers(title='Modules', help='Modules containing the functions')
+    for m_k, m_v in all_mod.items():
+        module = list_modules.add_parser(m_k)
+        module.set_defaults(module=m_k)
+        list_functions = module.add_subparsers(title=f'Functions in {m_k} module')
 
-for m_k, m_v in args.items():
-    module = list_modules.add_parser(m_k, help=m_v.pop('help'))
-    module.set_defaults(module=m_k)
-    list_functions = module.add_subparsers(title=f'Functions in {m_k} module')
+        for f_k, f_v in m_v.items():
+            function = list_functions.add_parser(f_k,
+                                                 formatter_class=RawTextHelpFormatter)
+            function.set_defaults(function=f_k)
+            function.add_argument('-l', '--log', default='info',
+                                  help='Logging level: info (default), debug')
 
-    for f_k, f_v in m_v.items():
-        function = list_functions.add_parser(f_k,
-                                             help=f_v['help'],  # when in module help
-                                             description=f_v['help'],  # when in the function help
-                                             formatter_class=RawTextHelpFormatter)
-        function.set_defaults(function=f_k)
-        function.add_argument('-l', '--log', default='info',
-                              help='Logging level: info (default), debug')
-        function.add_argument('-p', '--parameters',
-                              help='json file containing the parameters. If it does not exist, it simply generates a json file with the default values and exits. If it exists, it runs the function with those parameters.')
+            add_to_parser(function, f_v)
 
-        folders_arg = function.add_argument_group('folders arguments')
-        FOLDERS_DOC = {
-            'bids_dir': 'The directory with the raw data organized in the BIDS format',
-            'freesurfer_dir': 'The directory with Freesurfer',
-            'analysis_dir': 'The directory with preprocessed / analyzed data for each subject',
-            'output_dir': 'The directory with custom output',
-            }
+    return parser
 
-        for directory, required, doc in f_v['arguments']:
+def add_to_parser(function, main_f):
+    doc = getdoc(main_f)
+    args = {}
+    maindoc, docargs = doc.split('\nParameters\n----------\n')
+    docargs = docargs.split('\n')
+    for i in range(0, len(docargs), 2):
+        a_name, a_type = docargs[i].split(':')
+        if i < len(docargs) - 1:
+            comment = docargs[i + 1].strip()
+        else:
+            comment = ''
+        args[a_name.strip()] = (a_type.strip(), comment)
 
-            help_str = FOLDERS_DOC[directory]
-            if not required:
-                help_str = '(optional) ' + help_str
-            if doc is not None:
-                help_str += ' (' + doc + ')'
+    sign = signature(main_f)
 
-            folders_arg.add_argument(
-                '--' + directory,
-                required=required,
-                help=help_str,
-                )
+    FOLDERS_DOC = {
+        'bids_dir': 'The directory with the raw data organized in the BIDS format',
+        'freesurfer_dir': 'The directory with Freesurfer',
+        'analysis_dir': 'The directory with preprocessed / analyzed data for each subject',
+        'output_dir': 'The directory with custom output',
+        }
+
+    folders_arg = function.add_argument_group('folders arguments')
+    optionals_arg = function.add_argument_group('optional arguments')
+
+    for name, param in sign.parameters.items():
+        if args[name][0] == 'path':
+            one_arg = folders_arg
+            help_str = FOLDERS_DOC[name]
+            metavar = name.upper()
+
+        else:
+            one_arg = optionals_arg
+            help_str = args[name][1]
+            metavar = f'"{param.default}"'
+
+        if param.default == param.empty:
+            required = True
+        else:
+            required = False
+
+        if not required and args[name][0] == 'path':
+            help_str = '(optional) ' + help_str
+
+        one_arg.add_argument(
+            '--' + param.name,
+            required=required,
+            help=help_str,
+            metavar=metavar,
+            default=param.default,
+            )
 
 
 def boavus(arguments=None):
+
+    parser = __main__()
 
     # treat arguments as dict so we can remove keys as we go
     args = vars(parser.parse_args(arguments))
@@ -198,31 +129,6 @@ def boavus(arguments=None):
     called in general.
     """
     module = import_module('boavus.' + args.pop('module') + '.' + args.pop('function'))
-
-    """
-    We also modify the parameters. If the user passes a json file that doesn't
-    exist, the program simply writes down the PARAMETERS for the specific .py
-    file and exits. If it does exist, then we load the parameters.
-    """
-    parameters_json = args.pop('parameters')
-
-    if parameters_json is not None:
-        parameters_json = _path(parameters_json)
-
-        if parameters_json.exists():
-            with parameters_json.open() as f:
-                module.PARAMETERS.update(load(f))
-
-            lg.debug(pformat(module.PARAMETERS))
-
-        else:
-            with parameters_json.open('w') as f:
-                dump(module.PARAMETERS, f, indent='  ')
-                lg.debug(f'Default parameters for {module.__name__} written to {str(parameters_json)}\n'
-                         'Modify the .json file and run again:\n'
-                         f'"{module.__name__.replace(".", " ")}" with the previous arguments (including "-p {str(parameters_json)}")')
-
-                return
 
     """
     Use the leftover arguments only

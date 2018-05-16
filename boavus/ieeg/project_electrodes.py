@@ -22,6 +22,18 @@ PARAMETERS = {
 
 
 def main(bids_dir, freesurfer_dir, analysis_dir):
+    """
+    Project electrodes
+
+    Parameters
+    ----------
+    bids_dir : path
+
+    freesurfer_dir : path
+
+    analysis_dir : path
+
+    """
     args = []
     for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'):
         elec = Electrodes(electrode_path)

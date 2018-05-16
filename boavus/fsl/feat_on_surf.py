@@ -25,6 +25,18 @@ SURF_DIR = 'feat_surf'
 
 
 def main(analysis_dir, freesurfer_dir, output_dir):
+    """
+    map feat values on freesurfer surface',
+
+    Parameters
+    ----------
+    analysis_dir : path
+
+    freesurfer_dir : path
+
+    output_dir : path
+
+    """
 
     p_all = []
     surfs = []

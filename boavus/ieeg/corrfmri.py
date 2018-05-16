@@ -27,7 +27,18 @@ PARAMETERS = {
 
 
 def main(bids_dir, analysis_dir, output_dir):
+    """
+            help='compare fMRI values at electrode locations to ECoG values',
 
+    Parameters
+    ----------
+    bids_dir : path
+
+    analysis_dir : path
+
+    output_dir : path
+
+    """
     results_dir = output_dir / ZSTAT_DIR
     rmtree(results_dir, ignore_errors=True)
     results_dir.mkdir(exist_ok=True, parents=True)

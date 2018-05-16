@@ -31,8 +31,31 @@ PARAMETERS = {
     }
 
 
-def main(bids_dir, analysis_dir):
+def main(bids_dir, analysis_dir=None,
+         acquisition='*regions', markers_on='49', markers_off='48',
+         minimalduration=20, regions=[], reject_chan_thresh=3):
+    """
+    read in the data for move and rest
 
+    Parameters
+    ----------
+    bids_dir : path
+
+    analysis_dir : path
+
+    acquisition : str
+        type of electrodes
+    markers_on : str
+        marker start
+    markers_off : str
+        marker end
+    minimalduration : float
+        minimal duration of each block
+    regions : list
+        list of regions
+    reject_chan_thresh : float
+        threshold std to reject channels
+    """
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.eeg', generator=True):
         lg.debug(f'reading {ieeg_file}')
         try:

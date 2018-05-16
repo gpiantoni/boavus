@@ -31,7 +31,19 @@ PARAMETERS = {
     }
 
 
-def main(bids_dir, freesurfer_dir, analysis_dir):
+def main(bids_dir, freesurfer_dir, analysis_dir=None):
+    """
+    Calculate the (weighted) average of fMRI values at electrode locations
+
+    Parameters
+    ----------
+    bids_dir : path
+
+    freesurfer_dir : path
+
+    analysis_dir : path
+        only necessary if you include gray matter
+    """
     n_processes = len(list(find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True)))
 
     processes = []

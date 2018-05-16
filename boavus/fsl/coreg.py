@@ -11,6 +11,16 @@ PARAMETERS = {}
 
 
 def main(analysis_dir, freesurfer_dir):
+    """
+    coreg feat with freesurfer
+
+    Parameters
+    ----------
+    analysis_dir : path
+
+    freesurfer_dir : path
+
+    """
 
     for feat_path in find_in_bids(analysis_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')

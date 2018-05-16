@@ -22,6 +22,14 @@ PARAMETERS = {
 
 
 def main(analysis_dir):
+    """
+            help='compare the two conditions in percent change or zstat',
+
+    Parameters
+    ----------
+    analysis_dir : path
+
+    """
     for move_file in find_in_bids(analysis_dir, modality='freqmove', extension='.pkl', generator=True):
         with move_file.open('rb') as f:
             dat_move = load(f)

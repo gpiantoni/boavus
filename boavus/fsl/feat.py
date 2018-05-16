@@ -23,6 +23,16 @@ DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fs
 
 
 def main(bids_dir, analysis_dir):
+    """
+    run FEAT using the events.tsv information
+
+    Parameters
+    ----------
+    bids_dir : path
+
+    analysis_dir : path
+
+    """
 
     analysis_dir.mkdir(exist_ok=True)
 

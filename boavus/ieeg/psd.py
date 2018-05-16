@@ -21,7 +21,14 @@ PARAMETERS = {
 
 
 def main(analysis_dir):
+    """
+            help='compute psd for two conditions',
 
+    Parameters
+    ----------
+    analysis_dir : path
+
+    """
     args = []
     for cond in ('move', 'rest'):
         for ieeg_file in find_in_bids(analysis_dir, modality=cond, extension='.pkl', generator=True):

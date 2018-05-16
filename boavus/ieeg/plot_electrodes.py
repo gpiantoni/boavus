@@ -25,7 +25,20 @@ PARAMETERS = {
 
 
 def main(bids_dir, analysis_dir, freesurfer_dir, output_dir):
+    """
+            help='plot electrodes onto the brain surface',
 
+    Parameters
+    ----------
+    bids_dir : path
+
+    analysis_dir : path
+
+    freesurfer_dir : path
+
+    output_dir : path
+
+    """
     img_dir = output_dir / ELECSURF_DIR
     rmtree(img_dir, ignore_errors=True)
     img_dir.mkdir(exist_ok=True, parents=True)
