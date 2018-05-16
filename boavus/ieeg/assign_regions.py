@@ -8,13 +8,8 @@ from bidso.utils import replace_underscore
 
 from wonambi.attr import Freesurfer
 
-PARAMETERS = {
-    'acquisition': '*projected',
-    'parallel': True,
-    }
 
-
-def main(bids_dir, freesurfer_dir):
+def main(bids_dir, freesurfer_dir, acquisition='clinical', noparallel=False):
     """
     assign electrodes to brain regions',
 
@@ -24,19 +19,23 @@ def main(bids_dir, freesurfer_dir):
 
     freesurfer_dir : path
 
+    acquisition : str
+        acquisition type of the electrode files
+    noparallel : bool
+        if it should run serially (i.e. not parallely, mostly for debugging)
     """
     args = []
-    for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'):
+    for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=acquisition, modality='electrodes', extension='.tsv'):
         elec = Electrodes(electrode_path)
         fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
         args.append((elec, fs))
 
-    if PARAMETERS['parallel']:
-        with Pool(processes=4) as p:
-            p.starmap(assign_regions, args)
-    else:
+    if noparallel:
         for arg in args:
             assign_regions(*arg)
+    else:
+        with Pool(processes=4) as p:
+            p.starmap(assign_regions, args)
 
 
 def assign_regions(elec, freesurfer):

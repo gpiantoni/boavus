@@ -15,18 +15,11 @@ lg = getLogger(__name__)
 
 ELECSURF_DIR = 'electrodes_on_surface'
 
-PARAMETERS = {
-    'acquisition': '*ctmr',
-    'measure': {
-        'modality': '',
-        'column': '',
-        },
-    }
 
-
-def main(bids_dir, analysis_dir, freesurfer_dir, output_dir):
+def main(bids_dir, analysis_dir, freesurfer_dir, output_dir,
+         acquisition='clinical', measure_modality="", measure_column=""):
     """
-            help='plot electrodes onto the brain surface',
+    plot electrodes onto the brain surface,
 
     Parameters
     ----------
@@ -38,28 +31,34 @@ def main(bids_dir, analysis_dir, freesurfer_dir, output_dir):
 
     output_dir : path
 
+    acquisition : str
+        acquisition type of the electrode files
+    measure_modality : str
+        modality
+    measure_column : str
+        column
     """
     img_dir = output_dir / ELECSURF_DIR
     rmtree(img_dir, ignore_errors=True)
     img_dir.mkdir(exist_ok=True, parents=True)
 
-    for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=PARAMETERS['acquisition'], modality='electrodes', extension='.tsv'):
+    for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=acquisition, modality='electrodes', extension='.tsv'):
         lg.debug(f'Reading electrodes from {electrode_path}')
         elec = Electrodes(electrode_path)
         fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
 
         labels = None
-        if PARAMETERS['measure']['modality'] != '':
+        if measure_modality != "":
             ecog_file = find_in_bids(
                 analysis_dir,
                 subject=elec.subject,
-                modality=PARAMETERS['measure']['modality'],
+                modality=measure_modality,
                 extension='.tsv')
-            lg.debug(f'Reading {PARAMETERS["measure"]["column"]} from {ecog_file}')
+            lg.debug(f'Reading {measure_column} from {ecog_file}')
             ecog_tsv = read_tsv(ecog_file)
 
             labels = [x['name'] for x in elec.electrodes.tsv]
-            labels, vals = read_channels(ecog_tsv, labels, PARAMETERS['measure']['column'])
+            labels, vals = read_channels(ecog_tsv, labels, measure_column)
 
         else:
             vals = None

@@ -1,4 +1,3 @@
-from bidso.utils import replace_underscore
 from boavus import boavus
 
 from .paths import (BIDS_PATH,
@@ -19,71 +18,37 @@ def test_ieeg_projectelectrodes():
     boavus([
         'ieeg',
         'project_electrodes',
-        '--freesurfer_dir',
-        str(FREESURFER_PATH),
-        '--bids_dir',
-        str(BIDS_PATH),
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '--log',
-        'debug',
+        '--freesurfer_dir', str(FREESURFER_PATH),
+        '--bids_dir', str(BIDS_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
         '--acquisition', 'ct',
         '--noparallel',
         ])
 
 
 def test_ieeg_assignregions():
-    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_assignregions.json'
-    update_parameters(PARAMETERS_JSON, parallel=False)
 
     boavus([
         'ieeg',
         'assign_regions',
-        '--freesurfer_dir',
-        str(FREESURFER_PATH),
-        '--bids_dir',
-        str(BIDS_PATH),
-        '-p',
-        str(PARAMETERS_JSON),
-        '--log',
-        'debug',
+        '--freesurfer_dir', str(FREESURFER_PATH),
+        '--bids_dir', str(BIDS_PATH),
+        '--log', 'debug',
+        '--noparallel',
+        '--acquisition', 'ctprojected',
         ])
 
 
 def test_ieeg_plotelectrodes(qtbot):
 
-    PARAMETERS_JSON = PARAMETERS_PATH / 'ieeg_plotelectrodes.json'
     boavus([
         'ieeg',
         'plot_electrodes',
-        '--output_dir',
-        str(BOAVUS_PATH),
-        '--freesurfer_dir',
-        str(FREESURFER_PATH),
-        '--bids_dir',
-        str(BIDS_PATH),
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '-p',
-        str(PARAMETERS_JSON),
-        '--log',
-        'debug',
-        ])
-
-    update_parameters(PARAMETERS_JSON, acquisition='ctprojected')
-    boavus([
-        'ieeg',
-        'plot_electrodes',
-        '--output_dir',
-        str(BOAVUS_PATH),
-        '--freesurfer_dir',
-        str(FREESURFER_PATH),
-        '--bids_dir',
-        str(BIDS_PATH),
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '-p',
-        str(PARAMETERS_JSON),
-        '--log',
-        'debug',
+        '--output_dir', str(BOAVUS_PATH),
+        '--freesurfer_dir', str(FREESURFER_PATH),
+        '--bids_dir', str(BIDS_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--acquisition', 'ctprojected',
         ])
