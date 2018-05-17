@@ -12,18 +12,6 @@ def test_fmri_percent():
         'fmri',
         'compare',
         '--analysis_dir', str(ANALYSIS_PATH),
-        ])
-
-
-def test_fmri_compare_zstat():
-
-    if environ.get('FSLDIR') is None:
-        return
-
-    boavus([
-        'fmri',
-        'compare',
-        '--analysis_dir', str(ANALYSIS_PATH),
         '--log', 'debug',
         ])
 
