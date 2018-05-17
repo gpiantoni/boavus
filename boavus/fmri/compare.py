@@ -29,7 +29,7 @@ def main(analysis_dir, measure='percent', normalize_to_mean=False):
         lg.debug(f'Reading {feat_path}')
 
         if measure == 'percent':
-            fmri_stat = compute_percent(feat_path)
+            fmri_stat = compute_percent(feat_path, normalize_to_mean)
         elif measure == 'zstat':
             fmri_stat = compute_zstat(feat_path)
         else:
