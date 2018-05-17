@@ -25,7 +25,7 @@ def __main__():
     import boavus
     all_mod = defaultdict(dict)
     for one in sorted(Path(boavus.__path__[0]).rglob('*.py')):
-        mod = import_module(str(one.relative_to('/home/giovanni/tools/boavus/')).replace('/', '.')[:-3])
+        mod = import_module(str(one.relative_to(Path(__file__).parents[1])).replace('/', '.')[:-3])
         if hasattr(mod, 'main'):
             mod_name = one.stem
             grp_name = one.parent.stem
@@ -47,8 +47,8 @@ def __main__():
             function.add_argument('-l', '--log', default='info',
                                   help='Logging level: info (default), debug')
 
-
     return parser
+
 
 def add_to_parser(function, main_f):
     doc = getdoc(main_f)
