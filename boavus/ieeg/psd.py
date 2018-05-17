@@ -25,6 +25,10 @@ def main(analysis_dir, method="spectrogram", duration=1, noparallel=False):
 
     method : str
         "spectrogram" or "dh2012"
+    duration : float
+        duration of the trials
+    noparallel : bool
+        if it should run serially (i.e. not parallely, mostly for debugging)
     """
     args = []
     for cond in ('move', 'rest'):

@@ -20,18 +20,10 @@ from bidso.utils import replace_underscore
 lg = getLogger(__name__)
 
 
-PARAMETERS = {
-    'graymatter': True,
-    'kernels': list(range(1, 10)),
-    'distance': 'gaussian',
-    'acquisition': '*regions',
-    'parallel': True,
-    'upsample': False,
-    'approach': True,
-    }
-
-
-def main(bids_dir, freesurfer_dir, analysis_dir=None):
+def main(bids_dir, freesurfer_dir, analysis_dir=None, graymatter=False,
+         distance='gaussian', acquisition='*regions', noparallel=False,
+         upsample=False, approach=False, kernel_start=1, kernel_end=10,
+         kernel_step=.5):
     """
     Calculate the (weighted) average of fMRI values at electrode locations
 
@@ -43,6 +35,24 @@ def main(bids_dir, freesurfer_dir, analysis_dir=None):
 
     analysis_dir : path
         only necessary if you include gray matter
+    graymatter : bool
+
+    distance : str
+
+    acquisition : str
+
+    noparallel : bool
+
+    upsample : bool
+
+    approach : bool
+
+    kernel_start : int
+
+    kernel_end : int
+
+    kernel_step : float
+
     """
     n_processes = len(list(find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True)))
 

@@ -14,17 +14,11 @@ from ..utils import ENVIRON
 
 lg = getLogger(__name__)
 
-
-PARAMETERS = {
-    'modality': 'compare',
-    'surface': 'white',
-    'surf-fwhm': 0,
-    }
-
 SURF_DIR = 'feat_surf'
 
 
-def main(analysis_dir, freesurfer_dir, output_dir):
+def main(analysis_dir, freesurfer_dir, output_dir, modality='compare',
+         surface='white', surf_fwhm=0):
     """
     map feat values on freesurfer surface',
 
@@ -36,15 +30,20 @@ def main(analysis_dir, freesurfer_dir, output_dir):
 
     output_dir : path
 
+    modality : str
+        "compare"
+    surface : str
+        "white", "pial"
+    surf_fwhm : float
+        FWHM
     """
-
     p_all = []
     surfs = []
-    for in_vol_file in find_in_bids(analysis_dir, generator=True, extension='.nii.gz', modality=PARAMETERS['modality']):
+    for in_vol_file in find_in_bids(analysis_dir, generator=True, extension='.nii.gz', modality=modality):
         in_vol = file_Core(in_vol_file)
         feat_path = find_in_bids(analysis_dir, subject=in_vol.subject, extension='.feat')
         for hemi in ('lh', 'rh'):
-            p, out_surf = vol2surf(in_vol, feat_path, freesurfer_dir, hemi)
+            p, out_surf = vol2surf(in_vol, feat_path, freesurfer_dir, hemi, surface, surf_fwhm)
             p_all.append(p)
             surfs.append(out_surf)
 
@@ -55,10 +54,10 @@ def main(analysis_dir, freesurfer_dir, output_dir):
     img_dir.mkdir(exist_ok=True, parents=True)
 
     for one_surf in surfs:
-        plot_surf(img_dir, freesurfer_dir, one_surf)
+        plot_surf(img_dir, freesurfer_dir, one_surf, surface)
 
 
-def vol2surf(in_vol, feat_path, freesurfer_dir, hemi):
+def vol2surf(in_vol, feat_path, freesurfer_dir, hemi, surface, surf_fwhm):
     out_surf = replace_underscore(in_vol.filename, in_vol.modality + 'surf' + hemi + '.mgh')
 
     cmd = [
@@ -74,9 +73,9 @@ def vol2surf(in_vol, feat_path, freesurfer_dir, hemi):
         '--out',
         str(out_surf),
         '--surf',
-        PARAMETERS['surface'],
+        surface,
         '--surf-fwhm',
-        str(PARAMETERS['surf-fwhm']),
+        str(surf_fwhm),
         ]
 
     p = Popen(cmd, env={**ENVIRON, 'SUBJECTS_DIR': str(freesurfer_dir)},
@@ -91,10 +90,10 @@ def vol2surf(in_vol, feat_path, freesurfer_dir, hemi):
     return p, info
 
 
-def plot_surf(img_dir, freesurfer_dir, info):
+def plot_surf(img_dir, freesurfer_dir, info, surface):
 
     fs = Freesurfer(freesurfer_dir / info['subject'])
-    surf = getattr(fs.read_brain(PARAMETERS['surface']), info['hemi'])
+    surf = getattr(fs.read_brain(surface), info['hemi'])
 
     surf_img = nload(str(info['surf']))
     surf_val = surf_img.get_data()[:, 0, 0].astype('float64')

@@ -19,16 +19,10 @@ ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
 PNG_DIR = 'corr_ieeg_fmri_png'
 
 
-PARAMETERS = {
-    'acquisition': '*regions',
-    'regions': [],
-    'plot': True,
-    }
-
-
-def main(bids_dir, analysis_dir, output_dir):
+def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
+         regions=[], plot=False):
     """
-            help='compare fMRI values at electrode locations to ECoG values',
+    compare fMRI values at electrode locations to ECoG values
 
     Parameters
     ----------
@@ -37,6 +31,12 @@ def main(bids_dir, analysis_dir, output_dir):
     analysis_dir : path
 
     output_dir : path
+
+    acquisition : str
+
+    regions : list
+
+    plot : bool
 
     """
     results_dir = output_dir / ZSTAT_DIR
@@ -47,7 +47,8 @@ def main(bids_dir, analysis_dir, output_dir):
     for fmri_at_elec_file in find_in_bids(analysis_dir, generator=True, modality='*elec', extension='.tsv'):
         try:
             one_result = compute_corr_ecog_fmri(file_Core(fmri_at_elec_file),
-                                                bids_dir, analysis_dir, results_dir)
+                                                bids_dir, analysis_dir, results_dir,
+                                                acquisition, regions)
 
         except FileNotFoundError as err:
             lg.warning(err)
@@ -55,21 +56,22 @@ def main(bids_dir, analysis_dir, output_dir):
         else:
             results.append(one_result)
 
-    if PARAMETERS['plot']:
+    if plot:
         if len(results) == 0:
             lg.warning('No results were computed, skipping plot')
         else:
             plot_results(results, output_dir)
 
 
-def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir):
+def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir,
+                           acquisition, regions):
     fmri_tsv = read_tsv(fmri_file.filename)
 
     electrodes_file = find_in_bids(
         bids_dir,
         wildcard=True,
         subject=fmri_file.subject,
-        acquisition=PARAMETERS['acquisition'],
+        acquisition=acquisition,
         modality='electrodes',
         extension='.tsv')
     electrodes = Electrodes(electrodes_file)
@@ -84,7 +86,7 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir):
     n_all_elec = len(ecog_tsv)
 
     # use only values from electrodes which are in the ROI
-    labels_in_roi = find_labels_in_regions(electrodes, PARAMETERS['regions'])
+    labels_in_roi = find_labels_in_regions(electrodes, regions)
     ecog_tsv = list(filter(lambda x: x['channel'] in labels_in_roi, ecog_tsv))
     lg.debug(f'Using {len(ecog_tsv)}/{n_all_elec} electrodes in ROI')
 

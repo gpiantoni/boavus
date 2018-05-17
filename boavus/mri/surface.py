@@ -11,11 +11,9 @@ from scipy.ndimage.morphology import binary_closing
 from ..utils import check_subprocess
 
 
-PARAMETERS = {
-    'gaussian_filter': 1,
-    'closing_iter': 15,
-    'smooth_iteration': 60,
-    }
+GAUSSIAN_FILTER = 1
+CLOSING_ITER = 15
+SMOOTH_ITERATION = 60
 
 lg = getLogger(__name__)
 
@@ -51,7 +49,7 @@ def fill_surface(surf_in, surf_smooth):
         p = run([
             'mris_smooth',
             '-nw',
-            '-n', str(PARAMETERS['smooth_iteration']),
+            '-n', str(SMOOTH_ITERATION),
             str(surf_filled),
             str(surf_smooth)
             ], stdout=PIPE, stderr=PIPE)
@@ -62,13 +60,13 @@ def _close_volume(vol_file, filled):
 
     vol = niload(str(vol_file))
     volume = vol.get_data()
-    v = gaussian_filter(volume, PARAMETERS['gaussian_filter'])
+    v = gaussian_filter(volume, GAUSSIAN_FILTER)
 
     # binarize
     v[v <= 25 / 255] = 0
     v[v > 25 / 255] = 1
 
-    closed = binary_closing(v, iterations=PARAMETERS['closing_iter'])
+    closed = binary_closing(v, iterationS=CLOSING_ITER)
     n = Nifti1Image(closed.astype('float32'), vol.affine)
     n.to_filename(str(filled))
 

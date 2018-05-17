@@ -7,8 +7,6 @@ from ..utils import ENVIRON
 
 lg = getLogger(__name__)
 
-PARAMETERS = {}
-
 
 def main(analysis_dir, freesurfer_dir):
     """

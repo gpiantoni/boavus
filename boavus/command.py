@@ -2,7 +2,6 @@
 
 Make sure that the functions are organized in module/function.py.
 """
-
 from inspect import signature, getdoc
 from collections import defaultdict
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -44,10 +43,10 @@ def __main__():
             function = list_functions.add_parser(f_k,
                                                  formatter_class=RawTextHelpFormatter)
             function.set_defaults(function=f_k)
+            add_to_parser(function, f_v)
             function.add_argument('-l', '--log', default='info',
                                   help='Logging level: info (default), debug')
 
-            add_to_parser(function, f_v)
 
     return parser
 
@@ -78,6 +77,7 @@ def add_to_parser(function, main_f):
             const = None
 
         elif args[name][0] == 'bool':
+            assert not param.default, f'bool value {name} should be False, otherwise it\'s hard to interpret'
             one_arg = optionals_arg
             help_str = args[name][1]
             metavar = None

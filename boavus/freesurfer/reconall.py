@@ -6,8 +6,6 @@ from bidso.find import find_in_bids
 
 from ..utils import ENVIRON
 
-PARAMETERS = {}
-
 
 def main(bids_dir, freesurfer_dir):
     """

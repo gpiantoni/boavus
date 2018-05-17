@@ -11,8 +11,6 @@ from bidso.find import find_in_bids
 from .misc import run_bet, run_reorient2std
 from ..utils import ENVIRON
 
-PARAMETERS = {}
-
 
 EVENT_VALUE = {
     'move': 1,

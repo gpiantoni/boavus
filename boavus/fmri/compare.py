@@ -12,13 +12,7 @@ from bidso.utils import bids_mkdir
 lg = getLogger(__name__)
 
 
-PARAMETERS = {
-    'measure': 'percent',
-    'normalize_to_mean': False,
-    }
-
-
-def main(analysis_dir):
+def main(analysis_dir, measure='percent', normalize_to_mean=False):
     """
     compute percent change of the BOLD signal
 
@@ -26,24 +20,27 @@ def main(analysis_dir):
     ----------
     analysis_dir : path
 
-    """
+    measure : str
+        "percent", "zstat"
+    normalize_to_mean : bool
 
+    """
     for feat_path in find_in_bids(analysis_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')
 
-        if PARAMETERS['measure'] == 'percent':
+        if measure == 'percent':
             fmri_stat = compute_percent(feat_path)
-        elif PARAMETERS['measure'] == 'zstat':
+        elif measure == 'zstat':
             fmri_stat = compute_zstat(feat_path)
         else:
-            raise ValueError(f'Unknown PARAMETER["measure"]: {PARAMETERS["measure"]}')
+            raise ValueError(f'Unknown measure: {measure}')
 
         feat = file_Core(feat_path)
         task_path = bids_mkdir(analysis_dir, feat) / (feat.filename.stem + '_compare.nii.gz')
         nsave(fmri_stat, str(task_path))
 
 
-def compute_percent(feat_path):
+def compute_percent(feat_path, normalize_to_mean):
     """Calculate percent change for a task.
 
     Parameters
@@ -62,7 +59,7 @@ def compute_percent(feat_path):
     pe[pe == 0] = NaN
     perc = pe * 100 * design.ptp()
 
-    if PARAMETERS['normalize_to_mean']:
+    if normalize_to_mean:
         """I'm not sure if this is necessary, but for sure it increases the level
         of noise"""
         mean_mri = nload(str(feat_path / 'mean_func.nii.gz'))
