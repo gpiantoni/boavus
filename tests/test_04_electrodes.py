@@ -2,12 +2,9 @@ from boavus import boavus
 
 from .paths import (BIDS_PATH,
                     task_ieeg,
-                    elec_ct,
                     FREESURFER_PATH,
                     BOAVUS_PATH,
-                    PARAMETERS_PATH,
                     ANALYSIS_PATH,
-                    SIMULATE_PATH,
                     )
 
 ieeg_file = task_ieeg.get_filename(BIDS_PATH)

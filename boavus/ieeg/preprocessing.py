@@ -1,7 +1,7 @@
 from pickle import dump
 from wonambi.trans import select, montage, math, filter_
 from logging import getLogger
-from numpy import mean, std, empty
+from numpy import mean, std, empty, arange
 from wonambi import Dataset
 from wonambi.trans.select import _create_subepochs
 
@@ -145,7 +145,7 @@ def make_segments(dat):
 
     for i, trial in enumerate(trials):
         out.data[i] = trial
-        out.axis['time'][i] = dat.axis['time'][0]
+        out.axis['time'][i] = arange(i * 1023, i * 1023 + 1023) / dat.s_freq
         out.axis['chan'][i] = dat.axis['chan'][0]
 
     return out
