@@ -22,8 +22,8 @@ lg = getLogger(__name__)
 
 def main(bids_dir, freesurfer_dir, analysis_dir=None, graymatter=False,
          distance='gaussian', acquisition='*regions', noparallel=False,
-         upsample=False, approach=False, kernel_start=1, kernel_end=10,
-         kernel_step=.5):
+         upsample=False, approach=False, kernel_start=6, kernel_end=8,
+         kernel_step=1):
     """
     Calculate the (weighted) average of fMRI values at electrode locations
 

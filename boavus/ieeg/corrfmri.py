@@ -17,6 +17,8 @@ lg = getLogger(__name__)
 
 ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
 PNG_DIR = 'corr_ieeg_fmri_png'
+FMRI_MODALITY = 'bold_compare'
+IEEG_MODALITY = 'ieeg_compare'
 
 
 def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
@@ -44,7 +46,7 @@ def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
     results_dir.mkdir(exist_ok=True, parents=True)
 
     results = []
-    for fmri_at_elec_file in find_in_bids(analysis_dir, generator=True, modality='*elec', extension='.tsv'):
+    for fmri_at_elec_file in find_in_bids(analysis_dir, generator=True, modality=FMRI_MODALITY, extension='.tsv'):
         try:
             one_result = compute_corr_ecog_fmri(file_Core(fmri_at_elec_file),
                                                 bids_dir, analysis_dir, results_dir,
@@ -80,7 +82,7 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir,
         analysis_dir,
         subject=fmri_file.subject,
         task=fmri_file.task,
-        modality='compare',
+        modality=IEEG_MODALITY,
         extension='.tsv')
     ecog_tsv = read_tsv(ecog_file)
     n_all_elec = len(ecog_tsv)
