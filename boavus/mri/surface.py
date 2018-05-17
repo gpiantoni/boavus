@@ -66,7 +66,7 @@ def _close_volume(vol_file, filled):
     v[v <= 25 / 255] = 0
     v[v > 25 / 255] = 1
 
-    closed = binary_closing(v, iterationS=CLOSING_ITER)
+    closed = binary_closing(v, iterations=CLOSING_ITER)
     n = Nifti1Image(closed.astype('float32'), vol.affine)
     n.to_filename(str(filled))
 
