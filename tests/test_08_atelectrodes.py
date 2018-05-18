@@ -20,6 +20,7 @@ def test_fmri_at_electrodes_graymatter():
         '--bids_dir', str(BIDS_PATH),
         '--freesurfer_dir', str(FREESURFER_PATH),
         '--analysis_dir', str(ANALYSIS_PATH),
+        '--noparallel',
         '--log', 'debug',
         '--graymatter',
         ])
@@ -36,12 +37,13 @@ def test_fmri_at_electrodes_upsample():
         '--bids_dir', str(BIDS_PATH),
         '--freesurfer_dir', str(FREESURFER_PATH),
         '--analysis_dir', str(ANALYSIS_PATH),
+        '--noparallel',
         '--log', 'debug',
         '--upsample',
         ])
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 59382.12053669494)
+    assert_allclose(v, 59358.997935)
 
 
 def test_fmri_at_electrodes_sphere():
