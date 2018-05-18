@@ -1,5 +1,7 @@
 from boavus import boavus
 from bidso.utils import read_tsv, replace_underscore
+from numpy.testing import assert_allclose
+from pickle import load
 
 from .paths import (BIDS_PATH,
                     ANALYSIS_PATH,
@@ -7,7 +9,6 @@ from .paths import (BIDS_PATH,
                     BOAVUS_PATH,
                     task_ieeg,
                     )
-from .utils import compute_md5
 
 output_data = replace_underscore(task_ieeg.get_filename(ANALYSIS_PATH),
                                  'ieeg_move.pkl')
@@ -29,7 +30,9 @@ def test_ieeg_preprocessing():
         '--markers_off', 'rest',
         ])
 
-    assert compute_md5(output_data) == '5f176df6ed1ac7d330f0d88403ec4002'
+    with output_data.open('rb') as f:
+        data = load(f)
+    assert_allclose(abs(data.data[0]).sum(), 13963593.33152158)
 
 
 def test_ieeg_psd():
@@ -42,7 +45,9 @@ def test_ieeg_psd():
         '--noparallel',
         ])
 
-    assert compute_md5(output_freq) == '7fc7178101fa281a793ba80f51748bd6'
+    with output_data.open('rb') as f:
+        data = load(f)
+    assert_allclose(data.data[0].sum(), 53484510.01552996)
 
 
 def test_ieeg_compare_percent():
@@ -54,8 +59,8 @@ def test_ieeg_compare_percent():
         '--log', 'debug',
         ])
 
-    tsv = read_tsv(output_tsv)
-    assert [x['measure'] for x in tsv if x['channel'] == 'grid01'][0] == '0.9309301804179754'
+    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 0.9309301804179754)
 
 
 def test_ieeg_plotelectrodes_measure(qtbot):

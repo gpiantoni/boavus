@@ -1,6 +1,7 @@
-from os import environ
 from boavus import boavus
 from bidso.utils import read_tsv, replace_underscore, replace_extension
+from numpy.testing import assert_allclose
+from os import environ
 
 from .paths import (BIDS_PATH,
                     ANALYSIS_PATH,
@@ -44,8 +45,8 @@ def test_fmri_at_electrodes_gaussian():
         '--noparallel',
         ])
 
-    tsv = read_tsv(output_tsv)
-    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '59382.12053669494'
+    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 59382.12053669494)
 
 
 def test_fmri_at_electrodes_sphere():
@@ -64,8 +65,8 @@ def test_fmri_at_electrodes_sphere():
         '--distance', 'sphere',
         ])
 
-    tsv = read_tsv(output_tsv)
-    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61441.38281250001'
+    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 61441.38281250001)
 
 
 def test_fmri_at_electrodes_inverse():
@@ -84,8 +85,8 @@ def test_fmri_at_electrodes_inverse():
         '--distance', 'inverse',
         ])
 
-    tsv = read_tsv(output_tsv)
-    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '60590.677291881606'
+    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 60590.677291881606)
 
 
 def test_fmri_at_electrodes_approach():
@@ -104,5 +105,5 @@ def test_fmri_at_electrodes_approach():
         '--approach',
         ])
 
-    tsv = read_tsv(output_tsv)
-    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61441.387'
+    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 61441.387)
