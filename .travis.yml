@@ -50,7 +50,6 @@ before_install:
   - ls -l $LIB/freesurfer
   - export FREESURFER_HOME=$LIB/freesurfer
   - source $FREESURFER_HOME/SetUpFreeSurfer.sh
-  - ln -s $LIB/freesurfer/subjects/bert $DERIVATIVES/freesurfer/sub-bert -r
 
   # geckodriver
   #- json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
