@@ -60,10 +60,10 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
     processes = []
     for measure_nii in find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True):
         lg.debug(f'adding {measure_nii}')
-        if noparallel:
-            n_cpu = None
-        else:
+        if not noparallel:
             n_cpu = ceil(cpu_count() / n_processes) - 1
+        else:
+            n_cpu = None
         processes.append(Process(target=calc_fmri_at_elec,
                                  args=(measure_nii, bids_dir, freesurfer_dir,
                                        analysis_dir, upsample, acquisition,

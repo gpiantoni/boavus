@@ -103,7 +103,6 @@ def test_fmri_at_electrodes_gaussian():
         '--freesurfer_dir', str(FREESURFER_PATH),
         '--analysis_dir', str(ANALYSIS_PATH),
         '--log', 'debug',
-        '--noparallel',
         ])
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])

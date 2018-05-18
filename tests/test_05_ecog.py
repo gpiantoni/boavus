@@ -42,7 +42,6 @@ def test_ieeg_psd():
         'psd',
         '--analysis_dir', str(ANALYSIS_PATH),
         '--log', 'debug',
-        '--noparallel',
         ])
 
     with output_freq.open('rb') as f:
