@@ -80,7 +80,7 @@ before_script:
 script:
   - python -c "import vispy; print(vispy.sys_info())"
   - py.test --cov=boavus tests
-  - find . -type f -printf "\n%TY/%Tm/%Td %TH:%TM:%TS\t%s\n" -exec md5sum \{\} \;
+  - find tests/data -type f -printf "\n%TY/%Tm/%Td %TH:%TM:%TS\t%s\n" -exec md5sum \{\} \;
 
 after_success:
   - codecov
