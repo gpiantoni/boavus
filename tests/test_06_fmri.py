@@ -26,7 +26,7 @@ def test_fmri_percent():
         '--log', 'debug',
         ])
 
-    assert compute_md5(output_nii) == 'aeb85f5b34a1498319d1ee8772eec4a8'
+    assert compute_md5(output_nii) == '1d64d5bf6f83ba5f9f29c2459e98c307'
 
 
 def test_fmri_at_electrodes_gaussian():

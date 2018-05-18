@@ -107,6 +107,10 @@ def snap_elec_to_surf(e_init, surf_smooth):
     e = np.array(e_snapgreedy).copy()
     emin = np.array(e_snapgreedy).copy()
 
+    # TODO: there is a random element, and it seems to affect the results
+    # we set a seed, otherwise the tests are not reproducible
+    np.random.seed(0)
+
     # the annealing schedule continues until the maximum number of moves
     while h < H:
         h += 1

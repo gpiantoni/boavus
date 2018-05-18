@@ -53,7 +53,6 @@ elif args.command == 'test':
 
     run([
         'py.test',
-        '-x',
         '--cov=' + PROJECT,
         '--cov-report=html',
         '--cov-report=term',
