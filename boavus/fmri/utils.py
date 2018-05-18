@@ -2,6 +2,9 @@
 """
 from nibabel import load as nload
 from numpy import array
+from ..utils import check_subprocess
+from subprocess import run, PIPE
+
 
 def get_vox2ras_tkr(filename):
     """This should be identical
@@ -20,25 +23,26 @@ def get_vox2ras_tkr(filename):
 
     return vox2ras_tkr
 
-def ribbon_to_fmri_space():
+
+def ribbon_to_feat(freesurfer_path, feat_path):
     """
 
-    TODO
-    ----
-    Develop this function
     """
-    bids_subj in Path('/Fridge/users/giovanni/projects/dhbm/derivatives/analysis').glob('sub-*')
-    freesurfer_path = Path('/Fridge/users/giovanni/projects/dhbm/derivatives/freesurfer')
-    mov = freesurfer_path / bids_subj.name / 'mri' / 'ribbon.mgz'
-    targ = next(bids_subj.rglob('pe1.nii.gz'))
-    o = freesurfer_path / bids_subj.name / 'mri' / 'ribbon_feat.mgz'
-    reg = next(bids_subj.rglob('*.feat')) / 'reg'/ 'freesurfer' / 'anat2exf.register.dat'
+    o = freesurfer_path / 'mri' / 'ribbon_feat.mgz'
 
-    c = run([
-        'mri_vol2vol',
-        '--mov', str(targ),
-        '--targ', str(mov),
-        '--o', str(o),
-        '--inv',
-        '--reg', str(reg),
-    ])
+    if not o.exists():
+        mov = freesurfer_path / 'mri' / 'ribbon.mgz'
+        targ = feat_path / 'stats' / 'pe1.nii.gz'
+        reg = feat_path / 'reg' / 'freesurfer' / 'anat2exf.register.dat'
+
+        p = run([
+            'mri_vol2vol',
+            '--mov', str(targ),
+            '--targ', str(mov),
+            '--o', str(o),
+            '--inv',
+            '--reg', str(reg),
+        ], stdout=PIPE, stderr=PIPE)
+        check_subprocess(p)
+
+    return o

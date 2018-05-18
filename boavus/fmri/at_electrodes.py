@@ -17,6 +17,8 @@ from bidso import file_Core, Electrodes
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 
+from .utils import ribbon_to_feat
+
 lg = getLogger(__name__)
 
 
@@ -100,8 +102,9 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
 
     if graymatter:
         freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
-        fs = Freesurfer(freesurfer_path)
-        i_ndi = _select_graymatter(ndi, fs, upsample)
+        feat_path = find_in_bids(analysis_dir, subject=task_fmri.subject, extension='.feat')
+        ribbon = _get_ribbon(freesurfer_path, upsample, feat_path)
+        i_ndi = _select_graymatter(ndi, ribbon)
         ndi = ndi[i_ndi, :]
         mri = mri.flatten()[i_ndi]
 
@@ -112,7 +115,7 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
 
     # TODO: it might be better to create a separate folder
     for old_tsv in measure_nii.parent.glob(replace_underscore(measure_nii.name, '*.tsv')):
-            old_tsv.unlink()
+        old_tsv.unlink()
 
     fmri_vals_tsv = replace_underscore(measure_nii, 'compare.tsv')
     lg.debug(f'Saving {fmri_vals_tsv}')
@@ -123,12 +126,16 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
             f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
 
 
-def _select_graymatter(ndi, fs, upsample):
+def _get_ribbon(freesurfer_path, upsample, feat_path):
     if upsample:
-        ribbon_name = 'ribbon.mgz'
+        ribbon = ribbon_to_feat(freesurfer_path, feat_path)
     else:
-        ribbon_name = 'ribbon_feat.mgz'
-    ribbon = nload(str(fs.dir / 'mri' / ribbon_name))
+        ribbon = freesurfer_path / 'mri' / 'ribbon.mgz'
+    return ribbon
+
+
+def _select_graymatter(ndi, ribbon):
+    ribbon = nload(str(ribbon))
     x = from_chan_to_mrifile(ribbon, ndi)
 
     r_mri = ribbon.get_data()
