@@ -46,3 +46,63 @@ def test_fmri_at_electrodes_gaussian():
 
     tsv = read_tsv(output_tsv)
     assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '59696.5178553907'
+
+
+def test_fmri_at_electrodes_sphere():
+
+    if environ.get('FSLDIR') is None:
+        return
+
+    boavus([
+        'fmri',
+        'at_electrodes',
+        '--bids_dir', str(BIDS_PATH),
+        '--freesurfer_dir', str(FREESURFER_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--noparallel',
+        '--distance', 'sphere',
+        ])
+
+    tsv = read_tsv(output_tsv)
+    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61471.338169642855'
+
+
+def test_fmri_at_electrodes_inverse():
+
+    if environ.get('FSLDIR') is None:
+        return
+
+    boavus([
+        'fmri',
+        'at_electrodes',
+        '--bids_dir', str(BIDS_PATH),
+        '--freesurfer_dir', str(FREESURFER_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--noparallel',
+        '--distance', 'inverse',
+        ])
+
+    tsv = read_tsv(output_tsv)
+    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61838.581103671844'
+
+
+def test_fmri_at_electrodes_approach():
+
+    if environ.get('FSLDIR') is None:
+        return
+
+    boavus([
+        'fmri',
+        'at_electrodes',
+        '--bids_dir', str(BIDS_PATH),
+        '--freesurfer_dir', str(FREESURFER_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--noparallel',
+        '--approach',
+        ])
+
+    tsv = read_tsv(output_tsv)
+    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61471.34'

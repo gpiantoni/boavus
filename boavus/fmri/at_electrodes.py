@@ -20,7 +20,7 @@ from bidso.utils import replace_underscore
 lg = getLogger(__name__)
 
 
-def main(bids_dir, freesurfer_dir, analysis_dir=None, graymatter=False,
+def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
          distance='gaussian', acquisition='*regions', noparallel=False,
          upsample=False, approach=False, kernel_start=6, kernel_end=8,
          kernel_step=1):
@@ -31,9 +31,9 @@ def main(bids_dir, freesurfer_dir, analysis_dir=None, graymatter=False,
     ----------
     bids_dir : path
 
-    freesurfer_dir : path
-
     analysis_dir : path
+
+    freesurfer_dir : path
         only necessary if you include gray matter
     graymatter : bool
 
