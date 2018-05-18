@@ -36,8 +36,8 @@ def ribbon_to_fmri_space():
 
     c = run([
         'mri_vol2vol',
-        '--mov',str(targ),
-        '--targ',  str(mov),
+        '--mov', str(targ),
+        '--targ', str(mov),
         '--o', str(o),
         '--inv',
         '--reg', str(reg),

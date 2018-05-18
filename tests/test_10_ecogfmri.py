@@ -13,4 +13,5 @@ def test_ieeg_corrfmri():
         '--bids_dir', str(BIDS_PATH),
         '--log', 'debug',
         '--acquisition', 'ctprojectedregions',
+        '--plot',
         ])

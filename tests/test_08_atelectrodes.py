@@ -46,6 +46,24 @@ def test_fmri_at_electrodes_upsample():
     assert_allclose(v, 59358.997935)
 
 
+def test_fmri_at_electrodes_graymatter_upsample():
+
+    boavus([
+        'fmri',
+        'at_electrodes',
+        '--bids_dir', str(BIDS_PATH),
+        '--freesurfer_dir', str(FREESURFER_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--noparallel',
+        '--log', 'debug',
+        '--graymatter',
+        '--upsample',
+        ])
+
+    v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 54983.284009)
+
+
 def test_fmri_at_electrodes_sphere():
 
     boavus([
