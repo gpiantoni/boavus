@@ -45,7 +45,7 @@ def test_ieeg_psd():
         '--noparallel',
         ])
 
-    with output_data.open('rb') as f:
+    with output_freq.open('rb') as f:
         data = load(f)
     assert_allclose(data.data[0].sum(), 53484510.01552996)
 

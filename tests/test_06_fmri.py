@@ -30,25 +30,6 @@ def test_fmri_percent():
     assert compute_md5(output_nii) == '1d64d5bf6f83ba5f9f29c2459e98c307'
 
 
-def test_fmri_at_electrodes_gaussian():
-
-    if environ.get('FSLDIR') is None:
-        return
-
-    boavus([
-        'fmri',
-        'at_electrodes',
-        '--bids_dir', str(BIDS_PATH),
-        '--freesurfer_dir', str(FREESURFER_PATH),
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--noparallel',
-        ])
-
-    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 59382.12053669494)
-
-
 def test_fmri_at_electrodes_sphere():
 
     if environ.get('FSLDIR') is None:
@@ -65,7 +46,7 @@ def test_fmri_at_electrodes_sphere():
         '--distance', 'sphere',
         ])
 
-    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 61441.38281250001)
 
 
@@ -85,7 +66,7 @@ def test_fmri_at_electrodes_inverse():
         '--distance', 'inverse',
         ])
 
-    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 60590.677291881606)
 
 
@@ -105,5 +86,25 @@ def test_fmri_at_electrodes_approach():
         '--approach',
         ])
 
-    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 61441.387)
+
+
+def test_fmri_at_electrodes_gaussian():
+    # run default as the last one, so that it's used by other functions
+
+    if environ.get('FSLDIR') is None:
+        return
+
+    boavus([
+        'fmri',
+        'at_electrodes',
+        '--bids_dir', str(BIDS_PATH),
+        '--freesurfer_dir', str(FREESURFER_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--noparallel',
+        ])
+
+    v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 59382.12053669494)
