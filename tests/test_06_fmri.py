@@ -45,7 +45,7 @@ def test_fmri_at_electrodes_gaussian():
         ])
 
     tsv = read_tsv(output_tsv)
-    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '59696.5178553907'
+    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '59382.12053669494'
 
 
 def test_fmri_at_electrodes_sphere():
@@ -65,7 +65,7 @@ def test_fmri_at_electrodes_sphere():
         ])
 
     tsv = read_tsv(output_tsv)
-    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61471.338169642855'
+    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61441.38281250001'
 
 
 def test_fmri_at_electrodes_inverse():
@@ -85,7 +85,7 @@ def test_fmri_at_electrodes_inverse():
         ])
 
     tsv = read_tsv(output_tsv)
-    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61838.581103671844'
+    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '60590.677291881606'
 
 
 def test_fmri_at_electrodes_approach():
@@ -105,4 +105,4 @@ def test_fmri_at_electrodes_approach():
         ])
 
     tsv = read_tsv(output_tsv)
-    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61471.34'
+    assert [x['7'] for x in tsv if x['channel'] == 'grid01'][0] == '61441.387'
