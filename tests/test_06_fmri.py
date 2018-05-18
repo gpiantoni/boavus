@@ -2,6 +2,7 @@ from boavus import boavus
 from bidso.utils import read_tsv, replace_underscore, replace_extension
 from numpy.testing import assert_allclose
 from os import environ
+from pytest import raises
 
 from .paths import (BIDS_PATH,
                     ANALYSIS_PATH,
@@ -16,7 +17,47 @@ output_nii = replace_underscore(task_fmri.get_filename(ANALYSIS_PATH),
 output_tsv = replace_extension(output_nii, '.tsv')
 
 
-def test_fmri_percent():
+def test_fmri_compare_error():
+
+    with raises(ValueError):
+        boavus([
+            'fmri',
+            'compare',
+            '--analysis_dir', str(ANALYSIS_PATH),
+            '--measure', 'xxx',
+            ])
+
+
+def test_fmri_compare_zstat():
+    if environ.get('FSLDIR') is None:
+        return
+
+    boavus([
+        'fmri',
+        'compare',
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--measure', 'zstat',
+        ])
+
+    assert compute_md5(output_nii) == '82dccb2547855d0e883be67e3bf19d86'
+
+
+def test_fmri_compare_normalize():
+    if environ.get('FSLDIR') is None:
+        return
+
+    boavus([
+        'fmri',
+        'compare',
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--normalize_to_mean',
+        ])
+
+    assert compute_md5(output_nii) == '6876c3692c5e1bb1596b1f07c7d2455f'
+
+
+def test_fmri_compare():
     if environ.get('FSLDIR') is None:
         return
 
@@ -87,7 +128,7 @@ def test_fmri_at_electrodes_approach():
         ])
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 61441.387)
+    assert_allclose(v, 61441.387, atol=.5)  # additional tolerance
 
 
 def test_fmri_at_electrodes_gaussian():

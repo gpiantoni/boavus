@@ -35,6 +35,22 @@ def test_ieeg_preprocessing():
     assert_allclose(abs(data.data[0]).sum(), 13963593.33152158)
 
 
+def test_ieeg_psd_dh2012():
+
+    boavus([
+        'ieeg',
+        'psd',
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--noparallel',
+        '--log', 'info',
+        '--method', 'dh2012',
+        ])
+
+    with output_freq.open('rb') as f:
+        data = load(f)
+    assert_allclose(data.data[0].sum(), 9024920.18128)
+
+
 def test_ieeg_psd():
 
     boavus([
