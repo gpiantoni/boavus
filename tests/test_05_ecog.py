@@ -1,5 +1,5 @@
 from boavus import boavus
-from bidso.utils import read_tsv, replace_underscore, replace_extension
+from bidso.utils import read_tsv, replace_underscore
 
 from .paths import (BIDS_PATH,
                     ANALYSIS_PATH,
@@ -29,7 +29,7 @@ def test_ieeg_preprocessing():
         '--markers_off', 'rest',
         ])
 
-    assert compute_md5(output_data) == 'c595d44bdc2ee5705a349ca89b0b1372'
+    assert compute_md5(output_data) == '5f176df6ed1ac7d330f0d88403ec4002'
 
 
 def test_ieeg_psd():
@@ -42,7 +42,7 @@ def test_ieeg_psd():
         '--noparallel',
         ])
 
-    assert compute_md5(output_freq) == '4b0c35556789d6956e4337824036621b'
+    assert compute_md5(output_freq) == '7fc7178101fa281a793ba80f51748bd6'
 
 
 def test_ieeg_compare_percent():
@@ -55,7 +55,7 @@ def test_ieeg_compare_percent():
         ])
 
     tsv = read_tsv(output_tsv)
-    assert [x['measure'] for x in tsv if x['channel'] == 'grid01'][0] == '0.9277588988518676'
+    assert [x['measure'] for x in tsv if x['channel'] == 'grid01'][0] == '0.9309301804179754'
 
 
 def test_ieeg_plotelectrodes_measure(qtbot):

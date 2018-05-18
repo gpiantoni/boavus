@@ -1,7 +1,17 @@
 from json import dump
 from bidso.simulate import simulate_bold, simulate_ieeg, simulate_electrodes, simulate_anat
+from os import environ
+from pathlib import Path
+from shutil import copytree
 
-from .paths import BIDS_PATH, T1_PATH, task_ieeg, task_fmri, task_anat, elec_ct
+from .paths import (BIDS_PATH,
+                    T1_PATH,
+                    task_ieeg,
+                    task_fmri,
+                    task_anat,
+                    elec_ct,
+                    FREESURFER_PATH,
+                    )
 
 
 def test_simulate_root():
@@ -28,6 +38,11 @@ def test_simulate_ieeg():
 
 
 def test_simulate_anat():
+    freesurfer_bert = Path(environ['FREESURFER_HOME']) / 'subjects' / 'bert'
+
+    FREESURFER_PATH.mkdir(parents=True, exist_ok=True)
+    copytree(freesurfer_bert, FREESURFER_PATH / 'sub-bert')
+
     simulate_anat(BIDS_PATH, task_anat, T1_PATH)
 
 

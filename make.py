@@ -23,6 +23,7 @@ BIDS_PATH = DATA_PATH / 'bids'
 DERIVATIVES_PATH = DATA_PATH / 'derivatives'
 ANALYSIS_PATH = DERIVATIVES_PATH / 'analysis'
 BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
+FREESURFER_PATH = DERIVATIVES_PATH / 'freesurfer'
 
 
 parser = ArgumentParser(prog='make boavus',
@@ -48,6 +49,7 @@ elif args.command == 'test':
     rmtree(BIDS_PATH, ignore_errors=True)
     rmtree(ANALYSIS_PATH, ignore_errors=True)
     rmtree(BOAVUS_PATH, ignore_errors=True)
+    rmtree(FREESURFER_PATH, ignore_errors=True)
 
     run([
         'py.test',
@@ -64,3 +66,4 @@ elif args.command == 'clean':
     rmtree(BIDS_PATH, ignore_errors=True)
     rmtree(ANALYSIS_PATH, ignore_errors=True)
     rmtree(BOAVUS_PATH, ignore_errors=True)
+    rmtree(FREESURFER_PATH, ignore_errors=True)
