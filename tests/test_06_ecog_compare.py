@@ -23,7 +23,6 @@ def test_ieeg_compare_diff():
         ])
 
     v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    print(v)
     assert_allclose(v, 1.551890365962599)
 
 
@@ -38,7 +37,6 @@ def test_ieeg_compare_percent():
         ])
 
     v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    print(v)
     assert_allclose(v, 22.123573)
 
 
@@ -53,7 +51,6 @@ def test_ieeg_compare_dorat():
         ])
 
     v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    print(v)
     assert_allclose(v, -62.086533)
 
 
@@ -68,8 +65,38 @@ def test_ieeg_compare_baseline():
         ])
 
     v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    print(v)
     assert_allclose(v, 0.17740472587278314)
+
+
+def test_ieeg_compare_method():
+
+    METHODS = {
+        '1a': 1.0,
+        '1b': 1.0,
+        '1c': 1.0,
+        '1d': 1.0,
+        '2a': 0.9786426425543525,
+        '2b': 0.9848535661914938,
+        '2c': 0.9861305558261255,
+        '2d': 0.9881910378725067,
+        '3a': 0.9021175058094721,
+        '3b': 0.9309301804179754,
+        '3c': 0.9389189728427727,
+        }
+
+    for method, result in METHODS.items():
+
+        boavus([
+            'ieeg',
+            'compare',
+            '--analysis_dir', str(ANALYSIS_PATH),
+            '--log', 'debug',
+            '--method', method,
+            ])
+        print(method)
+
+        v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
+        assert_allclose(v, result)
 
 
 def test_ieeg_compare():
@@ -82,7 +109,6 @@ def test_ieeg_compare():
         ])
 
     v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    print(v)
     assert_allclose(v, 0.9309301804179754)
 
 
