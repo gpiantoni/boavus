@@ -14,7 +14,7 @@ output_freq = replace_underscore(task_ieeg.get_filename(ANALYSIS_PATH),
                                  'ieeg_freqmove.pkl')
 
 
-def notest_ieeg_preprocessing():
+def test_ieeg_preprocessing():
 
     boavus([
         'ieeg',
@@ -46,7 +46,7 @@ def test_ieeg_psd_spectrogram():
     assert_allclose(data.data[0].sum(), 53484510.01552996)
 
 
-def notest_ieeg_psd_dh2012():
+def test_ieeg_psd_dh2012():
 
     boavus([
         'ieeg',
