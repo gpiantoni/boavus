@@ -10,6 +10,8 @@ from wonambi.attr import Channels, Freesurfer
 from wonambi.viz import Viz3
 
 from ..bidso import read_channels
+from ..utils import check_subprocess
+
 
 lg = getLogger(__name__)
 
@@ -49,11 +51,16 @@ def main(bids_dir, analysis_dir, freesurfer_dir, output_dir,
 
         labels = None
         if measure_modality != "":
-            ecog_file = find_in_bids(
-                analysis_dir,
-                subject=elec.subject,
-                modality=measure_modality,
-                extension='.tsv')
+            try:
+                ecog_file = find_in_bids(
+                    analysis_dir,
+                    subject=elec.subject,
+                    modality=measure_modality,
+                    extension='.tsv')
+            except FileNotFoundError as err:
+                lg.warning(err)
+                continue
+
             lg.debug(f'Reading {measure_column} from {ecog_file}')
             ecog_tsv = read_tsv(ecog_file)
 

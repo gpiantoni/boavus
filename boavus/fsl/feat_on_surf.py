@@ -1,6 +1,6 @@
 from logging import getLogger
 from shutil import rmtree
-from subprocess import Popen, DEVNULL
+from subprocess import Popen, PIPE
 
 from nibabel import load as nload
 from wonambi.viz import Viz3
@@ -10,7 +10,8 @@ from bidso import file_Core
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 
-from ..utils import ENVIRON
+from ..utils import ENVIRON, check_subprocess
+
 
 lg = getLogger(__name__)
 
@@ -47,7 +48,9 @@ def main(analysis_dir, freesurfer_dir, output_dir, modality='compare',
             p_all.append(p)
             surfs.append(out_surf)
 
-    assert all([p.wait() == 0 for p in p_all]), 'Could not compute vol2surf for some tasks'  # I don't know how to get the error message from Popen
+    # wait for all processes to run
+    [p.wait() for p in p_all]
+    [check_subprocess(p) for p in p_all]
 
     img_dir = output_dir / SURF_DIR
     rmtree(img_dir, ignore_errors=True)
@@ -79,7 +82,7 @@ def vol2surf(in_vol, feat_path, freesurfer_dir, hemi, surface, surf_fwhm):
         ]
 
     p = Popen(cmd, env={**ENVIRON, 'SUBJECTS_DIR': str(freesurfer_dir)},
-              stdout=DEVNULL, stderr=DEVNULL)
+              stdout=PIPE, stderr=PIPE)
 
     info = {
         "surf": out_surf,
