@@ -10,8 +10,6 @@ from wonambi.attr import Channels, Freesurfer
 from wonambi.viz import Viz3
 
 from ..bidso import read_channels
-from ..utils import check_subprocess
-
 
 lg = getLogger(__name__)
 

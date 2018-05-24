@@ -40,14 +40,14 @@ def test_ieeg_compare_percent():
     assert_allclose(v, 22.123573)
 
 
-def test_ieeg_compare_dorat():
+def test_ieeg_compare_dh2012t():
 
     boavus([
         'ieeg',
         'compare',
         '--analysis_dir', str(ANALYSIS_PATH),
         '--log', 'debug',
-        '--measure', 'dora_t',
+        '--measure', 'dh2012_t',
         ])
 
     v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])

@@ -11,7 +11,7 @@ from bidso.utils import replace_underscore
 
 
 def main(analysis_dir, frequency_low=65, frequency_high=96, baseline=False,
-         method='dora', measure='dora_r2'):
+         method='dh2012', measure='dh2012_r2'):
     """
     compare the two conditions in percent change or zstat
 
@@ -26,9 +26,9 @@ def main(analysis_dir, frequency_low=65, frequency_high=96, baseline=False,
     baseline : bool
         if you want to substract baseline
     method : str
-        "dora"
+        "dh2012"
     measure : str
-        "dora_r2"
+        "dh2012_r2"
     """
     frequency = [frequency_low, frequency_high]
     for move_file in find_in_bids(analysis_dir, modality='freqmove', extension='.pkl', generator=True):
@@ -48,17 +48,17 @@ def main(analysis_dir, frequency_low=65, frequency_high=96, baseline=False,
             ecog_stats = compute_diff(hfa_move, hfa_rest)
         elif measure == 'percent':
             ecog_stats = compute_percent(hfa_move, hfa_rest)
-        elif measure in ('zstat', 'dora_t'):  # identical
+        elif measure in ('zstat', 'dh2012_t'):  # identical
             ecog_stats = compute_zstat(hfa_move, hfa_rest)
-            if measure == 'dora_t':
-                ecog_stats.data[0] *= -1  # opposite sign in Dora's script
+            if measure == 'dh2012_t':
+                ecog_stats.data[0] *= -1  # opposite sign in dh2012's script
 
-        elif measure == 'dora_r2':
-            ecog_stats = calc_dora_values(hfa_move, hfa_rest, measure)
+        elif measure == 'dh2012_r2':
+            ecog_stats = calc_dh2012_values(hfa_move, hfa_rest, measure)
 
         # need to check pvalues
         if True:
-            pvalues = calc_dora_values(hfa_move, hfa_rest, 'dora_pv')
+            pvalues = calc_dh2012_values(hfa_move, hfa_rest, 'dh2012_pv')
         else:
             pvalues = [NaN, ] * ecog_stats.number_of('chan')[0]
 
@@ -148,7 +148,7 @@ def merge(freq, method, frequency):
         # values per time point
         out = math(freq, operator_name='dB')
 
-    elif method == 'dora':
+    elif method == 'dh2012':
         # identical to 3b, but use log instead of dB
         freq = concatenate(freq, axis='time')
         freq = math(freq, operator_name='log')
@@ -184,8 +184,8 @@ def compute_zstat(hfa_move, hfa_rest):
     return Data(zstat, hfa_move.s_freq, chan=hfa_move.chan[0])
 
 
-def calc_dora_values(hfa_move, hfa_rest, measure):
-    """This is the exact translation of Dora's Matlab code
+def calc_dh2012_values(hfa_move, hfa_rest, measure):
+    """This is the exact translation of dh2012's Matlab code
     """
     ecog = hstack((hfa_move.data[0], hfa_rest.data[0]))
     stim = hstack((ones(hfa_move.data[0].shape[1]), ones(hfa_rest.data[0].shape[1]) * 0))
@@ -194,10 +194,10 @@ def calc_dora_values(hfa_move, hfa_rest, measure):
     for ecog_chan in ecog:
         [r, p] = pearsonr(ecog_chan, stim)
 
-        if measure == 'dora_r2':
+        if measure == 'dh2012_r2':
             val.append(r ** 2 * sign(r))
 
-        elif measure == 'dora_pv':
+        elif measure == 'dh2012_pv':
             val.append(p)
 
     return Data(array(val), hfa_move.s_freq, chan=hfa_move.chan[0])
