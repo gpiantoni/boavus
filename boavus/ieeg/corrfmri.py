@@ -22,7 +22,7 @@ IEEG_MODALITY = 'ieeg_compare'
 
 
 def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
-         regions=[], plot=False):
+         regions=[], pvalue=0.05, plot=False):
     """
     compare fMRI values at electrode locations to ECoG values
 
@@ -38,6 +38,8 @@ def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
 
     regions : list
 
+    pvalue : float
+
     plot : bool
 
     """
@@ -50,7 +52,7 @@ def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
         try:
             one_result = compute_corr_ecog_fmri(file_Core(fmri_at_elec_file),
                                                 bids_dir, analysis_dir, results_dir,
-                                                acquisition, regions)
+                                                acquisition, regions, pvalue)
 
         except FileNotFoundError as err:
             lg.warning(err)
@@ -66,7 +68,7 @@ def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
 
 
 def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir,
-                           acquisition, regions):
+                           acquisition, regions, PVALUE):
     fmri_tsv = read_tsv(fmri_file.filename)
 
     electrodes_file = find_in_bids(
@@ -100,7 +102,7 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir,
 
         for KERNEL in KERNELS:
             try:
-                r2 = compute_rsquared(ecog_tsv, fmri_tsv, KERNEL)
+                r2 = compute_rsquared(ecog_tsv, fmri_tsv, KERNEL, PVALUE)
             except Exception:
                 r2 = NaN
             f.write(f'{KERNEL}\t{r2}\n')
@@ -108,7 +110,7 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir,
     return results_tsv
 
 
-def compute_rsquared(ecog_tsv, fmri_tsv, KERNEL):
+def compute_rsquared(ecog_tsv, fmri_tsv, KERNEL, PVALUE):
     fmri_vals = []
     for one_ecog in ecog_tsv:
         one_val = [float(elec[KERNEL]) for elec in fmri_tsv if elec['channel'] == one_ecog['channel']][0]
@@ -118,7 +120,7 @@ def compute_rsquared(ecog_tsv, fmri_tsv, KERNEL):
     p_val = array([float(x['pvalue']) for x in ecog_tsv])
     x = ecog_val
     y = array(fmri_vals)
-    mask = ~isnan(x) & ~isnan(y) & (p_val <= 0.05)
+    mask = ~isnan(x) & ~isnan(y) & (p_val <= PVALUE)
 
     lr = linregress(x[mask], y[mask])
     return lr.rvalue ** 2
