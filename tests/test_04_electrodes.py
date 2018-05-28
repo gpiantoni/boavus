@@ -13,8 +13,8 @@ ieeg_file = task_ieeg.get_filename(BIDS_PATH)
 def test_ieeg_projectelectrodes():
 
     boavus([
-        'ieeg',
-        'project_electrodes',
+        'electrodes',
+        'project_to_surf',
         '--freesurfer_dir', str(FREESURFER_PATH),
         '--bids_dir', str(BIDS_PATH),
         '--analysis_dir', str(ANALYSIS_PATH),
@@ -27,7 +27,7 @@ def test_ieeg_projectelectrodes():
 def test_ieeg_assignregions():
 
     boavus([
-        'ieeg',
+        'electrodes',
         'assign_regions',
         '--freesurfer_dir', str(FREESURFER_PATH),
         '--bids_dir', str(BIDS_PATH),
@@ -40,8 +40,8 @@ def test_ieeg_assignregions():
 def test_ieeg_plotelectrodes(qtbot):
 
     boavus([
-        'ieeg',
-        'plot_electrodes',
+        'electrodes',
+        'plot',
         '--output_dir', str(BOAVUS_PATH),
         '--freesurfer_dir', str(FREESURFER_PATH),
         '--bids_dir', str(BIDS_PATH),
