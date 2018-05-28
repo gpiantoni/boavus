@@ -4,14 +4,12 @@ from logging import getLogger
 from math import ceil
 from multiprocessing import Pool, Process, cpu_count
 
-from numpy import arange, ndindex, array, sum, power, zeros, repeat, diag, NaN, nanmean, isfinite, nansum
+from numpy import arange, ndindex, array, sum, power, zeros, repeat, diag, NaN, isfinite, nansum
 from numpy.linalg import norm, inv
 from scipy.stats import norm as normdistr
 from nibabel import Nifti1Image
 from nibabel.affines import apply_affine
 from nibabel import load as nload
-
-from wonambi.attr import Freesurfer
 
 from bidso import file_Core, Electrodes
 from bidso.find import find_in_bids
@@ -24,7 +22,7 @@ lg = getLogger(__name__)
 
 def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
          distance='gaussian', acquisition='*regions', noparallel=False,
-         upsample=False, approach=False, kernel_start=6, kernel_end=8,
+         upsample=False, kernel_start=6, kernel_end=8,
          kernel_step=1):
     """
     Calculate the (weighted) average of fMRI values at electrode locations
@@ -47,8 +45,6 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
 
     upsample : bool
 
-    approach : bool
-
     kernel_start : int
 
     kernel_end : int
@@ -69,7 +65,7 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
         processes.append(Process(target=calc_fmri_at_elec,
                                  args=(measure_nii, bids_dir, freesurfer_dir,
                                        analysis_dir, upsample, acquisition,
-                                       kernels, graymatter, approach, distance,
+                                       kernels, graymatter, distance,
                                        n_cpu),
                                  daemon=False))  # make sure daemon is False, otherwise no children
 
@@ -78,8 +74,8 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
 
 
 def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
-                      upsample, acquisition, kernels, graymatter, approach,
-                      distance, n_cpu=None):
+                      upsample, acquisition, kernels, graymatter, distance,
+                      n_cpu=None):
     img = nload(str(measure_nii))
     if upsample:
         img = upsample_mri(img)
@@ -109,8 +105,7 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
         mri = mri.flatten()[i_ndi]
 
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
-    fmri_vals_list = compute_kernels(kernels, chan_xyz, mri, ndi, approach,
-                                     distance, n_cpu)
+    fmri_vals_list = compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu)
     fmri_vals = array(fmri_vals_list).reshape(-1, len(kernels))
 
     # TODO: it might be better to create a separate folder
@@ -172,9 +167,8 @@ def upsample_mri(img_lowres):
     return nifti
 
 
-def compute_kernels(kernels, chan_xyz, mri, ndi, approach, distance, n_cpu=None):
-    partial_compute_chan = partial(compute_chan, ndi=ndi, mri=mri,
-                                   approach=approach, distance=distance)
+def compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu=None):
+    partial_compute_chan = partial(compute_chan, ndi=ndi, mri=mri, distance=distance)
 
     args = product(chan_xyz, kernels)
     if n_cpu is None:
@@ -187,28 +181,21 @@ def compute_kernels(kernels, chan_xyz, mri, ndi, approach, distance, n_cpu=None)
     return fmri_val
 
 
-def compute_chan(pos, KERNEL, ndi, mri, approach, distance):
+def compute_chan(pos, KERNEL, ndi, mri, distance):
     dist_chan = norm(ndi - pos, axis=1)
 
-    if approach:
-        m = zeros(dist_chan.shape, dtype=bool)
-        m[dist_chan <= KERNEL] = True
-        m = m.reshape(mri.shape)
-        return nanmean(mri[m])
+    if distance == 'gaussian':
+        m = normdistr.pdf(dist_chan, scale=KERNEL)
 
-    else:
-        if distance == 'gaussian':
-            m = normdistr.pdf(dist_chan, scale=KERNEL)
+    elif distance == 'sphere':
+        m = zeros(dist_chan.shape)
+        m[dist_chan <= KERNEL] = 1
 
-        elif distance == 'sphere':
-            m = zeros(dist_chan.shape)
-            m[dist_chan <= KERNEL] = 1
+    elif distance == 'inverse':
+        m = power(dist_chan, -1 * KERNEL)
 
-        elif distance == 'inverse':
-            m = power(dist_chan, -1 * KERNEL)
+    m = m.reshape(mri.shape)
+    m /= sum(m[isfinite(mri)])  # normalize so that the sum of the finite numbers is 1
 
-        m = m.reshape(mri.shape)
-        m /= sum(m[isfinite(mri)])  # normalize so that the sum of the finite numbers is 1
-
-        mq = m * mri
-        return nansum(mq)
+    mq = m * mri
+    return nansum(mq)

@@ -98,23 +98,6 @@ def test_fmri_at_electrodes_inverse():
     assert_allclose(v, 60590.677291881606)
 
 
-def test_fmri_at_electrodes_approach():
-
-    boavus([
-        'fmri',
-        'at_electrodes',
-        '--bids_dir', str(BIDS_PATH),
-        '--freesurfer_dir', str(FREESURFER_PATH),
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--noparallel',
-        '--approach',
-        ])
-
-    v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 61441.387, atol=.5)  # additional tolerance
-
-
 def test_fmri_at_electrodes_gaussian():
     # run default as the last one, so that it's used by other functions
 
