@@ -10,7 +10,7 @@ from .paths import (BIDS_PATH,
 
 output_tsv = replace_underscore(task_fmri.get_filename(ANALYSIS_PATH),
                                 'bold_compare.tsv')
-nvox_tsv = replace_underscore(output_tsv, 'bold_nvoxels.tsv')
+nvox_tsv = replace_underscore(output_tsv, 'nvoxels.tsv')
 
 
 def test_fmri_at_electrodes_graymatter():
