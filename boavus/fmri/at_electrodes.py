@@ -145,9 +145,9 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
 
 def _get_ribbon(freesurfer_path, upsample, feat_path):
     if upsample:
-        ribbon = ribbon_to_feat(freesurfer_path, feat_path)
-    else:
         ribbon = freesurfer_path / 'mri' / 'ribbon.mgz'
+    else:
+        ribbon = ribbon_to_feat(freesurfer_path, feat_path)
     return ribbon
 
 
