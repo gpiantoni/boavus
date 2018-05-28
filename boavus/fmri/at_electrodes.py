@@ -3,8 +3,22 @@ from itertools import product
 from logging import getLogger
 from math import ceil
 from multiprocessing import Pool, Process, cpu_count
+import warnings
 
-from numpy import arange, ndindex, array, sum, power, zeros, repeat, diag, NaN, isfinite, nansum, isnan
+from numpy import (arange,
+                   ndindex,
+                   array,
+                   sum,
+                   power,
+                   zeros,
+                   repeat,
+                   diag,
+                   NaN,
+                   isfinite,
+                   nansum,
+                   isnan,
+                   where,
+                   )
 from numpy.linalg import norm, inv
 from scipy.stats import norm as normdistr
 from nibabel import Nifti1Image
@@ -18,6 +32,9 @@ from bidso.utils import replace_underscore
 from .utils import ribbon_to_feat
 
 lg = getLogger(__name__)
+
+COUNT_THRESHOLD = 0.5
+# 1 sigma = 0.6065306597126334
 
 
 def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
@@ -105,8 +122,7 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
         mri = mri.flatten()[i_ndi]
 
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
-    fmri_vals_list = compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu)
-    fmri_vals = array(fmri_vals_list).reshape(-1, len(kernels))
+    fmri_vals, n_voxels = compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu)
 
     # TODO: it might be better to create a separate folder
     for old_tsv in measure_nii.parent.glob(replace_underscore(measure_nii.name, '*.tsv')):
@@ -118,6 +134,12 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
     with fmri_vals_tsv.open('w') as f:
         f.write('channel\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
         for one_label, val_at_elec in zip(labels, fmri_vals):
+            f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
+
+    n_voxels_tsv = replace_underscore(measure_nii, 'nvoxels.tsv')
+    with n_voxels_tsv.open('w') as f:
+        f.write('channel\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
+        for one_label, val_at_elec in zip(labels, n_voxels):
             f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
 
 
@@ -172,13 +194,19 @@ def compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu=None):
 
     args = product(chan_xyz, kernels)
     if n_cpu is None:
-        fmri_val = [partial_compute_chan(*arg) for arg in args]
+        output = [partial_compute_chan(*arg) for arg in args]
     else:
         lg.debug(f'Number of CPU: {n_cpu}')
         with Pool(n_cpu) as p:
-            fmri_val = p.starmap(partial_compute_chan, args)
+            output = p.starmap(partial_compute_chan, args)
 
-    return fmri_val
+    fmri_vals = [i[0] for i in output]
+    n_voxels = [i[1] for i in output]
+
+    fmri_vals = array(fmri_vals).reshape(-1, len(kernels))
+    n_voxels = array(n_voxels).reshape(-1, len(kernels))
+
+    return fmri_vals, n_voxels
 
 
 def compute_chan(pos, KERNEL, ndi, mri, distance):
@@ -186,6 +214,7 @@ def compute_chan(pos, KERNEL, ndi, mri, distance):
 
     if distance == 'gaussian':
         m = normdistr.pdf(dist_chan, scale=KERNEL)
+        m /= normdistr.pdf(0, scale=KERNEL)  # normalize so that peak is at 1, so that it's easier to count voxels
 
     elif distance == 'sphere':
         m = zeros(dist_chan.shape)
@@ -196,7 +225,34 @@ def compute_chan(pos, KERNEL, ndi, mri, distance):
 
     m = m.reshape(mri.shape)
     m[isnan(mri)] = NaN
+    n_vox = _count_voxels(m)
+
     m /= sum(m[isfinite(m)])  # normalize so that the sum of the finite numbers is 1
 
     mq = m * mri
-    return nansum(mq)
+    return nansum(mq), n_vox
+
+
+def _count_voxels(m):
+    """Count voxels inside a 3D weight matrix.
+
+    Parameters
+    ----------
+    m : 3d ndarray
+        matrix as same size as mri, where the peak is 1 and each voxel has
+        the weight based on the distance parameters
+
+    Returns
+    -------
+    int
+        number of voxels which have a weight higher than COUNT_THRESHOLD
+
+    Notes
+    -----
+    Suppress RunTimeWarning because of > used against NaN.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        n_vox = len(where(m >= COUNT_THRESHOLD)[0])
+
+    return n_vox

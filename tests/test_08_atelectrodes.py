@@ -10,6 +10,7 @@ from .paths import (BIDS_PATH,
 
 output_tsv = replace_underscore(task_fmri.get_filename(ANALYSIS_PATH),
                                 'bold_compare.tsv')
+nvox_tsv = replace_underscore(output_tsv, 'bold_nvoxels.tsv')
 
 
 def test_fmri_at_electrodes_graymatter():
@@ -28,6 +29,9 @@ def test_fmri_at_electrodes_graymatter():
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 54836.57947565812)
 
+    v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 10)
+
 
 def test_fmri_at_electrodes_upsample():
 
@@ -44,6 +48,9 @@ def test_fmri_at_electrodes_upsample():
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 59358.997935)
+
+    v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 2294)
 
 
 def test_fmri_at_electrodes_graymatter_upsample():
@@ -63,6 +70,9 @@ def test_fmri_at_electrodes_graymatter_upsample():
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 59690.03212629289)
 
+    v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 0)
+
 
 def test_fmri_at_electrodes_sphere():
 
@@ -79,6 +89,9 @@ def test_fmri_at_electrodes_sphere():
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 61441.38281250001)
+
+    v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 22)
 
 
 def test_fmri_at_electrodes_inverse():
@@ -97,6 +110,9 @@ def test_fmri_at_electrodes_inverse():
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 60590.677291881606)
 
+    v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 0)
+
 
 def test_fmri_at_electrodes_gaussian():
     # run default as the last one, so that it's used by other functions
@@ -112,3 +128,6 @@ def test_fmri_at_electrodes_gaussian():
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 59382.12053669494)
+
+    v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
+    assert_allclose(v, 33)
