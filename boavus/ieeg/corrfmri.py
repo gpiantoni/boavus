@@ -162,24 +162,13 @@ def plot_single_points(ecog_tsv, fmri_tsv, kernel, pvalue):
         ]
 
     layout = go.Layout(
-        title=f'Correlation with {float(kernel):.2f}mm kernel size',
+        title=f'Correlation with {float(kernel):.2f}mm kernel size<br />R<sup>2</sup> = {lr.rvalue ** 2:.3f}<br />Y = {lr.slope:.3f}X + {lr.intercept:.3f}',
         xaxis=go.XAxis(
             title='ECoG values',
             ),
         yaxis=go.YAxis(
             title='fMRI values',
             ),
-        annotations=[
-            go.Annotation(
-                x=min(ecog_val),
-                y=lr.slope * min(ecog_val) + lr.intercept,
-                text=f'R<sup>2</sup> = {lr.rvalue ** 2:.3f}<br />Y = {lr.slope:.3f}X + {lr.intercept:.3f}',
-                showarrow=True,
-                font=go.Font(
-                    size=16,
-                    )
-                ),
-            ],
         )
     fig = go.Figure(
         data=traces,
