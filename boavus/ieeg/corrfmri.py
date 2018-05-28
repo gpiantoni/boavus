@@ -15,10 +15,11 @@ from ..bidso import find_labels_in_regions
 
 lg = getLogger(__name__)
 
-ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
-PNG_DIR = 'corr_ieeg_fmri_png'
 FMRI_MODALITY = 'bold_compare'
 IEEG_MODALITY = 'ieeg_compare'
+ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
+PNG_DIR = 'corr_ieeg_fmri_png'
+SINGLE_POINTS_DIR = 'corr_ieeg_fmri_point'
 
 
 def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
@@ -47,12 +48,17 @@ def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
     rmtree(results_dir, ignore_errors=True)
     results_dir.mkdir(exist_ok=True, parents=True)
 
+    if plot:
+        singlepoints_dir = output_dir / SINGLE_POINTS_DIR
+        rmtree(singlepoints_dir, ignore_errors=True)
+        singlepoints_dir.mkdir(exist_ok=True, parents=True)
+
     results = []
     for fmri_at_elec_file in find_in_bids(analysis_dir, generator=True, modality=FMRI_MODALITY, extension='.tsv'):
         try:
             one_result = compute_corr_ecog_fmri(file_Core(fmri_at_elec_file),
-                                                bids_dir, analysis_dir, results_dir,
-                                                acquisition, regions, pvalue)
+                                                bids_dir, analysis_dir, output_dir,
+                                                acquisition, regions, pvalue, plot)
 
         except FileNotFoundError as err:
             lg.warning(err)
@@ -67,8 +73,8 @@ def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
             plot_results(results, output_dir)
 
 
-def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir,
-                           acquisition, regions, PVALUE):
+def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, output_dir,
+                           acquisition, regions, PVALUE, PLOT):
     fmri_tsv = read_tsv(fmri_file.filename)
 
     electrodes_file = find_in_bids(
@@ -94,23 +100,103 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, results_dir,
     ecog_tsv = list(filter(lambda x: x['channel'] in labels_in_roi, ecog_tsv))
     lg.debug(f'Using {len(ecog_tsv)}/{n_all_elec} electrodes in ROI')
 
-    KERNELS = [col for col in fmri_tsv[0] if col != 'channel']
+    KERNELS = array([col for col in fmri_tsv[0] if col != 'channel'])
 
-    results_tsv = results_dir / replace_underscore(fmri_file.get_filename(), fmri_file.modality + '.tsv')
+    results_tsv = output_dir / ZSTAT_DIR / replace_underscore(fmri_file.get_filename(), fmri_file.modality + '.tsv')
     with results_tsv.open('w') as f:
         f.write('Kernel\tRsquared\n')
 
+        all_r2 = []
         for KERNEL in KERNELS:
             try:
-                r2 = compute_rsquared(ecog_tsv, fmri_tsv, KERNEL, PVALUE)
+                ecog_val, p_val, fmri_val = read_measures(ecog_tsv, fmri_tsv, KERNEL)
+                r2 = compute_rsquared(ecog_val, fmri_val, p_val, PVALUE)
             except Exception:
                 r2 = NaN
+            all_r2.append(r2)
             f.write(f'{KERNEL}\t{r2}\n')
+
+    all_r2 = array(all_r2)
+    if PLOT:
+        best_kernel = KERNELS[argmax(all_r2)]
+        fig = plot_single_points(ecog_tsv, fmri_tsv, best_kernel, PVALUE)
+        singlepoints_png = output_dir / SINGLE_POINTS_DIR / (results_tsv.stem + '.png')
+        export_plotly(fig, singlepoints_png)
 
     return results_tsv
 
 
-def compute_rsquared(ecog_tsv, fmri_tsv, KERNEL, PVALUE):
+def plot_single_points(ecog_tsv, fmri_tsv, kernel, pvalue):
+    ecog_val, p_val, fmri_val = read_measures(ecog_tsv, fmri_tsv, kernel)
+    mask = ~isnan(ecog_val) & ~isnan(fmri_val) & (p_val <= pvalue)
+    lr = linregress(ecog_val[mask], fmri_val[mask])
+
+    traces = [
+        go.Scatter(
+            name='not significant',
+            x=ecog_val[p_val > pvalue],
+            y=fmri_val[p_val > pvalue],
+            mode='markers',
+            marker=go.Marker(
+                color='cyan',
+                )
+            ),
+        go.Scatter(
+            name='significant',
+            x=ecog_val[p_val <= pvalue],
+            y=fmri_val[p_val <= pvalue],
+            mode='markers',
+            marker=go.Marker(
+                color='magenta',
+                )
+            ),
+        go.Scatter(
+            x=ecog_val,
+            y=lr.slope * ecog_val + lr.intercept,
+            mode='lines',
+            marker=go.Marker(
+                color='magenta'
+                ),
+            name='Fit'
+            ),
+        ]
+
+    layout = go.Layout(
+        title=f'Correlation with {float(kernel):.2f}mm kernel size',
+        xaxis=go.XAxis(
+            title='ECoG values',
+            ),
+        yaxis=go.YAxis(
+            title='fMRI values',
+            ),
+        annotations=[
+            go.Annotation(
+                x=min(ecog_val),
+                y=lr.slope * min(ecog_val) + lr.intercept,
+                text=f'R<sup>2</sup> = {lr.rvalue ** 2:.3f}<br />Y = {lr.slope:.3f}X + {lr.intercept:.3f}',
+                showarrow=True,
+                font=go.Font(
+                    size=16,
+                    )
+                ),
+            ],
+        )
+    fig = go.Figure(
+        data=traces,
+        layout=layout,
+        )
+
+    return fig
+
+
+def compute_rsquared(x, y, p_val, PVALUE):
+    mask = ~isnan(x) & ~isnan(y) & (p_val <= PVALUE)
+
+    lr = linregress(x[mask], y[mask])
+    return lr.rvalue ** 2
+
+
+def read_measures(ecog_tsv, fmri_tsv, KERNEL):
     fmri_vals = []
     for one_ecog in ecog_tsv:
         one_val = [float(elec[KERNEL]) for elec in fmri_tsv if elec['channel'] == one_ecog['channel']][0]
@@ -118,12 +204,7 @@ def compute_rsquared(ecog_tsv, fmri_tsv, KERNEL, PVALUE):
 
     ecog_val = array([float(x['measure']) for x in ecog_tsv])
     p_val = array([float(x['pvalue']) for x in ecog_tsv])
-    x = ecog_val
-    y = array(fmri_vals)
-    mask = ~isnan(x) & ~isnan(y) & (p_val <= PVALUE)
-
-    lr = linregress(x[mask], y[mask])
-    return lr.rvalue ** 2
+    return ecog_val, p_val, array(fmri_vals)
 
 
 def plot_results(results_tsv, output_dir):
