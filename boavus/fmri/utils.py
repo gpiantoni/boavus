@@ -1,10 +1,12 @@
 """Various functions, that I don't know where to place
 """
-from nibabel import load as nload
-from numpy import array
-from ..utils import check_subprocess
 from subprocess import run, PIPE
 
+from nibabel import load as nload
+from numpy import array, zeros
+from nibabel import Nifti1Image
+
+from ..utils import check_subprocess
 
 def get_vox2ras_tkr(filename):
     """This should be identical
@@ -46,3 +48,23 @@ def ribbon_to_feat(freesurfer_path, feat_path):
         check_subprocess(p)
 
     return o
+
+
+def ribbon_to_graymatter(freesurfer_dir, analysis_dir, subject):
+    anat_dir = analysis_dir / ('sub-' + subject) / 'anat'  # TODO: 'anat'
+    graymatter_file = anat_dir / 'ribbon_graymatter.nii.gz'
+
+    if graymatter_file.exists():
+        nifti = nload(str(graymatter_file))
+
+    else:
+        ribbon_file = freesurfer_dir / ('sub-' + subject) / 'mri' / 'ribbon.mgz'
+        ribbon = nload(str(ribbon_file))
+        ribbon_mri = ribbon.get_data()
+
+        graymatter = zeros(ribbon_mri.shape)
+        graymatter[(ribbon_mri == 42) | (ribbon_mri == 3)] = 1
+        nifti = Nifti1Image(graymatter, ribbon.affine)
+        nifti.to_filename(str(graymatter_file))
+
+    return nifti

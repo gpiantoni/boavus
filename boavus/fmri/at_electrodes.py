@@ -29,7 +29,7 @@ from bidso import file_Core, Electrodes
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 
-from .utils import ribbon_to_feat
+from .utils import ribbon_to_feat, ribbon_to_graymatter
 
 lg = getLogger(__name__)
 
@@ -43,6 +43,8 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
          kernel_step=1):
     """
     Calculate the (weighted) average of fMRI values at electrode locations
+
+    TODO: Make sure that upsample mri and bold are in the same space
 
     Parameters
     ----------
@@ -114,12 +116,13 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
     ndi = from_mrifile_to_chan(img, nd)
 
     if graymatter:
-        freesurfer_path = freesurfer_dir / ('sub-' + task_fmri.subject)
-        feat_path = find_in_bids(analysis_dir, subject=task_fmri.subject, extension='.feat')
-        ribbon = _get_ribbon(freesurfer_path, upsample, feat_path)
-        i_ndi = _select_graymatter(ndi, ribbon)
-        ndi = ndi[i_ndi, :]
-        mri = mri.flatten()[i_ndi]
+        if upsample:
+            graymatter = ribbon_to_graymatter(freesurfer_dir, analysis_dir,
+                                              task_fmri.subject)
+            gm_mri = graymatter.get_data().astype(bool)
+            mri[~gm_mri] = NaN
+        else:
+            raise NotImplementedError('graymatter / not upsample')
 
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
     fmri_vals, n_voxels = compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu)
@@ -149,22 +152,6 @@ def _get_ribbon(freesurfer_path, upsample, feat_path):
     else:
         ribbon = ribbon_to_feat(freesurfer_path, feat_path)
     return ribbon
-
-
-def _select_graymatter(ndi, ribbon):
-    ribbon = nload(str(ribbon))
-    x = from_chan_to_mrifile(ribbon, ndi)
-
-    r_mri = ribbon.get_data()
-
-    brain = zeros(x.shape[0], dtype=bool)
-    for i, i_x in enumerate(x):
-        try:
-            brain[i] = (r_mri[tuple(i_x)] == 42) or (r_mri[tuple(i_x)] == 3)
-        except IndexError:
-            continue
-
-    return brain
 
 
 def from_chan_to_mrifile(img, xyz):
