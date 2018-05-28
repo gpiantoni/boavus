@@ -115,8 +115,8 @@ def test_ieeg_compare():
 def test_ieeg_plotelectrodes_measure(qtbot):
 
     boavus([
-        'ieeg',
-        'plot_electrodes',
+        'electrodes',
+        'plot',
         '--output_dir',
         str(BOAVUS_PATH),
         '--freesurfer_dir',
