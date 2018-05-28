@@ -4,7 +4,7 @@ from logging import getLogger
 from math import ceil
 from multiprocessing import Pool, Process, cpu_count
 
-from numpy import arange, ndindex, array, sum, power, zeros, repeat, diag, NaN, isfinite, nansum
+from numpy import arange, ndindex, array, sum, power, zeros, repeat, diag, NaN, isfinite, nansum, isnan
 from numpy.linalg import norm, inv
 from scipy.stats import norm as normdistr
 from nibabel import Nifti1Image
@@ -195,7 +195,8 @@ def compute_chan(pos, KERNEL, ndi, mri, distance):
         m = power(dist_chan, -1 * KERNEL)
 
     m = m.reshape(mri.shape)
-    m /= sum(m[isfinite(mri)])  # normalize so that the sum of the finite numbers is 1
+    m[isnan(mri)] = NaN
+    m /= sum(m[isfinite(m)])  # normalize so that the sum of the finite numbers is 1
 
     mq = m * mri
     return nansum(mq)
