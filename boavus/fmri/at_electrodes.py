@@ -98,6 +98,8 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
     img = nload(str(measure_nii))
     if upsample:
         img = upsample_mri(img)
+        upsampled_measure_nii = replace_underscore(measure_nii, 'comparehd.nii.gz')
+        img.to_filename(str(upsampled_measure_nii))
     mri = img.get_data()
     mri[mri == 0] = NaN
 
