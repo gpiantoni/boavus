@@ -3,7 +3,6 @@ from itertools import product
 from logging import getLogger
 from math import ceil
 from multiprocessing import Pool, Process, cpu_count
-from pathlib import Path
 import warnings
 
 from numpy import (arange,
@@ -27,8 +26,11 @@ from bidso import file_Core, Electrodes
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore, replace_extension
 
-from .utils import ribbon_to_feat, ribbon_to_graymatter
-from ..fsl.misc import run_flirt_resample
+from .utils import ribbon2graymatter
+from ..fsl.misc import (run_flirt_resample,
+                        run_flirt_feat,
+                        run_fslmaths_threshold,
+                        )
 
 
 lg = getLogger(__name__)
@@ -125,18 +127,18 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
     ndi = from_mrifile_to_chan(img, nd)
 
     if graymatter:
-        graymatter = ribbon_to_graymatter(freesurfer_dir, analysis_dir,
-                                          task_fmri.subject)
-        gm_file = Path(graymatter.get_filename())
+        gm_file = ribbon2graymatter(task_fmri, freesurfer_dir)
         lg.debug(f'High-resolution graymatter file: {gm_file}')
 
         if not upsample:
             gm_lowres_file = replace_extension(gm_file, '_downsample.nii.gz')
             run_flirt_resample(gm_file, gm_lowres_file, DOWNSAMPLE_RESOLUTION)
-            graymatter = nload(str(gm_lowres_file))
+            gm_file = run_fslmaths_threshold(gm_lowres_file, .5)
             lg.debug(f'Same resolution as fMRI: {gm_lowres_file}')
 
-        gm_mri = graymatter.get_data() > GRAYMATTER_THRESHOLD
+        gm_feat_file = run_flirt_feat(task_fmri, gm_file)
+        lg.debug(f'Same affine as fMRI: {gm_feat_file}')
+        gm_mri = nload(str(gm_feat_file)).get_data().astype(bool)
         mri[~gm_mri] = NaN
 
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
