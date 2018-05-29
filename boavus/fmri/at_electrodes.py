@@ -3,6 +3,7 @@ from itertools import product
 from logging import getLogger
 from math import ceil
 from multiprocessing import Pool, Process, cpu_count
+from pathlib import Path
 import warnings
 
 from numpy import (arange,
@@ -11,8 +12,6 @@ from numpy import (arange,
                    sum,
                    power,
                    zeros,
-                   repeat,
-                   diag,
                    NaN,
                    isfinite,
                    nansum,
@@ -21,20 +20,23 @@ from numpy import (arange,
                    )
 from numpy.linalg import norm, inv
 from scipy.stats import norm as normdistr
-from nibabel import Nifti1Image
 from nibabel.affines import apply_affine
 from nibabel import load as nload
 
 from bidso import file_Core, Electrodes
 from bidso.find import find_in_bids
-from bidso.utils import replace_underscore
+from bidso.utils import replace_underscore, replace_extension
 
 from .utils import ribbon_to_feat, ribbon_to_graymatter
+from ..fsl.misc import run_flirt_resample
+
 
 lg = getLogger(__name__)
 
 COUNT_THRESHOLD = 0.5
 # 1 sigma = 0.6065306597126334
+UPSAMPLE_RESOLUTION = 1
+DOWNSAMPLE_RESOLUTION = 4
 
 
 def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
@@ -43,8 +45,6 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
          kernel_step=1):
     """
     Calculate the (weighted) average of fMRI values at electrode locations
-
-    TODO: Make sure that upsample mri and bold are in the same space
 
     Parameters
     ----------
@@ -71,6 +71,9 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
     kernel_step : float
 
     """
+    if graymatter and freesurfer_dir is None:
+        raise ValueError('You need to specify "freesurfer_dir" if you select the gray matter')
+
     n_processes = len(list(find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True)))
     kernels = arange(kernel_start, kernel_end, kernel_step)
 
@@ -95,11 +98,14 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
 def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
                       upsample, acquisition, kernels, graymatter, distance,
                       n_cpu=None):
-    img = nload(str(measure_nii))
+
     if upsample:
-        img = upsample_mri(img)
         upsampled_measure_nii = replace_underscore(measure_nii, 'comparehd.nii.gz')
-        img.to_filename(str(upsampled_measure_nii))
+        lg.debug(f'Upsampling measure file: {upsampled_measure_nii}')
+        run_flirt_resample(measure_nii, upsampled_measure_nii, UPSAMPLE_RESOLUTION)
+        measure_nii = upsampled_measure_nii
+
+    img = nload(str(measure_nii))
     mri = img.get_data()
     mri[mri == 0] = NaN
 
@@ -118,13 +124,19 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
     ndi = from_mrifile_to_chan(img, nd)
 
     if graymatter:
-        if upsample:
-            graymatter = ribbon_to_graymatter(freesurfer_dir, analysis_dir,
-                                              task_fmri.subject)
-            gm_mri = graymatter.get_data().astype(bool)
-            mri[~gm_mri] = NaN
-        else:
-            raise NotImplementedError('graymatter / not upsample')
+        graymatter = ribbon_to_graymatter(freesurfer_dir, analysis_dir,
+                                          task_fmri.subject)
+        gm_file = Path(graymatter.get_filename())
+        lg.debug(f'High-resolution graymatter file: {gm_file}')
+
+        if not upsample:
+            gm_lowres_file = replace_extension(gm_file, '_downsample.nii.gz')
+            run_flirt_resample(gm_file, gm_lowres_file, DOWNSAMPLE_RESOLUTION)
+            graymatter = nload(str(gm_lowres_file))
+            lg.debug(f'Same resolution as fMRI: {gm_lowres_file}')
+
+        gm_mri = graymatter.get_data().astype(bool)
+        mri[~gm_mri] = NaN
 
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
     fmri_vals, n_voxels = compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu)
@@ -162,20 +174,6 @@ def from_chan_to_mrifile(img, xyz):
 
 def from_mrifile_to_chan(img, xyz):
     return apply_affine(img.affine, xyz)
-
-
-def upsample_mri(img_lowres):
-    lowres = img_lowres.get_data()
-    r = lowres.copy()
-    for i in range(3):
-        r = repeat(r, 4, axis=i)
-
-    af = img_lowres.affine.copy()
-    af[:3, :3] /= 4
-    af[:3, -1] -= diag(af)[:3] * 1.5  # I think it's 4 / 2 - 1 / 2 (not sure about where to get the sign)
-
-    nifti = Nifti1Image(r, af)
-    return nifti
 
 
 def compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu=None):

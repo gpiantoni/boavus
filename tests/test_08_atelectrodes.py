@@ -1,6 +1,7 @@
 from boavus import boavus
 from bidso.utils import read_tsv, replace_underscore
 from numpy.testing import assert_allclose
+from pytest import raises
 
 from .paths import (BIDS_PATH,
                     ANALYSIS_PATH,
@@ -11,6 +12,19 @@ from .paths import (BIDS_PATH,
 output_tsv = replace_underscore(task_fmri.get_filename(ANALYSIS_PATH),
                                 'bold_compare.tsv')
 nvox_tsv = replace_underscore(output_tsv, 'nvoxels.tsv')
+
+
+def test_fmri_at_electrodes_graymatter_error():
+
+    with raises(ValueError):
+        boavus([
+            'fmri',
+            'at_electrodes',
+            '--bids_dir', str(BIDS_PATH),
+            '--analysis_dir', str(ANALYSIS_PATH),
+            '--log', 'debug',
+            '--graymatter',
+            ])
 
 
 def test_fmri_at_electrodes_graymatter():
@@ -27,10 +41,10 @@ def test_fmri_at_electrodes_graymatter():
         ])
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 54836.57947565812)
+    assert_allclose(v, 59196.672219)
 
     v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 10)
+    assert_allclose(v, 0)
 
 
 def test_fmri_at_electrodes_upsample():
@@ -39,7 +53,6 @@ def test_fmri_at_electrodes_upsample():
         'fmri',
         'at_electrodes',
         '--bids_dir', str(BIDS_PATH),
-        '--freesurfer_dir', str(FREESURFER_PATH),
         '--analysis_dir', str(ANALYSIS_PATH),
         '--noparallel',
         '--log', 'debug',
@@ -47,10 +60,10 @@ def test_fmri_at_electrodes_upsample():
         ])
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 59358.997935)
+    assert_allclose(v, 56550.003565)
 
     v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 2294)
+    assert_allclose(v, 2338)
 
 
 def test_fmri_at_electrodes_graymatter_upsample():
@@ -68,7 +81,7 @@ def test_fmri_at_electrodes_graymatter_upsample():
         ])
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 59690.03212629289)
+    assert_allclose(v, 58563.469165)
 
     v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
     assert_allclose(v, 0)
