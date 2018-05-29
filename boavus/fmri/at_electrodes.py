@@ -37,6 +37,7 @@ COUNT_THRESHOLD = 0.5
 # 1 sigma = 0.6065306597126334
 UPSAMPLE_RESOLUTION = 1
 DOWNSAMPLE_RESOLUTION = 4
+GRAYMATTER_THRESHOLD = 0.5
 
 
 def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
@@ -135,7 +136,7 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
             graymatter = nload(str(gm_lowres_file))
             lg.debug(f'Same resolution as fMRI: {gm_lowres_file}')
 
-        gm_mri = graymatter.get_data().astype(bool)
+        gm_mri = graymatter.get_data() > GRAYMATTER_THRESHOLD
         mri[~gm_mri] = NaN
 
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
