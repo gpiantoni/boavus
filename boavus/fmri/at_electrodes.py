@@ -161,14 +161,6 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
             f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
 
 
-def _get_ribbon(freesurfer_path, upsample, feat_path):
-    if upsample:
-        ribbon = freesurfer_path / 'mri' / 'ribbon.mgz'
-    else:
-        ribbon = ribbon_to_feat(freesurfer_path, feat_path)
-    return ribbon
-
-
 def from_chan_to_mrifile(img, xyz):
     return apply_affine(inv(img.affine), xyz).astype(int)
 
