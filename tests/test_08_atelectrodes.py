@@ -81,10 +81,10 @@ def test_fmri_at_electrodes_graymatter_upsample():
         ])
 
     v = float([x['7'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 55097.180256)
+    assert_allclose(v, 55097.18025556713)
 
     v = int([x['7'] for x in read_tsv(nvox_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 0)
+    assert_allclose(v, 702)
 
 
 def test_fmri_at_electrodes_sphere():

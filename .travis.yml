@@ -9,6 +9,10 @@ env:
     - LIB=$HOME/lib
     - DERIVATIVES=tests/data/derivatives
     - INSTALL=$HOME/bin
+    - SOURCE_PATH=$TRAVIS_BUILD_DIR/docs/source
+    - API_PATH=$SOURCE_PATH/api
+    - BUILD_PATH=$TRAVIS_BUILD_DIR/docs/build
+    - HTML_PATH=$TRAVIS_BUILD_DIR/docs/build/html
 
 cache: 
  - directories:
@@ -85,6 +89,9 @@ script:
 
 after_success:
   - codecov
+  - pip install sphinx sphinx_rtd_theme
+  - sphinx-apidoc -fMeT -o $API_PATH boavus
+  - sphinx-build -T -b html -d $BUILD_PATH/doctrees $SOURCE_PATH $HTML_PATH
 
 notifications:
   email: false
