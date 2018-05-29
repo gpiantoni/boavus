@@ -1,10 +1,9 @@
 BOAVUS
 ======
-Transparent Object-Oriented Approach to BIDS in Python.
+Analysis of ECoG and fMRI data in Python based on BIDS
 
 Features
 --------
-
 - Pure Python
 
 Installation
@@ -17,6 +16,8 @@ Requirements
 ------------
 - Python 3.6
 - bidso
+- fsl
+- freesurfer
 
 License
 -------
