@@ -3,6 +3,7 @@ from shutil import rmtree
 
 from numpy import argmax, array, polyfit, isnan, NaN
 from scipy.stats import linregress
+from collections import defaultdict
 import plotly.graph_objs as go
 
 from exportimages import export_plotly, Webdriver
@@ -20,6 +21,16 @@ IEEG_MODALITY = 'ieeg_compare'
 ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
 PNG_DIR = 'corr_ieeg_fmri_png'
 SINGLE_POINTS_DIR = 'corr_ieeg_fmri_point'
+
+
+ATTRIBUTES = [
+    'acquisition',
+    'task',
+    ]
+VALUE_TYPES = [
+    'peak',
+    'r2',
+    ]
 
 
 def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
@@ -102,7 +113,7 @@ def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, output_dir,
 
     KERNELS = array([col for col in fmri_tsv[0] if col != 'channel'])
 
-    results_tsv = output_dir / ZSTAT_DIR / replace_underscore(fmri_file.get_filename(), fmri_file.modality + '.tsv')
+    results_tsv = output_dir / ZSTAT_DIR / replace_underscore(ecog_file.stem, 'bold_r2.tsv')
     with results_tsv.open('w') as f:
         f.write('Kernel\tRsquared\n')
 
@@ -203,170 +214,19 @@ def plot_results(results_tsv, output_dir):
 
     with Webdriver(img_dir) as d:
         for one_tsv in results_tsv:
-            if one_tsv is None:
-                continue
-
-            results = read_tsv(one_tsv)
-            k = [float(x['Kernel']) for x in results]
-            rsquared = [float(x['Rsquared']) for x in results]
-            traces = [{
-                'x': k,
-                'y': rsquared,
-                },
-                ]
-
-            if ('duiven' in one_tsv.stem) or ('ommen' in one_tsv.stem) or ('vledder' in one_tsv.stem):
-                title = 'high-density'
-            else:
-                title = 'clinical'
-            layout = go.Layout(
-                title=title,
-                xaxis=dict(
-                    title='mm',
-                    range=(min(k), max(k)),
-                    ),
-                yaxis=dict(
-                    title='r<sup>2</sup>',
-                    rangemode='tozero',
-                    ),
-                )
-
-            fig = go.Figure(data=traces, layout=layout)
+            fig = _plot_fit_over_kernel(one_tsv)
             output_png = img_dir / (one_tsv.stem + '.png')
             export_plotly(fig, output_png, driver=d)
 
-        # histogram
-        thumb_val = []
-        hand_val = []
-
-        for one_tsv in results_tsv:
-            vals = read_shape(one_tsv)
-            if vals[0] < 0:
-                if 'thumb' in one_tsv.stem:
-                    thumb_val.append(vals[1])
-                else:
-                    hand_val.append(vals[1])
-
-        xbins = dict(
-            start=-.5,
-            end=9,
-            size=1
-            )
-
-        traces = [
-            go.Histogram(
-                x=hand_val,
-                xbins=xbins,
-                name='hand',
-            ),
-            go.Histogram(
-                x=thumb_val,
-                xbins=xbins,
-                name='thumb',
-            ),
-            ]
-
-        layout = go.Layout(
-            xaxis=dict(
-                title='mm',
-                range=(min(k), max(k)),
-                ),
-            yaxis=dict(
-                title='# tasks',
-                ),
-            )
-
-        fig = go.Figure(data=traces, layout=layout)
-        output_png = img_dir / 'histogram_handthumb.png'
-        export_plotly(fig, output_png, driver=d)
-
-        # histogram
-        thumb_val = []
-        hand_val = []
-
-        for one_tsv in results_tsv:
-            vals = read_shape(one_tsv)
-            if vals[0] < 0:
-                if ('duiven' in one_tsv.stem) or ('ommen' in one_tsv.stem) or ('vledder' in one_tsv.stem):
-                    thumb_val.append(vals[1])
-                else:
-                    hand_val.append(vals[1])
-
-        xbins = dict(
-            start=-.5,
-            end=9,
-            size=1
-            )
-
-        traces = [
-            go.Histogram(
-                x=hand_val,
-                xbins=xbins,
-                name='clinical',
-            ),
-            go.Histogram(
-                x=thumb_val,
-                xbins=xbins,
-                name='high density',
-            ),
-            ]
-        layout = go.Layout(
-            xaxis=dict(
-                title='mm',
-                range=(min(k), max(k)),
-                ),
-            yaxis=dict(
-                title='# tasks',
-                ),
-            )
-
-        fig = go.Figure(data=traces, layout=layout)
-        output_png = img_dir / 'histogram_gridtype.png'
-        export_plotly(fig, output_png, driver=d)
-
-        # histogram
-        thumb_val = []
-        hand_val = []
-
-        for one_tsv in results_tsv:
-            vals = read_shape(one_tsv)
-            if vals[0] < 0:
-                if ('duiven' in one_tsv.stem) or ('ommen' in one_tsv.stem) or ('vledder' in one_tsv.stem):
-                    thumb_val.append(vals[2])
-                else:
-                    hand_val.append(vals[2])
-
-        xbins = dict(
-            start=-.05,
-            end=1,
-            size=.1
-            )
-
-        traces = [
-            go.Histogram(
-                x=hand_val,
-                xbins=xbins,
-                name='clinical',
-            ),
-            go.Histogram(
-                x=thumb_val,
-                xbins=xbins,
-                name='high density',
-            ),
-            ]
-        layout = go.Layout(
-            xaxis=dict(
-                title='r<sup>2</sup>',
-                range=(0, 1),
-                ),
-            yaxis=dict(
-                title='# tasks',
-                ),
-            )
-
-        fig = go.Figure(data=traces, layout=layout)
-        output_png = img_dir / 'histogram_gridtype_rsquared.png'
-        export_plotly(fig, output_png, driver=d)
+        for value_type in VALUE_TYPES:
+            for attribute in ATTRIBUTES:
+                val_per_group, max_val = read_values_per_group(results_tsv,
+                                                               attribute,
+                                                               value_type)
+                fig = _plot_histogram(val_per_group, max_val, attribute,
+                                      value_type)
+                output_png = img_dir / f'histogram_{attribute}_{value_type}.png'
+                export_plotly(fig, output_png, driver=d)
 
 
 def read_shape(one_tsv):
@@ -375,3 +235,85 @@ def read_shape(one_tsv):
     rsquared = [float(x['Rsquared']) for x in results]
 
     return polyfit(k, rsquared, 2)[0], k[argmax(rsquared)], max(rsquared)
+
+
+def read_values_per_group(results_tsv, attribute, value_type):
+    groups = defaultdict(list)
+    max_val = 0
+    for one_tsv in results_tsv:
+        name = getattr(file_Core(one_tsv.stem), attribute)
+        shape = read_shape(one_tsv)
+        if value_type == 'peak':
+            if shape[0] >= 0:
+                continue
+            vals = shape[1]
+        elif value_type == 'r2':
+            vals = shape[2]
+        max_val = max(max_val, vals)
+        groups[name].append(vals)
+
+    return groups, max_val
+
+
+def _plot_fit_over_kernel(one_tsv):
+    acquisition = file_Core(one_tsv).acquisition
+
+    results = read_tsv(one_tsv)
+    k = [float(x['Kernel']) for x in results]
+    rsquared = [float(x['Rsquared']) for x in results]
+    traces = [{
+        'x': k,
+        'y': rsquared,
+        },
+        ]
+
+    layout = go.Layout(
+        title=acquisition,
+        xaxis=dict(
+            title='mm',
+            range=(min(k), max(k)),
+            ),
+        yaxis=dict(
+            title='r<sup>2</sup>',
+            rangemode='tozero',
+            ),
+        )
+
+    fig = go.Figure(data=traces, layout=layout)
+    return fig
+
+
+def _plot_histogram(val_per_group, max_val, attribute, value_type):
+    if value_type == 'peak':
+        bin_size = 1
+        xaxis_title = 'mm'
+    elif value_type == 'r2':
+        bin_size = .1
+        xaxis_title = 'r<sup>2</sup>'
+
+    xbins = dict(
+        start=-.5,
+        end=max_val,
+        size=bin_size,
+        )
+    traces = []
+    for name, vals in val_per_group.items():
+        traces.append(
+            go.Histogram(
+                x=vals,
+                xbins=xbins,
+                name=name,
+            ))
+
+    layout = go.Layout(
+        xaxis=dict(
+            title=xaxis_title,
+            range=(0, max_val),
+            ),
+        yaxis=dict(
+            title='# tasks',
+            ),
+        )
+
+    fig = go.Figure(data=traces, layout=layout)
+    return fig
