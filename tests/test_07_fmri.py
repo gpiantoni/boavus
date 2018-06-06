@@ -2,6 +2,8 @@ from boavus import boavus
 from bidso.utils import replace_underscore
 from pytest import raises
 
+from boavus.fmri.utils import mri_nan2zero
+
 from .paths import (ANALYSIS_PATH,
                     task_fmri,
                     )
@@ -58,3 +60,9 @@ def test_fmri_compare():
         ])
 
     assert compute_md5(output_nii) == '1d64d5bf6f83ba5f9f29c2459e98c307'
+
+
+def test_mri_nan2zero():
+
+    mri_nozero = mri_nan2zero(output_nii)
+    assert compute_md5(mri_nozero) == 'd7aacadbc2fc53521b0beda22545af48'

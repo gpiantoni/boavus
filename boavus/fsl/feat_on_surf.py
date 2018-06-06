@@ -10,6 +10,7 @@ from bidso import file_Core
 from bidso.find import find_in_bids
 from bidso.utils import replace_underscore
 
+from ..fmri.utils import mri_nan2zero
 from ..utils import ENVIRON, check_subprocess
 
 
@@ -51,6 +52,7 @@ def main(analysis_dir, freesurfer_dir, output_dir, modality='compare',
     # wait for all processes to run
     [p.wait() for p in p_all]
     [check_subprocess(p) for p in p_all]
+    [info['mri_nonan'].unlink() for info in surfs]
 
     img_dir = output_dir / SURF_DIR
     rmtree(img_dir, ignore_errors=True)
@@ -62,11 +64,12 @@ def main(analysis_dir, freesurfer_dir, output_dir, modality='compare',
 
 def vol2surf(in_vol, feat_path, freesurfer_dir, hemi, surface, surf_fwhm):
     out_surf = replace_underscore(in_vol.filename, in_vol.modality + 'surf' + hemi + '.mgh')
+    mri_nonan = mri_nan2zero(in_vol.filename)
 
     cmd = [
         'mri_vol2surf',
         '--src',
-        str(in_vol.filename),
+        str(mri_nonan),
         '--srcreg',
         str(feat_path / 'reg/freesurfer/anat2exf.register.dat'),
         '--trgsubject',
@@ -88,6 +91,7 @@ def vol2surf(in_vol, feat_path, freesurfer_dir, hemi, surface, surf_fwhm):
         "surf": out_surf,
         "hemi": hemi,
         "subject": 'sub-' + in_vol.subject,
+        "mri_nonan": mri_nonan,
         }
 
     return p, info
