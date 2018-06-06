@@ -90,7 +90,7 @@ def plot_electrodes(elec, freesurfer, labels=None, values=None):
     else:
         surf = freesurfer.read_brain().lh
     v = Viz3()
-    v.add_chan(chan, values=values)
+    v.add_chan(chan, values=values, colorbar=True)
     v.add_surf(surf, alpha=0.5)
 
     return v
