@@ -48,11 +48,20 @@ def main(bids_dir, analysis_dir=None,
             lg.warning(f'Skipping {ieeg_file.stem}: {err}')
             continue
 
-        output_file = replace_extension(Task(ieeg_file).get_filename(analysis_dir), '_move.pkl')
+        output_task = Task(ieeg_file)
+        output_task.extension = '.pkl'
+        output_task.task += 'move'
+        output_file = output_task.get_filename(analysis_dir)
+
         output_file.parent.mkdir(exist_ok=True, parents=True)
         with output_file.open('wb') as f:
             dump(dat_move, f)
-        output_file = replace_extension(Task(ieeg_file).get_filename(analysis_dir), '_rest.pkl')
+
+        output_task = Task(ieeg_file)
+        output_task.extension = '.pkl'
+        output_task.task += 'rest'
+        output_file = output_task.get_filename(analysis_dir)
+
         with output_file.open('wb') as f:
             dump(dat_rest, f)
 
