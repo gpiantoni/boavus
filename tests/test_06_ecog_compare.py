@@ -11,9 +11,9 @@ from .paths import (BIDS_PATH,
                     )
 
 task_compare = deepcopy(task_ieeg)
-task_compare.modality = 'ieegpsdcompare'
+task_compare.modality = 'ieegprocpsdcompare'
 task_compare.extension = '.tsv'
-task_compare.task = 'moverest'
+task_compare.task = 'block'
 output_tsv = task_compare.get_filename(ANALYSIS_PATH, 'ieeg')
 
 

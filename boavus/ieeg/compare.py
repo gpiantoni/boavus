@@ -1,3 +1,4 @@
+from difflib import SequenceMatcher
 from pickle import load
 from numpy import ones, hstack, sign, array, NaN
 from numpy import concatenate as np_concatenate
@@ -49,6 +50,7 @@ def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
             task=taskB,
             modality=MODALITY,
             extension='.pkl')
+        ieeg_B = file_Core(file_B)
 
         with file_A.open('rb') as f:
             dat_A = load(f)
@@ -86,7 +88,7 @@ def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
             acquisition=ieeg_A.acquisition,
             modality=MODALITY + 'compare',
             extension='.tsv',
-            task=(taskA + taskB).replace('*', ''),
+            task=find_longest_match(ieeg_A.task, ieeg_B.task),
             )
         compare_file = output.get_filename(analysis_dir, 'ieeg')
         with compare_file.open('w') as f:
@@ -249,3 +251,8 @@ def merge_datasets(dat1, dat2):
     both.axis['chan'] = np_concatenate((dat1.chan, dat2.chan))
     both.axis['freq'] = np_concatenate((dat1.freq, dat2.freq))
     return both
+
+
+def find_longest_match(taskA, taskB):
+    s = SequenceMatcher(a=taskA, b=taskB).find_longest_match(0, len(taskA), 0, len(taskB))
+    return taskA[s.a:(s.a + s.size)]
