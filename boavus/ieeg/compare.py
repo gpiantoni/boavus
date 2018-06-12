@@ -6,18 +6,22 @@ from scipy.stats import ttest_ind, pearsonr
 from wonambi.trans import math, concatenate, select
 from wonambi.datatype import Data
 
+from bidso import file_Core
 from bidso.find import find_in_bids
-from bidso.utils import replace_underscore
 
 
-def main(analysis_dir, frequency_low=65, frequency_high=96, baseline=False,
-         method='dh2012', measure='dh2012_r2'):
+def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
+         frequency_high=96, baseline=False, method='dh2012', measure='dh2012_r2'):
     """
     compare the two conditions in percent change or zstat
 
     Parameters
     ----------
     analysis_dir : path
+
+    taskA : str
+
+    taskB : str
 
     frequency_low : float
 
@@ -31,39 +35,59 @@ def main(analysis_dir, frequency_low=65, frequency_high=96, baseline=False,
         "dh2012_r2"
     """
     frequency = [frequency_low, frequency_high]
-    for move_file in find_in_bids(analysis_dir, modality='freqmove', extension='.pkl', generator=True):
-        with move_file.open('rb') as f:
-            dat_move = load(f)
-        rest_file = replace_underscore(move_file, 'freqrest.pkl')
-        with rest_file.open('rb') as f:
-            dat_rest = load(f)
+    for file_A in find_in_bids(analysis_dir, task=taskA, modality='ieegpsd', extension='.pkl', generator=True):
+
+        ieeg_A = file_Core(file_A)
+        file_B = find_in_bids(
+            analysis_dir,
+            subject=ieeg_A.subject,
+            session=ieeg_A.session,
+            run=ieeg_A.run,
+            acquisition=ieeg_A.acquisition,
+            task=taskB,
+            modality='ieegpsd',
+            extension='.pkl')
+
+        with file_A.open('rb') as f:
+            dat_A = load(f)
+        with file_B.open('rb') as f:
+            dat_B = load(f)
 
         if baseline:
-            dat_move, dat_rest = correct_baseline(dat_move, dat_rest, frequency)
+            dat_A, dat_B = correct_baseline(dat_A, dat_B, frequency)
 
-        hfa_move = merge(dat_move, method, frequency)
-        hfa_rest = merge(dat_rest, method, frequency)
+        hfa_A = merge(dat_A, method, frequency)
+        hfa_B = merge(dat_B, method, frequency)
 
         if measure == 'diff':
-            ecog_stats = compute_diff(hfa_move, hfa_rest)
+            ecog_stats = compute_diff(hfa_A, hfa_B)
         elif measure == 'percent':
-            ecog_stats = compute_percent(hfa_move, hfa_rest)
+            ecog_stats = compute_percent(hfa_A, hfa_B)
         elif measure in ('zstat', 'dh2012_t'):  # identical
-            ecog_stats = compute_zstat(hfa_move, hfa_rest)
+            ecog_stats = compute_zstat(hfa_A, hfa_B)
             if measure == 'dh2012_t':
                 ecog_stats.data[0] *= -1  # opposite sign in dh2012's script
 
         elif measure == 'dh2012_r2':
-            ecog_stats = calc_dh2012_values(hfa_move, hfa_rest, measure)
+            ecog_stats = calc_dh2012_values(hfa_A, hfa_B, measure)
 
         # need to check pvalues
         if True:
-            pvalues = calc_dh2012_values(hfa_move, hfa_rest, 'dh2012_pv')
+            pvalues = calc_dh2012_values(hfa_A, hfa_B, 'dh2012_pv')
         else:
             pvalues = [NaN, ] * ecog_stats.number_of('chan')[0]
 
-        percent_file = replace_underscore(move_file, 'compare.tsv')
-        with percent_file.open('w') as f:
+        output = file_Core(
+            subject=ieeg_A.subject,
+            session=ieeg_A.session,
+            run=ieeg_A.run,
+            acquisition=ieeg_A.acquisition,
+            modality='ieegpsdcompare',
+            extension='.tsv',
+            task=(taskA + taskB).replace('*', ''),
+            )
+        compare_file = output.get_filename(analysis_dir, 'ieeg')
+        with compare_file.open('w') as f:
             f.write('channel\tmeasure\tpvalue\n')
             for i, chan in enumerate(ecog_stats.chan[0]):
                 f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\t{pvalues(trial=0, chan=chan)}\n')
@@ -158,37 +182,37 @@ def merge(freq, method, frequency):
     return out
 
 
-def compute_diff(hfa_move, hfa_rest):
-    hfa_move.data[0] -= hfa_rest.data[0]
-    return Data(hfa_move.data[0][:, 0], hfa_move.s_freq, chan=hfa_move.chan[0])
+def compute_diff(hfa_A, hfa_B):
+    hfa_A.data[0] -= hfa_B.data[0]
+    return Data(hfa_A.data[0][:, 0], hfa_A.s_freq, chan=hfa_A.chan[0])
 
 
-def compute_percent(hfa_move, hfa_rest):
-    x_move = math(hfa_move, operator_name='mean', axis=hfa_move.list_of_axes[1])
-    x_rest = math(hfa_rest, operator_name='mean', axis=hfa_move.list_of_axes[1])
+def compute_percent(hfa_A, hfa_B):
+    x_A = math(hfa_A, operator_name='mean', axis=hfa_A.list_of_axes[1])
+    x_B = math(hfa_B, operator_name='mean', axis=hfa_A.list_of_axes[1])
 
-    perc = (x_move(trial=0) - x_rest(trial=0)) / x_rest(trial=0) * 100
-    data_perc = Data(perc, hfa_move.s_freq, chan=hfa_move.chan[0])
+    perc = (x_A(trial=0) - x_B(trial=0)) / x_B(trial=0) * 100
+    data_perc = Data(perc, hfa_A.s_freq, chan=hfa_A.chan[0])
 
     return data_perc
 
 
-def compute_zstat(hfa_move, hfa_rest):
+def compute_zstat(hfa_A, hfa_B):
     """
     TODO
     ----
     You can compute zstat by taking diff and then divide by standard deviation
     """
-    zstat = ttest_ind(hfa_move.data[0], hfa_rest.data[0], axis=1, equal_var=False).statistic
+    zstat = ttest_ind(hfa_A.data[0], hfa_B.data[0], axis=1, equal_var=False).statistic
 
-    return Data(zstat, hfa_move.s_freq, chan=hfa_move.chan[0])
+    return Data(zstat, hfa_A.s_freq, chan=hfa_A.chan[0])
 
 
-def calc_dh2012_values(hfa_move, hfa_rest, measure):
+def calc_dh2012_values(hfa_A, hfa_B, measure):
     """This is the exact translation of dh2012's Matlab code
     """
-    ecog = hstack((hfa_move.data[0], hfa_rest.data[0]))
-    stim = hstack((ones(hfa_move.data[0].shape[1]), ones(hfa_rest.data[0].shape[1]) * 0))
+    ecog = hstack((hfa_A.data[0], hfa_B.data[0]))
+    stim = hstack((ones(hfa_A.data[0].shape[1]), ones(hfa_B.data[0].shape[1]) * 0))
 
     val = []
     for ecog_chan in ecog:
@@ -200,12 +224,12 @@ def calc_dh2012_values(hfa_move, hfa_rest, measure):
         elif measure == 'dh2012_pv':
             val.append(p)
 
-    return Data(array(val), hfa_move.s_freq, chan=hfa_move.chan[0])
+    return Data(array(val), hfa_A.s_freq, chan=hfa_A.chan[0])
 
 
-def correct_baseline(freq_move, freq_rest, frequency):
-    move = select(freq_move, freq=frequency)
-    rest = select(freq_rest, freq=frequency)
+def correct_baseline(freq_A, freq_B, frequency):
+    move = select(freq_A, freq=frequency)
+    rest = select(freq_B, freq=frequency)
 
     merged = merge_datasets(move, rest)
     merged = concatenate(merged, 'time')

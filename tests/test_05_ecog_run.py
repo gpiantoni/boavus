@@ -1,5 +1,4 @@
 from boavus import boavus
-from bidso.utils import replace_underscore
 from numpy.testing import assert_allclose
 from pickle import load
 
@@ -8,10 +7,11 @@ from .paths import (BIDS_PATH,
                     task_ieeg,
                     )
 
-output_data = replace_underscore(task_ieeg.get_filename(ANALYSIS_PATH),
-                                 'ieeg_move.pkl')
-output_freq = replace_underscore(task_ieeg.get_filename(ANALYSIS_PATH),
-                                 'ieeg_freqmove.pkl')
+task_ieeg.task += 'move'
+task_ieeg.extension = '.pkl'
+output_data = task_ieeg.get_filename(ANALYSIS_PATH)
+task_ieeg.modality += 'psd'
+output_freq = task_ieeg.get_filename(ANALYSIS_PATH, 'ieeg')
 
 
 def test_ieeg_preprocessing():

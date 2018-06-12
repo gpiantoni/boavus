@@ -7,7 +7,7 @@ from scipy.signal import welch
 from wonambi.trans import timefrequency
 from wonambi.datatype import ChanTimeFreq
 from bidso.find import find_in_bids
-from bidso.utils import replace_underscore
+from bidso.utils import replace_extension
 
 lg = getLogger(__name__)
 
@@ -31,9 +31,8 @@ def main(analysis_dir, method="spectrogram", duration=1, noparallel=False):
         if it should run serially (i.e. not parallely, mostly for debugging)
     """
     args = []
-    for cond in ('move', 'rest'):
-        for ieeg_file in find_in_bids(analysis_dir, modality=cond, extension='.pkl', generator=True):
-            args.append((ieeg_file, cond, method, duration))
+    for ieeg_file in find_in_bids(analysis_dir, modality='ieeg', extension='.pkl', generator=True):
+        args.append((ieeg_file, method, duration))
 
     if noparallel:
         for arg in args:
@@ -43,7 +42,7 @@ def main(analysis_dir, method="spectrogram", duration=1, noparallel=False):
             p.starmap(save_frequency, args)
 
 
-def save_frequency(ieeg_file, cond, method, duration):
+def save_frequency(ieeg_file, method, duration):
     with ieeg_file.open('rb') as f:
         dat = load(f)
 
@@ -52,7 +51,7 @@ def save_frequency(ieeg_file, cond, method, duration):
     elif method == 'dh2012':
         freq = compute_welch_dh2012(dat, duration)
 
-    output_file = replace_underscore(ieeg_file, 'freq' + cond + '.pkl')
+    output_file = replace_extension(ieeg_file, 'psd.pkl')
     with output_file.open('wb') as f:
         dump(freq, f)
 
