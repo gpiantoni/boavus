@@ -58,6 +58,14 @@ elif args.command == 'test':
         '--cov-report=term',
         str(TEST_PATH),
         ])
+    run([
+        'coverage',
+        'combine',
+        ])
+    run([
+        'coverage',
+        'html',
+        ])
 
 elif args.command == 'clean':
     rmtree(BUILD_PATH, ignore_errors=True)
