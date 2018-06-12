@@ -35,7 +35,22 @@ def test_ieeg_read():
 
     with output_data.open('rb') as f:
         data = load(f)
-    assert_allclose(abs(data.data[0]).sum(), 13963593.33152158)
+    assert_allclose(abs(data.data[0]).sum(), 229309580.97038913)
+
+
+def test_ieeg_preprocessing_regression():
+
+    boavus([
+        'ieeg',
+        'preprocessing',
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--reref', 'regression',
+        ])
+
+    with output_proc.open('rb') as f:
+        data = load(f)
+    assert_allclose(abs(data.data[0]).sum(), 13962283.42361395)
 
 
 def test_ieeg_preprocessing():
@@ -47,7 +62,7 @@ def test_ieeg_preprocessing():
         '--log', 'debug',
         ])
 
-    with output_data.open('rb') as f:
+    with output_proc.open('rb') as f:
         data = load(f)
     assert_allclose(abs(data.data[0]).sum(), 13963593.33152158)
 

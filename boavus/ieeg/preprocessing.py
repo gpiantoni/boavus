@@ -14,7 +14,7 @@ lg = getLogger(__name__)
 
 def main(analysis_dir, reref='average', noparallel=False):
     """
-    read in the data for move and rest
+    preprocess the data (no notch filter here, it's done when reading the data)
 
     Parameters
     ----------

@@ -15,6 +15,8 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
     """
     read in the data for move and rest
 
+    Notch filter here
+
     Parameters
     ----------
     bids_dir : path
