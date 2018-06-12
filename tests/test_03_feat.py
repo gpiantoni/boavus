@@ -3,7 +3,7 @@ from boavus import boavus
 from .paths import BIDS_PATH, ANALYSIS_PATH, FREESURFER_PATH
 
 
-def notest_main_fsl_feat():
+def test_main_fsl_feat():
 
     boavus([
         'fsl',
@@ -14,7 +14,7 @@ def notest_main_fsl_feat():
         ])
 
 
-def notest_main_fsl_coreg():
+def test_main_fsl_coreg():
 
     boavus([
         'fsl',
