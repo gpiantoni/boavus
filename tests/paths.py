@@ -22,7 +22,7 @@ task_ieeg = file_Core(
     subject=subject,
     session='day02',
     modality='ieeg',
-    task='block',
+    task='Motor',
     run='1',
     acquisition='clinical',
     extension='.eeg',
@@ -31,7 +31,7 @@ task_fmri = file_Core(
     subject=subject,
     session='day01',
     modality='bold',
-    task='block',
+    task='Motor',
     run='1',
     extension='.nii.gz',
     )

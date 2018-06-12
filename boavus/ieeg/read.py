@@ -36,30 +36,30 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
     """
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.eeg', generator=True):
         lg.debug(f'reading {ieeg_file}')
-        try:
-            dat_move, dat_rest = read_ieeg(
+
+        output_task = Task(ieeg_file)
+        if output_task.task.startswith('Motor'):
+
+            all_data = read_ieeg(
                 ieeg_file, acquisition,
                 markers_on, markers_off, minimalduration, reject_chan_thresh)
-        except FileNotFoundError as err:
-            lg.warning(f'Skipping {ieeg_file.stem}: {err}')
-            continue
+            conds = ['move', 'rest']
 
-        output_task = Task(ieeg_file)
-        output_task.extension = '.pkl'
-        output_task.task += 'move'
-        output_file = output_task.get_filename(analysis_dir)
+        elif output_task.task.startswith('bair'):
+            pass
 
-        output_file.parent.mkdir(exist_ok=True, parents=True)
-        with output_file.open('wb') as f:
-            dump(dat_move, f)
+        else:
+            raise ValueError(f'Unknown task "{output_task.task}" for {ieeg_file}')
 
-        output_task = Task(ieeg_file)
-        output_task.extension = '.pkl'
-        output_task.task += 'rest'
-        output_file = output_task.get_filename(analysis_dir)
+        for cond, data in zip(conds, all_data):
+            output_task = Task(ieeg_file)
+            output_task.extension = '.pkl'
+            output_task.task += cond
+            output_file = output_task.get_filename(analysis_dir)
 
-        with output_file.open('wb') as f:
-            dump(dat_rest, f)
+            output_file.parent.mkdir(exist_ok=True, parents=True)
+            with output_file.open('wb') as f:
+                dump(data, f)
 
 
 def read_ieeg(filename, acquisition, markers_on, markers_off, minimalduration,
