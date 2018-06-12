@@ -14,9 +14,28 @@ task_move.task += 'move'
 task_move.extension = '.pkl'
 output_data = task_move.get_filename(ANALYSIS_PATH)
 
-task_freq = deepcopy(task_move)
-task_freq.modality += 'psd'
-output_freq = task_freq.get_filename(ANALYSIS_PATH, 'ieeg')
+task_move.modality += 'proc'
+output_proc = task_move.get_filename(ANALYSIS_PATH, 'ieeg')
+
+task_move.modality += 'psd'
+output_freq = task_move.get_filename(ANALYSIS_PATH, 'ieeg')
+
+
+def test_ieeg_read():
+
+    boavus([
+        'ieeg',
+        'read',
+        '--bids_dir', str(BIDS_PATH),
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--markers_on', 'move',
+        '--markers_off', 'rest',
+        ])
+
+    with output_data.open('rb') as f:
+        data = load(f)
+    assert_allclose(abs(data.data[0]).sum(), 13963593.33152158)
 
 
 def test_ieeg_preprocessing():
@@ -24,11 +43,8 @@ def test_ieeg_preprocessing():
     boavus([
         'ieeg',
         'preprocessing',
-        '--bids_dir', str(BIDS_PATH),
         '--analysis_dir', str(ANALYSIS_PATH),
         '--log', 'debug',
-        '--markers_on', 'move',
-        '--markers_off', 'rest',
         ])
 
     with output_data.open('rb') as f:
