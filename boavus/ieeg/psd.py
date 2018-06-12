@@ -31,7 +31,7 @@ def main(analysis_dir, method="spectrogram", duration=1, noparallel=False):
         if it should run serially (i.e. not parallely, mostly for debugging)
     """
     args = []
-    for ieeg_file in find_in_bids(analysis_dir, modality='ieeg', extension='.pkl', generator=True):
+    for ieeg_file in find_in_bids(analysis_dir, modality='ieegproc', extension='.pkl', generator=True):
         args.append((ieeg_file, method, duration))
 
     if noparallel:

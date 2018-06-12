@@ -44,7 +44,7 @@ def main(analysis_dir, bands=[], method="5", noparallel=False):
     bands = [[float(f) for f in b.split('-')] for b in bands.split(',')]
 
     args = []
-    for ieeg_file in find_in_bids(analysis_dir, extension='.pkl', generator=True):
+    for ieeg_file in find_in_bids(analysis_dir, modality='ieegproc', extension='.pkl', generator=True):
         args.append((ieeg_file, bands, method))
 
     if noparallel:

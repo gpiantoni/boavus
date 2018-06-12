@@ -35,7 +35,7 @@ def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
         "dh2012_r2"
     """
     frequency = [frequency_low, frequency_high]
-    for file_A in find_in_bids(analysis_dir, task=taskA, modality='ieegpsd', extension='.pkl', generator=True):
+    for file_A in find_in_bids(analysis_dir, task=taskA, modality='ieegprocpsd', extension='.pkl', generator=True):
 
         ieeg_A = file_Core(file_A)
         file_B = find_in_bids(
