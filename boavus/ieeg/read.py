@@ -92,6 +92,7 @@ def read_ieeg(filename, acquisition, markers_on, markers_off, minimalduration,
     lg.debug(f'Clean channels {len(clean_labels)} / {len(elec_names)}')
 
     data = d.read_data(chan=clean_labels, begsam=move_times[0], endsam=move_times[1])
+    data = filter_(data, ftype='notch')
     dat_move = d.read_data(begsam=move_times[0], endsam=move_times[1], chan=clean_labels)
     dat_rest = d.read_data(begsam=rest_times[0], endsam=rest_times[1], chan=clean_labels)
 

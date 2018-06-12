@@ -49,7 +49,6 @@ def preprocess_ecog(ieeg_file, reref):
     with ieeg_file.open('rb') as f:
         data = load(f)
 
-    data = filter_(data, ftype='notch')
     data = montage(data, ref_to_avg=True, method=reref)
     data = make_segments(data)
 
