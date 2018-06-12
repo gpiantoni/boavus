@@ -1,6 +1,7 @@
 from pickle import load, dump
 from logging import getLogger
 from multiprocessing import Pool
+import warnings
 from numpy import (array,
                    diff,
                    empty,
@@ -95,7 +96,9 @@ def butterpass_eeglabdata_core(signal, band, srate, Rp=3, Rs=60, bw=.5):
     y = lfilter(b, a, signal)
 
     # measure time shift of filter
-    f, gd = group_delay((b, a), int(srate), False)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        f, gd = group_delay((b, a), int(srate), False)
     f = f * nyqLimit / pi
     shift_frames = int(mean(gd[(f > band[0]) & (f <= band[1])]))
 
