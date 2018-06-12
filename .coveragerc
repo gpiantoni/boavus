@@ -1,3 +1,8 @@
 [run]
 concurrency = multiprocessing
-omit = virtualenv/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    except FileNotFoundError
+    with Pool

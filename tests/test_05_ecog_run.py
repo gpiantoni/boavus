@@ -47,6 +47,7 @@ def test_ieeg_preprocessing_regression():
         'ieeg',
         'preprocessing',
         '--analysis_dir', str(ANALYSIS_PATH),
+        '--noparallel',
         '--log', 'debug',
         '--reref', 'regression',
         ])
@@ -62,6 +63,7 @@ def test_ieeg_preprocessing():
         'ieeg',
         'preprocessing',
         '--analysis_dir', str(ANALYSIS_PATH),
+        '--noparallel',
         '--log', 'debug',
         ])
 
