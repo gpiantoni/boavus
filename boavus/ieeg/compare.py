@@ -9,6 +9,8 @@ from wonambi.datatype import Data
 from bidso import file_Core
 from bidso.find import find_in_bids
 
+MODALITY = 'ieegprocpsd'
+
 
 def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
          frequency_high=96, baseline=False, method='dh2012', measure='dh2012_r2'):
@@ -35,7 +37,7 @@ def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
         "dh2012_r2"
     """
     frequency = [frequency_low, frequency_high]
-    for file_A in find_in_bids(analysis_dir, task=taskA, modality='ieegprocpsd', extension='.pkl', generator=True):
+    for file_A in find_in_bids(analysis_dir, task=taskA, modality=MODALITY, extension='.pkl', generator=True):
 
         ieeg_A = file_Core(file_A)
         file_B = find_in_bids(
@@ -45,7 +47,7 @@ def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
             run=ieeg_A.run,
             acquisition=ieeg_A.acquisition,
             task=taskB,
-            modality='ieegpsd',
+            modality=MODALITY,
             extension='.pkl')
 
         with file_A.open('rb') as f:
@@ -82,7 +84,7 @@ def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
             session=ieeg_A.session,
             run=ieeg_A.run,
             acquisition=ieeg_A.acquisition,
-            modality='ieegpsdcompare',
+            modality=MODALITY + 'compare',
             extension='.tsv',
             task=(taskA + taskB).replace('*', ''),
             )

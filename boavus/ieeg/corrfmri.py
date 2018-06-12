@@ -17,7 +17,7 @@ from ..bidso import find_labels_in_regions
 lg = getLogger(__name__)
 
 FMRI_MODALITY = 'bold_compare'
-IEEG_MODALITY = 'ieeg_compare'
+IEEG_MODALITY = 'ieegprocpsdcompare'
 ZSTAT_DIR = 'corr_ieeg_fmri_zstat'
 PNG_DIR = 'corr_ieeg_fmri_png'
 SINGLE_POINTS_DIR = 'corr_ieeg_fmri_point'
