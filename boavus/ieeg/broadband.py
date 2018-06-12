@@ -18,7 +18,7 @@ from scipy.signal import (iirdesign,
 from scipy.stats.mstats import gmean
 
 from bidso.find import find_in_bids
-from bidso.utils import add_underscore
+from bidso.utils import replace_extension
 
 from wonambi.trans import math
 
@@ -62,7 +62,7 @@ def save_frequency(ieeg_file, bands, method):
     data = butterpass_eeglabdata(data, bands)
     data = extract_broadband(data, method)
 
-    output_file = add_underscore(ieeg_file, 'broadband.pkl')
+    output_file = replace_extension(ieeg_file, 'broadband.pkl')
     with output_file.open('wb') as f:
         dump(data, f)
 
@@ -95,7 +95,7 @@ def butterpass_eeglabdata_core(signal, band, srate, Rp=3, Rs=60, bw=.5):
     y = lfilter(b, a, signal)
 
     # measure time shift of filter
-    f, gd = group_delay((b, a), srate, False)
+    f, gd = group_delay((b, a), int(srate), False)
     f = f * nyqLimit / pi
     shift_frames = int(mean(gd[(f > band[0]) & (f <= band[1])]))
 

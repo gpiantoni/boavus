@@ -20,6 +20,9 @@ output_proc = task_move.get_filename(ANALYSIS_PATH, 'ieeg')
 task_move.modality += 'psd'
 output_freq = task_move.get_filename(ANALYSIS_PATH, 'ieeg')
 
+task_move.modality = task_move.modality[:-3] + 'broadband'
+output_broadband = task_move.get_filename(ANALYSIS_PATH, 'ieeg')
+
 
 def test_ieeg_read():
 
@@ -111,3 +114,19 @@ def test_ieeg_psd_parallel():
     with output_freq.open('rb') as f:
         data = load(f)
     assert_allclose(data.data[0].sum(), 53484510.01552996)
+
+
+def test_ieeg_broadband():
+
+    boavus([
+        'ieeg',
+        'broadband',
+        '--analysis_dir', str(ANALYSIS_PATH),
+        '--log', 'debug',
+        '--noparallel',
+        '--bands', '30-40',
+        ])
+
+    with output_broadband.open('rb') as f:
+        data = load(f)
+    assert_allclose(data.data[0].sum(), 1393445261.229699)
