@@ -1,3 +1,4 @@
+from copy import deepcopy
 from boavus import boavus
 from numpy.testing import assert_allclose
 from pickle import load
@@ -7,11 +8,15 @@ from .paths import (BIDS_PATH,
                     task_ieeg,
                     )
 
-task_ieeg.task += 'move'
-task_ieeg.extension = '.pkl'
-output_data = task_ieeg.get_filename(ANALYSIS_PATH)
-task_ieeg.modality += 'psd'
-output_freq = task_ieeg.get_filename(ANALYSIS_PATH, 'ieeg')
+
+task_move = deepcopy(task_ieeg)
+task_move.task += 'move'
+task_move.extension = '.pkl'
+output_data = task_move.get_filename(ANALYSIS_PATH)
+
+task_freq = deepcopy(task_move)
+task_freq.modality += 'psd'
+output_freq = task_freq.get_filename(ANALYSIS_PATH, 'ieeg')
 
 
 def test_ieeg_preprocessing():

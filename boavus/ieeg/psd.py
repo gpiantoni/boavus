@@ -52,6 +52,7 @@ def save_frequency(ieeg_file, method, duration):
         freq = compute_welch_dh2012(dat, duration)
 
     output_file = replace_extension(ieeg_file, 'psd.pkl')
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     with output_file.open('wb') as f:
         dump(freq, f)
 

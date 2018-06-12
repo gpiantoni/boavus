@@ -1,3 +1,4 @@
+from copy import deepcopy
 from boavus import boavus
 from bidso.utils import read_tsv
 from numpy.testing import assert_allclose
@@ -9,10 +10,11 @@ from .paths import (BIDS_PATH,
                     task_ieeg,
                     )
 
-task_ieeg.modality = 'ieegpsdcompare'
-task_ieeg.extension = '.tsv'
-task_ieeg.task = 'moverest'
-output_tsv = task_ieeg.get_filename(ANALYSIS_PATH, 'ieeg')
+task_compare = deepcopy(task_ieeg)
+task_compare.modality = 'ieegpsdcompare'
+task_compare.extension = '.tsv'
+task_compare.task = 'moverest'
+output_tsv = task_compare.get_filename(ANALYSIS_PATH, 'ieeg')
 
 
 def test_ieeg_compare_diff():

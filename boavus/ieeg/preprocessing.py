@@ -7,7 +7,6 @@ from wonambi.trans.select import _create_subepochs
 
 from bidso import Task, Electrodes
 from bidso.find import find_in_bids, find_root
-from bidso.utils import replace_extension
 
 from ..bidso import find_labels_in_regions
 
