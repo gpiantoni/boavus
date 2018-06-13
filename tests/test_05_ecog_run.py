@@ -50,6 +50,7 @@ def test_ieeg_preprocessing_regression():
         '--noparallel',
         '--log', 'debug',
         '--reref', 'regression',
+        '--duration', '4',
         ])
 
     with output_proc.open('rb') as f:
@@ -65,6 +66,7 @@ def test_ieeg_preprocessing():
         '--analysis_dir', str(ANALYSIS_PATH),
         '--noparallel',
         '--log', 'debug',
+        '--duration', '4',
         ])
 
     with output_proc.open('rb') as f:
