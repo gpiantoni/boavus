@@ -13,7 +13,7 @@ from .paths import (BIDS_PATH,
 task_compare = deepcopy(task_ieeg)
 task_compare.modality = 'ieegprocpsdcompare'
 task_compare.extension = '.tsv'
-task_compare.task = 'block'
+task_compare.task = 'motor'
 output_tsv = task_compare.get_filename(ANALYSIS_PATH, 'ieeg')
 
 

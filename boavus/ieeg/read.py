@@ -38,7 +38,7 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
         lg.debug(f'reading {ieeg_file}')
 
         output_task = Task(ieeg_file)
-        if output_task.task.startswith('Motor'):
+        if output_task.task.startswith('motor'):
 
             all_data = read_ieeg(
                 ieeg_file, acquisition,
