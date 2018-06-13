@@ -40,9 +40,12 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
         output_task = Task(ieeg_file)
         if output_task.task.startswith('motor'):
 
-            all_data = read_ieeg(
-                ieeg_file, acquisition,
-                markers_on, markers_off, minimalduration, reject_chan_thresh)
+            try:
+                all_data = read_ieeg(
+                    ieeg_file, acquisition,
+                    markers_on, markers_off, minimalduration, reject_chan_thresh)
+            except FileNotFoundError as err:
+                lg.warning(err)
             conds = ['move', 'rest']
 
         elif output_task.task.startswith('bair'):
