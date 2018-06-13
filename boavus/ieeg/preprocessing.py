@@ -30,7 +30,7 @@ def main(analysis_dir, reref='average', duration=2, noparallel=False):
     args = []
     for ieeg_file in find_in_bids(analysis_dir, modality='ieeg', extension='.pkl', generator=True):
         lg.debug(f'reading {ieeg_file}')
-        args.append((ieeg_file, reref, duration))
+        args.append((ieeg_file, reref, float(duration)))
 
     if noparallel:
         for arg in args:
