@@ -1,7 +1,7 @@
 from pickle import dump
 from wonambi.trans import math, filter_
 from logging import getLogger
-from numpy import mean, std
+from numpy import array, mean, std
 from wonambi import Dataset
 
 from bidso import Task, Electrodes
@@ -11,7 +11,8 @@ lg = getLogger(__name__)
 
 
 def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
-         markers_off='48', minimalduration=20, reject_chan_thresh=3):
+         markers_off='48', minimalduration=20, reject_chan_thresh=3,
+         prestim=0.5, poststim=1.5):
     """
     read in the data for move and rest
 
@@ -24,15 +25,19 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
     analysis_dir : path
 
     acquisition : str
-        type of electrodes
+        (motor) type of electrodes
     markers_on : str
-        marker start
+        (motor) marker start
     markers_off : str
-        marker end
+        (motor) marker end
     minimalduration : float
-        minimal duration of each block
+        (motor) minimal duration of each block
     reject_chan_thresh : float
-        threshold std to reject channels
+        (motor) threshold std to reject channels
+    prestim : float
+        (bair) prestimulus time
+    poststim : float
+        (bair) poststimulus time
     """
     for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.eeg', generator=True):
         lg.debug(f'reading {ieeg_file}')
@@ -49,7 +54,16 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
             conds = ['move', 'rest']
 
         elif output_task.task.startswith('bair'):
-            pass
+
+            prestim = float(prestim)
+            poststim = float(poststim)
+
+            d = Dataset(ieeg_file, bids=True)
+            events = array([x['start'] for x in d.read_markers()])
+            all_data = (
+                d.read_data(begtime=list(events - prestim), endtime=list(events + poststim + 1 / d.header['s_freq'])),
+                )
+            conds = ['', ]
 
         else:
             raise ValueError(f'Unknown task "{output_task.task}" for {ieeg_file}')

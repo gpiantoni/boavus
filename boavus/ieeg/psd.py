@@ -11,11 +11,10 @@ from bidso.utils import replace_extension
 
 lg = getLogger(__name__)
 
-TAPER = 'dpss'
 HALFBANDWIDTH = 2
 
 
-def main(analysis_dir, method="spectrogram", duration=1, noparallel=False):
+def main(analysis_dir, method="spectrogram", taper='dpss', duration=1, noparallel=False):
     """
     compute psd for two conditions
 
@@ -25,6 +24,8 @@ def main(analysis_dir, method="spectrogram", duration=1, noparallel=False):
 
     method : str
         "spectrogram" or "dh2012"
+    taper : str
+        "dpss", "boxcar", "hann" (only if method=='spectrogram')
     duration : float
         duration of the trials
     noparallel : bool
@@ -32,7 +33,7 @@ def main(analysis_dir, method="spectrogram", duration=1, noparallel=False):
     """
     args = []
     for ieeg_file in find_in_bids(analysis_dir, modality='ieegproc', extension='.pkl', generator=True):
-        args.append((ieeg_file, method, duration))
+        args.append((ieeg_file, method, taper, float(duration)))
 
     if noparallel:
         for arg in args:
@@ -42,12 +43,12 @@ def main(analysis_dir, method="spectrogram", duration=1, noparallel=False):
             p.starmap(save_frequency, args)
 
 
-def save_frequency(ieeg_file, method, duration):
+def save_frequency(ieeg_file, method, taper, duration):
     with ieeg_file.open('rb') as f:
         dat = load(f)
 
     if method == 'spectrogram':
-        freq = compute_frequency(dat, duration)
+        freq = compute_frequency(dat, taper, duration)
     elif method == 'dh2012':
         freq = compute_welch_dh2012(dat, duration)
 
@@ -57,14 +58,14 @@ def save_frequency(ieeg_file, method, duration):
         dump(freq, f)
 
 
-def compute_frequency(dat, duration):
+def compute_frequency(dat, taper, duration):
     """Remove epochs which have very high activity in high-freq range, then
     average over time (only high-freq range) and ALL the frequencies."""
 
     dat = timefrequency(
         dat,
         method='spectrogram',
-        taper=TAPER,
+        taper=taper,
         duration=duration,
         halfbandwidth=HALFBANDWIDTH,
         )
