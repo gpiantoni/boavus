@@ -22,11 +22,14 @@ S_FREQ = 500
 N_CHAN = 10
 DUR = 1
 STIM_FILE = 'prf.npy'
+VIEWING_DISTANCE = 38
+SCREEN_WIDTH = 25
 
 
 def simulate_prf(filename):
 
-    stimulus, bar = generate_stimulus()
+    bars = generate_bars()
+    stimulus = generate_stimulus(bars)
     model = generate_model(stimulus)
     dat = generate_population_data(model)
 
@@ -36,35 +39,36 @@ def simulate_prf(filename):
     data.start_time = datetime.now()
     data.export(filename, 'bids')
 
-    create_prf_events(replace_underscore(filename, 'events.tsv'), bar.shape[2])
+    create_prf_events(replace_underscore(filename, 'events.tsv'), bars.shape[2])
 
     bids_dir = find_root(filename)
     stimuli_dir = bids_dir / 'stimuli'
     stimuli_dir.mkdir(exist_ok=True, parents=True)
     bar_file = stimuli_dir / STIM_FILE
-    save(bar_file, bar)
+    save(bar_file, bars)
 
 
-def generate_stimulus():
-    viewing_distance = 38
-    screen_width = 25
+def generate_bars():
     thetas = arange(0, 360, 90)
     thetas = insert(thetas, 0, -1)
     thetas = append(thetas, -1)
     num_blank_steps = 30
     num_bar_steps = 30
     ecc = 12
-    tr_length = 1.0
-    scale_factor = 1.0
     pixels_across = 100
     pixels_down = 100
+    bar = simulate_bar_stimulus(pixels_across, pixels_down, VIEWING_DISTANCE,
+                                SCREEN_WIDTH, thetas, num_bar_steps, num_blank_steps, ecc)
+    return bar
+
+
+def generate_stimulus(bars):
+    tr_length = 1.0
+    scale_factor = 1.0
     dtype = c_int16
-    bar = simulate_bar_stimulus(pixels_across, pixels_down, viewing_distance,
-                                screen_width, thetas, num_bar_steps, num_blank_steps, ecc)
+    stimulus = VisualStimulus(bars, VIEWING_DISTANCE, SCREEN_WIDTH, scale_factor, tr_length, dtype)
 
-    stimulus = VisualStimulus(bar, viewing_distance, screen_width, scale_factor, tr_length, dtype)
-
-    return stimulus, bar
+    return stimulus
 
 
 def nohrf(*args):

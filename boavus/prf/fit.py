@@ -6,12 +6,13 @@ from bidso.find import find_in_bids
 from bidso.utils import replace_extension
 from wonambi.trans import select, math, concatenate
 
-from .core.simulate import generate_stimulus
-from .core.least_squares import minimize
+from .core.simulate import generate_bars
+from .core.least_squares import fit_analyzePRF
+from .core.popeye import fit_popeye
 
 lg = getLogger(__name__)
 
-bar = generate_stimulus()[1]
+bar = generate_bars()
 
 
 def main(analysis_dir, method="analyzePRF", input='ieegprocpsd', noparallel=False):
@@ -55,10 +56,10 @@ def estimate_prf(ieeg_file, method):
         f.write(f'channel\tx\ty\tsigma\tbeta\n')
         for i in range(data.number_of('chan')[0]):
             if method == 'analyzePRF':
-                result = minimize(bar, data.data[0][i, :])
+                result = fit_analyzePRF(bar, data.data[0][i, :])
                 f.write(f'{data.chan[0][i]}\t{result.x[0]}\t{result.x[1]}\t{result.x[2]}\t{result.x[3]}\n')
 
             elif method == 'popeye':
-                pass
+                result = fit_popeye(bar, data.data[0][i, :])
 
             f.flush()

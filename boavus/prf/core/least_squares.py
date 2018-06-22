@@ -22,7 +22,7 @@ def fun_to_minimize(params, stimulus, X, Y, ydata):
     return modelfun(params, stimulus, X, Y) - ydata
 
 
-def minimize(stimulus, data):
+def fit_analyzePRF(stimulus, data):
     res = stimulus.shape[0]
 
     X, Y = meshgrid(arange(res) + 1, arange(res) + 1)
