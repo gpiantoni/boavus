@@ -12,7 +12,7 @@ from .core.popeye import fit_popeye
 lg = getLogger(__name__)
 
 
-def main(analysis_dir, method="analyzePRF", input='ieegprocpsd', noparallel=False):
+def main(analysis_dir, method="analyzePRF", task='bairprf', input='ieegprocpsd', noparallel=False):
     """
     compute psd for two conditions
 
@@ -22,13 +22,15 @@ def main(analysis_dir, method="analyzePRF", input='ieegprocpsd', noparallel=Fals
 
     method : str
         "popeye" or "analyzePRF"
+    task : str
+        task to analyze
     input : str
         name of the modality of the preceding step
     noparallel : bool
         if it should run serially (i.e. not parallely, mostly for debugging)
     """
     args = []
-    for ieeg_file in find_in_bids(analysis_dir, modality=input, extension='.pkl', generator=True):
+    for ieeg_file in find_in_bids(analysis_dir, task=task, modality=input, extension='.pkl', generator=True):
         args.append((ieeg_file, method))
 
     if noparallel:
@@ -50,16 +52,22 @@ def estimate_prf(ieeg_file, method):
     data = math(data, operator_name='mean', axis='freq')
     data = concatenate(data, 'trial')
 
-    tsv_file = replace_extension(ieeg_file, 'prf.tsv')
+    compute_prf(ieeg_file, data.data[0], data.chan[0], stimuli, method)
+
+
+def compute_prf(input_file, dat, indices, stimuli, method):
+
+    tsv_file = replace_extension(input_file, 'prf.tsv')
+
     with tsv_file.open('w') as f:
         f.write(f'channel\tx\ty\tsigma\tbeta\n')
-        for i in range(data.number_of('chan')[0]):
+        for i, index in enumerate(indices):
             if method == 'analyzePRF':
-                result = fit_analyzePRF(stimuli, data.data[0][i, :])
-                f.write(f'{data.chan[0][i]}\t{result.x[0]}\t{result.x[1]}\t{result.x[2]}\t{result.x[3]}\n')
+                result = fit_analyzePRF(stimuli, dat[i, :])
+                f.write(f'{index}\t{result.x[0]}\t{result.x[1]}\t{result.x[2]}\t{result.x[3]}\n')
 
             elif method == 'popeye':
-                result = fit_popeye(stimuli, data.data[0][i, :])
-                f.write(f'{data.chan[0][i]}\t{result.estimate[0]}\t{result.estimate[1]}\t{result.estimate[2]}\t{result.estimate[3]}\n')
+                result = fit_popeye(stimuli, dat[i, :])
+                f.write(f'{index}\t{result.estimate[0]}\t{result.estimate[1]}\t{result.estimate[2]}\t{result.estimate[3]}\n')
 
             f.flush()
