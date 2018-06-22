@@ -67,7 +67,6 @@ def main(bids_dir, analysis_dir, task='motor', acquisition='*regions', markers_o
                 begtime=list(events - prestim),
                 endtime=list(events + poststim + 1 / d.header['s_freq']))
             data.attr['stimuli'] = _read_stimuli(d)
-            # TODO: add bars
             all_data = (data, )
             conds = ['', ]
 
