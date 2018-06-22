@@ -27,6 +27,15 @@ task_ieeg = file_Core(
     acquisition='clinical',
     extension='.eeg',
     )
+task_prf = file_Core(
+    subject=subject,
+    session='day03',
+    modality='ieeg',
+    task='bairprf',
+    run='1',
+    acquisition='clinical',
+    extension='.eeg',
+    )
 task_fmri = file_Core(
     subject=subject,
     session='day01',
