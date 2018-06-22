@@ -14,7 +14,8 @@ lg = getLogger(__name__)
 HALFBANDWIDTH = 2
 
 
-def main(analysis_dir, method="spectrogram", taper='dpss', duration=1, noparallel=False):
+def main(analysis_dir, method="spectrogram", taper='dpss', duration=1,
+         input='ieegproc', noparallel=False):
     """
     compute psd for two conditions
 
@@ -28,11 +29,13 @@ def main(analysis_dir, method="spectrogram", taper='dpss', duration=1, noparalle
         "dpss", "boxcar", "hann" (only if method=='spectrogram')
     duration : float
         duration of the trials
+    input : str
+        name of the modality of the preceding step
     noparallel : bool
         if it should run serially (i.e. not parallely, mostly for debugging)
     """
     args = []
-    for ieeg_file in find_in_bids(analysis_dir, modality='ieegproc', extension='.pkl', generator=True):
+    for ieeg_file in find_in_bids(analysis_dir, modality=input, extension='.pkl', generator=True):
         args.append((ieeg_file, method, taper, float(duration)))
 
     if noparallel:
