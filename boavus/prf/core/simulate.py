@@ -31,12 +31,12 @@ def simulate_prf(filename):
     dat = generate_population_data(model)
 
     chan = _make_chan_name(n_chan=N_CHAN)
-    data = Data(data=array(dat), s_freq=S_FREQ, chan=chan, time=arange(dat[0].shape[0]) / S_FREQ)
+    data = Data(data=dat, s_freq=S_FREQ, chan=chan, time=arange(dat[0].shape[0]) / S_FREQ)
 
     data.start_time = datetime.now()
     data.export(filename, 'bids')
 
-    create_prf_events(replace_underscore(filename, 'events.tsv'), dat.shape[1])
+    create_prf_events(replace_underscore(filename, 'events.tsv'), bar.shape[2])
 
     bids_dir = find_root(filename)
     stimuli_dir = bids_dir / 'stimuli'

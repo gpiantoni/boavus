@@ -10,7 +10,7 @@ from bidso.find import find_in_bids, find_root
 lg = getLogger(__name__)
 
 
-def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
+def main(bids_dir, analysis_dir, task='motor', acquisition='*regions', markers_on='49',
          markers_off='48', minimalduration=20, reject_chan_thresh=3,
          prestim=0.5, poststim=1.5):
     """
@@ -24,6 +24,8 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
 
     analysis_dir : path
 
+    task : str
+        task to read in
     acquisition : str
         (motor) type of electrodes
     markers_on : str
@@ -39,7 +41,7 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
     poststim : float
         (bair) poststimulus time
     """
-    for ieeg_file in find_in_bids(bids_dir, modality='ieeg', extension='.eeg', generator=True):
+    for ieeg_file in find_in_bids(bids_dir, task=task, modality='ieeg', extension='.eeg', generator=True):
         lg.debug(f'reading {ieeg_file}')
 
         output_task = Task(ieeg_file)
@@ -60,9 +62,12 @@ def main(bids_dir, analysis_dir, acquisition='*regions', markers_on='49',
 
             d = Dataset(ieeg_file, bids=True)
             events = array([x['start'] for x in d.read_markers()])
-            all_data = (
-                d.read_data(begtime=list(events - prestim), endtime=list(events + poststim + 1 / d.header['s_freq'])),
-                )
+
+            data = d.read_data(
+                begtime=list(events - prestim),
+                endtime=list(events + poststim + 1 / d.header['s_freq']))
+            # TODO: add bars
+            all_data = (data, )
             conds = ['', ]
 
         else:
