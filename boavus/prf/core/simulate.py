@@ -9,6 +9,7 @@ from numpy import (append,
                    pi,
                    save,
                    sin,
+                   tan,
                    )
 from numpy.random import seed, random
 from bidso.find import find_root
@@ -22,8 +23,10 @@ S_FREQ = 500
 N_CHAN = 10
 DUR = 1
 STIM_FILE = 'prf.npy'
-VIEWING_DISTANCE = 38
+
 SCREEN_WIDTH = 25
+N_PIXELS = 100
+VIEWING_DISTANCE = SCREEN_WIDTH / (tan(pi / 360 * N_PIXELS) * 2)
 
 
 def simulate_prf(filename):
@@ -55,9 +58,7 @@ def generate_bars():
     num_blank_steps = 30
     num_bar_steps = 30
     ecc = 12
-    pixels_across = 100
-    pixels_down = 100
-    bar = simulate_bar_stimulus(pixels_across, pixels_down, VIEWING_DISTANCE,
+    bar = simulate_bar_stimulus(N_PIXELS, N_PIXELS, VIEWING_DISTANCE,
                                 SCREEN_WIDTH, thetas, num_bar_steps, num_blank_steps, ecc)
     return bar
 
