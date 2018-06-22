@@ -1,7 +1,7 @@
 from pickle import dump
 from wonambi.trans import math, filter_
 from logging import getLogger
-from numpy import array, mean, std
+from numpy import array, mean, std, load
 from wonambi import Dataset
 
 from bidso import Task, Electrodes
@@ -66,6 +66,7 @@ def main(bids_dir, analysis_dir, task='motor', acquisition='*regions', markers_o
             data = d.read_data(
                 begtime=list(events - prestim),
                 endtime=list(events + poststim + 1 / d.header['s_freq']))
+            data.attr['stimuli'] = _read_stimuli(d)
             # TODO: add bars
             all_data = (data, )
             conds = ['', ]
@@ -140,3 +141,18 @@ def read_markers(d, marker_on, marker_off, minimalduration):
     rest_start = [mrk['start'] for mrk in markers if mrk['name'] == marker_off if (mrk['end'] - mrk['start']) > minimalduration]
     rest_end = [mrk['end'] for mrk in markers if mrk['name'] == marker_off if (mrk['end'] - mrk['start']) > minimalduration]
     return (move_start, move_end), (rest_start, rest_end)
+
+
+def _read_stimuli(d):
+    """Read stimuli to compute the PRF
+    """
+    stimuli_dir = find_root(d.filename) / 'stimuli'
+
+    stim_file = stimuli_dir / d.dataset.task.events.tsv[0]['stim_file']
+    if stim_file.suffix == '.npy':
+        stimuli = load(stim_file)
+
+    stim_file_index = array([int(x['stim_file_index']) - 1 for x in d.dataset.task.events.tsv])
+    stimuli = stimuli[:, :, stim_file_index]
+
+    return stimuli

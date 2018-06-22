@@ -37,7 +37,7 @@ def test_prf_analyzePRF():
     ])
 
 
-def notest_prf_popeye():
+def test_prf_popeye():
     boavus([
         'prf', 'fit',
         '--analysis_dir', str(ANALYSIS_PATH),
