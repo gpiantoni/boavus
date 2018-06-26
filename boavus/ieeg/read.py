@@ -2,6 +2,7 @@ from pickle import dump
 from wonambi.trans import math, filter_
 from logging import getLogger
 from numpy import array, mean, std, load
+from scipy.io import loadmat
 from wonambi import Dataset
 
 from bidso import Task, Electrodes
@@ -150,6 +151,10 @@ def _read_stimuli(d):
     stim_file = stimuli_dir / d.dataset.task.events.tsv[0]['stim_file']
     if stim_file.suffix == '.npy':
         stimuli = load(stim_file)
+
+    elif stim_file.suffix == '.mat':
+        mat = loadmat(stim_file)
+        stimuli = mat['stimulus'][0, 0]['images']
 
     stim_file_index = array([int(x['stim_file_index']) - 1 for x in d.dataset.task.events.tsv])
     stimuli = stimuli[:, :, stim_file_index]
