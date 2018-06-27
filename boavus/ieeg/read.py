@@ -67,7 +67,7 @@ def main(bids_dir, analysis_dir, task='motor', acquisition='*regions', markers_o
             data = d.read_data(
                 begtime=list(events - prestim),
                 endtime=list(events + poststim + 1 / d.header['s_freq']))
-            data.attr['stimuli'] = _read_stimuli(d)
+            data.attr['stimuli'] = read_prf_stimuli(d.dataset.task)
             all_data = (data, )
             conds = ['', ]
 
@@ -143,12 +143,17 @@ def read_markers(d, marker_on, marker_off, minimalduration):
     return (move_start, move_end), (rest_start, rest_end)
 
 
-def _read_stimuli(d):
+def read_prf_stimuli(task):
     """Read stimuli to compute the PRF
-    """
-    stimuli_dir = find_root(d.filename) / 'stimuli'
 
-    stim_file = stimuli_dir / d.dataset.task.events.tsv[0]['stim_file']
+    Parameters
+    ----------
+    task : instance of bidso.Task
+        task containing the events and filename
+    """
+    stimuli_dir = find_root(task.filename) / 'stimuli'
+
+    stim_file = stimuli_dir / task.events.tsv[0]['stim_file']
     if stim_file.suffix == '.npy':
         stimuli = load(stim_file)
 
@@ -156,7 +161,7 @@ def _read_stimuli(d):
         mat = loadmat(stim_file)
         stimuli = mat['stimulus'][0, 0]['images']
 
-    stim_file_index = array([int(x['stim_file_index']) - 1 for x in d.dataset.task.events.tsv])
+    stim_file_index = array([int(x['stim_file_index']) - 1 for x in task.events.tsv])
     stimuli = stimuli[:, :, stim_file_index]
 
     return stimuli
