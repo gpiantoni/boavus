@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
-from codecs import open
-from os import path
+from pathlib import Path
 
-here = path.abspath(path.dirname(__file__))
-with open(path.join(here, 'VERSION')) as f:
-    VERSION = f.read().strip('\n')  # editors love to add newline
+here = Path(__file__).resolve().parent
+with (here / 'boavus' / 'VERSION').open() as f:
+    VERSION = f.read().strip('\n')
 
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with (here / 'README.rst').open(encoding='utf-8') as f:
     long_description = f.read()
+
 
 setup(
     name='boavus',
@@ -41,6 +41,11 @@ setup(
             'codecov',
             ],
         },
+    package_data={
+        'sanajeh': [
+            'VERSION',
+            ],
+    },
     entry_points={
         'console_scripts': [
             'boavus=boavus.command:boavus',

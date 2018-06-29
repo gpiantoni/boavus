@@ -1,3 +1,5 @@
 from .command import boavus
 
-__version__ = '0.1'
+from pathlib import Path
+with (Path(__file__).parent / 'VERSION').open() as f:
+    __version__ = f.read().strip()
