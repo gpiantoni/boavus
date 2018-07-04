@@ -27,43 +27,8 @@ before_install:
   - source /etc/fsl/fsl.sh
   - export FSLOUTPUTTYPE=NIFTI_GZ
 
-  # install freesurfer
-  - mkdir $DERIVATIVES/freesurfer -p
-  - wget -q --directory-prefix=$DOWNLOADS https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz ;
-  - mkdir $LIB -p
-  - tar 
-    -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz 
-    -C $LIB 
-    --exclude='freesurfer/trctrain' 
-    --exclude='freesurfer/subjects/fsaverage_sym' 
-    --exclude='freesurfer/subjects/fsaverage3' 
-    --exclude='freesurfer/subjects/fsaverage4'
-    --exclude='freesurfer/subjects/fsaverage5' 
-    --exclude='freesurfer/subjects/fsaverage6' 
-    --exclude='freesurfer/subjects/cvs_avg35' 
-    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' 
-    --exclude='freesurfer/subjects/V1_average' 
-    --exclude='freesurfer/average/mult-comp-cor' 
-    --exclude='freesurfer/lib/cuda' 
-    --exclude='freesurfer/lib/qt' 
-    --exclude='freesurfer/lib/tcltktixblt'
-    --exclude='freesurfer/lib/vtk' 
-    --exclude='freesurfer/diffusion' 
-    freesurfer ;
-  - echo -e $FREESURFER_LICENSE > $LIB/freesurfer/license.txt
-  - ls -l $LIB/freesurfer
-  - export FREESURFER_HOME=$LIB/freesurfer
-  - source $FREESURFER_HOME/SetUpFreeSurfer.sh
-
-  # geckodriver
-  #- json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
-  #- url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
-  - url=https://github.com/mozilla/geckodriver/releases/download/v0.20.1/geckodriver-v0.20.1-linux64.tar.gz
-  - curl -s -L "$url" | tar -xz
-  - chmod +x geckodriver
-  - mkdir $INSTALL -p
-  - mv geckodriver $INSTALL
-  - export PATH=$INSTALL:$PATH
+  # install afni
+  - sudo apt-get install -y -qq afni
 
 install:
 
