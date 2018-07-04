@@ -58,6 +58,3 @@ elec_ct = file_Core(
     acquisition='ct',
     extension='.tsv',
     )
-
-
-T1_PATH = FREESURFER_PATH / 'sub-bert/mri/T1.mgz'
