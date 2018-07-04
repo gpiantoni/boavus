@@ -31,18 +31,20 @@ setup(
     keywords='bids',
     packages=find_packages(exclude=('test', )),
     install_requires=[
+        'bidso',
         'nibabel',
-        'numpy',
+        'wonambi',
         ],
     extras_require={
         'test': [  # to run tests
+            'sanajeh',
             'pytest',
             'pytest-cov',
             'codecov',
             ],
         },
     package_data={
-        'sanajeh': [
+        'boavus': [
             'VERSION',
             ],
     },
