@@ -4,7 +4,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 from subprocess import run
 from shutil import rmtree
-from os import putenv
+from os import putenv, environ
 
 PACKAGE = 'boavus'
 putenv('CI', 'true')  # make sure putenv is supported
@@ -27,6 +27,9 @@ args = parser.parse_args()
 
 
 BASE_PATH = Path(__file__).resolve().parent
+PKG_PATH = BASE_PATH / PACKAGE
+VER_PATH = PKG_PATH / 'VERSION'
+CHANGES_PATH = BASE_PATH / 'CHANGES.rst'
 
 DOCS_PATH = BASE_PATH / 'docs'
 BUILD_PATH = DOCS_PATH / 'build'
@@ -41,49 +44,6 @@ DERIVATIVES_PATH = DATA_PATH / 'derivatives'
 ANALYSIS_PATH = DERIVATIVES_PATH / 'analysis'
 BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
 FREESURFER_PATH = DERIVATIVES_PATH / 'freesurfer'
-
-
-if args.command == 'doc':
-    run([
-        'sphinx-build',
-        '-T',
-        '-b',
-        'html', '-d',
-        str(BUILD_PATH / 'doctrees'),
-        str(SOURCE_PATH),
-        str(HTML_PATH),
-        ])
-
-elif args.command == 'test':
-    rmtree(BIDS_PATH, ignore_errors=True)
-    rmtree(ANALYSIS_PATH, ignore_errors=True)
-    rmtree(BOAVUS_PATH, ignore_errors=True)
-    rmtree(FREESURFER_PATH, ignore_errors=True)
-
-    run([
-        'py.test',
-        '--cov=' + PACKAGE,
-        '--cov-report=html',
-        '--cov-report=term',
-        str(TEST_PATH),
-        ])
-    run([
-        'coverage',
-        'combine',
-        ])
-    run([
-        'coverage',
-        'html',
-        ])
-
-elif args.command == 'clean':
-    rmtree(BUILD_PATH, ignore_errors=True)
-    rmtree(API_PATH, ignore_errors=True)
-    rmtree(BIDS_PATH, ignore_errors=True)
-    rmtree(ANALYSIS_PATH, ignore_errors=True)
-    rmtree(BOAVUS_PATH, ignore_errors=True)
-    rmtree(FREESURFER_PATH, ignore_errors=True)
-
 
 
 def _new_version(level):
@@ -171,17 +131,29 @@ def _release(level):
 
 
 def _tests():
+
+    rmtree(BIDS_PATH, ignore_errors=True)
+    rmtree(ANALYSIS_PATH, ignore_errors=True)
+    rmtree(BOAVUS_PATH, ignore_errors=True)
+    rmtree(FREESURFER_PATH, ignore_errors=True)
+
     CMD = ['pytest',
            f'--cov={PACKAGE}',
-           '--cov-report=term',
            'tests',
            ]
 
-    # html report if local
-    if not environ.get('CI', False):
-        CMD.insert(1, '--cov-report=html')
-
     output = run(CMD)
+
+    run([
+        'coverage',
+        'combine',
+        ])
+    if not environ.get('CI', False):
+        run([
+            'coverage',
+            'html',
+            ])
+
     return output.returncode
 
 
@@ -195,24 +167,26 @@ def _docs():
         str(API_PATH),
         str(PKG_PATH),
         ])
-    output = run(['sphinx-build',
-                  '-T',
-                  '-b',
-                  'html',
-                  '-d',
-                  str(BUILD_PATH / 'doctrees'),
-                  str(SOURCE_PATH),
-                  str(HTML_PATH),
-                  ])
+    output = run([
+        'sphinx-build',
+        '-T',
+        '-b',
+        'html',
+        '-d',
+        str(BUILD_PATH / 'doctrees'),
+        str(SOURCE_PATH),
+        str(HTML_PATH),
+        ])
     return output.returncode
 
 
 def _clean_all():
     rmtree(BUILD_PATH, ignore_errors=True)
     rmtree(API_PATH, ignore_errors=True)
-
-    # also remove coverage folder
-    rmtree(COV_PATH, ignore_errors=True)
+    rmtree(BIDS_PATH, ignore_errors=True)
+    rmtree(ANALYSIS_PATH, ignore_errors=True)
+    rmtree(BOAVUS_PATH, ignore_errors=True)
+    rmtree(FREESURFER_PATH, ignore_errors=True)
 
 
 if __name__ == '__main__':
