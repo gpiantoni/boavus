@@ -64,8 +64,9 @@ before_install:
   - source $FREESURFER_HOME/SetUpFreeSurfer.sh
 
   # geckodriver
-  - json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
-  - url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
+  # - json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
+  # - url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
+  - url=https://github.com/mozilla/geckodriver/releases/download/v0.21.0/geckodriver-v0.21.0-linux64.tar.gz
   - echo $url
   - curl -s -L "$url" | tar -xz
   - chmod +x geckodriver
