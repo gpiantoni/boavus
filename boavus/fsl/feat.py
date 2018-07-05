@@ -2,7 +2,7 @@ from os import setpgrp
 from pathlib import Path
 from nibabel import load as niload
 from time import sleep
-from subprocess import Popen, run
+from subprocess import Popen
 
 from bidso import file_Core, Task
 from bidso.utils import bids_mkdir, replace_underscore, read_tsv, replace_extension, remove_extension
@@ -37,6 +37,9 @@ def main(bids_dir, analysis_dir):
     feats = []
     for fmri_path in bids_dir.rglob('*_bold.nii.gz'):
         task = Task(fmri_path)
+        if task.task != 'motor':
+            continue
+
         feat_path = run_feat(analysis_dir, task)
         feats.append(feat_path)
 
@@ -57,7 +60,6 @@ def run_feat(FEAT_OUTPUT, task, dry_run=False):
 
     if not dry_run:
         Popen(cmd, env=ENVIRON, preexec_fn=setpgrp)
-        # run(cmd, env=ENVIRON)
 
     feat_path = bids_mkdir(FEAT_OUTPUT, task)
     return feat_path / replace_extension(task.filename.name, '.feat')
