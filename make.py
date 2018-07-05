@@ -43,7 +43,6 @@ BIDS_PATH = DATA_PATH / 'bids'
 DERIVATIVES_PATH = DATA_PATH / 'derivatives'
 ANALYSIS_PATH = DERIVATIVES_PATH / 'analysis'
 BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
-FREESURFER_PATH = DERIVATIVES_PATH / 'freesurfer'
 
 
 def _new_version(level):
@@ -185,7 +184,6 @@ def _clean_all():
     rmtree(BIDS_PATH, ignore_errors=True)
     rmtree(ANALYSIS_PATH, ignore_errors=True)
     rmtree(BOAVUS_PATH, ignore_errors=True)
-    rmtree(FREESURFER_PATH, ignore_errors=True)
 
 
 if __name__ == '__main__':

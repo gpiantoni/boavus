@@ -29,7 +29,7 @@ task_ieeg = file_Core(
     )
 task_prf = file_Core(
     subject=subject,
-    session='day03',
+    session='day04',
     modality='ieeg',
     task='bairprf',
     run='1',
