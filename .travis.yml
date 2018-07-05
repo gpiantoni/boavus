@@ -36,7 +36,6 @@ before_install:
   - afni -ver
 
   # install freesurfer
-  - mkdir $DERIVATIVES/freesurfer -p
   - wget -q --directory-prefix=$DOWNLOADS https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz ;
   - mkdir $LIB -p
   - tar 
@@ -59,9 +58,13 @@ before_install:
     --exclude='freesurfer/diffusion' 
     freesurfer ;
   - echo -e $FREESURFER_LICENSE > $LIB/freesurfer/license.txt
-  - ls -l $LIB/freesurfer
   - export FREESURFER_HOME=$LIB/freesurfer
   - source $FREESURFER_HOME/SetUpFreeSurfer.sh
+  # copy bert to boavus
+  - mkdir $DERIVATIVES/freesurfer -p
+  - cp -r $FREESURFER_HOME/subjects/bert $DERIVATIVES/freesurfer/sub-bert
+  - ls -l $DERIVATIVES/freesurfer
+  - ls -l $DERIVATIVES/freesurfer/sub-bert
 
   # geckodriver
   # - json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
