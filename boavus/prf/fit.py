@@ -30,18 +30,41 @@ def main(analysis_dir, method="analyzePRF", task='bairprf', input='ieegprocpsd',
         if it should run serially (i.e. not parallely, mostly for debugging)
     """
     args = []
-    for ieeg_file in find_in_bids(analysis_dir, task=task, modality=input, extension='.pkl', generator=True):
-        args.append((ieeg_file, method))
+    for prf_file in find_in_bids(analysis_dir, task=task, modality=input, extension='.pkl', generator=True):
+        if input.startswith('ieeg'):
+            funct = estimate_ieeg_prf
+
+        elif input.startswith('bold'):
+            funct = estimate_bold_prf
+
+        else:
+            raise ValueError(f'Unknown modality {input}')
+
+        args.append((funct, prf_file, method))
 
     if noparallel:
         for arg in args:
-            estimate_prf(*arg)
+            args[0](*arg[1:])
     else:
         with Pool() as p:
-            p.starmap(estimate_prf, args)
+            p.starmap(arg[0], arg[1:])
 
 
-def estimate_prf(ieeg_file, method):
+def estimate_ieeg_prf(ieeg_file, method):
+    with ieeg_file.open('rb') as f:
+        data = load(f)
+
+    stimuli = data.attr['stimuli']
+
+    data = select(data, freq=(60, 80))
+    data = math(data, operator_name='mean', axis='time')
+    data = math(data, operator_name='mean', axis='freq')
+    data = concatenate(data, 'trial')
+
+    compute_prf(ieeg_file, data.data[0], data.chan[0], stimuli, method)
+
+
+def estimate_bold_prf(bold_file, method):
     with ieeg_file.open('rb') as f:
         data = load(f)
 
