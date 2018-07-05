@@ -135,7 +135,6 @@ def _tests():
     rmtree(BIDS_PATH, ignore_errors=True)
     rmtree(ANALYSIS_PATH, ignore_errors=True)
     rmtree(BOAVUS_PATH, ignore_errors=True)
-    rmtree(FREESURFER_PATH, ignore_errors=True)
 
     CMD = ['pytest',
            f'--cov={PACKAGE}',

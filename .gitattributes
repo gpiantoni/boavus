@@ -1,0 +1,4 @@
+tests/data/derivatives/freesurfer/sub-bert/mri/aparc+aseg.mgz filter=lfs diff=lfs merge=lfs -text
+tests/data/derivatives/freesurfer/sub-bert/mri/T1.mgz filter=lfs diff=lfs merge=lfs -text
+tests/data/derivatives/freesurfer/sub-bert/surf/lh.pial filter=lfs diff=lfs merge=lfs -text
+tests/data/derivatives/freesurfer/sub-bert/surf/rh.pial filter=lfs diff=lfs merge=lfs -text
