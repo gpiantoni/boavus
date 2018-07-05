@@ -33,7 +33,6 @@ before_install:
 
   # install afni
   - sudo apt-get install -y -qq afni
-  - afni -ver
 
   # install freesurfer
   - wget -q --directory-prefix=$DOWNLOADS https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz ;
@@ -63,14 +62,11 @@ before_install:
   # copy bert to boavus
   - mkdir $DERIVATIVES/freesurfer -p
   - cp -r $FREESURFER_HOME/subjects/bert $DERIVATIVES/freesurfer/sub-bert
-  - ls -l $DERIVATIVES/freesurfer
-  - ls -l $DERIVATIVES/freesurfer/sub-bert
 
   # geckodriver
   # - json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
   # - url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
   - url=https://github.com/mozilla/geckodriver/releases/download/v0.21.0/geckodriver-v0.21.0-linux64.tar.gz
-  - echo $url
   - curl -s -L "$url" | tar -xz
   - chmod +x geckodriver
   - mkdir $INSTALL -p
