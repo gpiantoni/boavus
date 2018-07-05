@@ -21,12 +21,10 @@ cache:
 before_install:
   # install neurodebian (without spyware)
   - sudo apt-get update -qq
-  - sudo apt-get install lsb-release
   - source /etc/lsb-release
   - wget -O- http://neuro.debian.net/lists/${DISTRIB_CODENAME}.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
   - sudo apt-key adv --recv-keys --keyserver pool.sks-keyservers.net 2649A5A9
   - sudo apt-get update -qq
-  - sudo apt-cache policy
 
   # install fsl
   - sudo apt-get install -y -qq fsl-core
