@@ -60,6 +60,8 @@ def save_frequency(ieeg_file, method, taper, duration):
     with output_file.open('wb') as f:
         dump(freq, f)
 
+    return output_file
+
 
 def compute_frequency(dat, taper, duration):
     """Remove epochs which have very high activity in high-freq range, then
