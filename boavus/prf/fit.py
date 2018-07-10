@@ -59,18 +59,20 @@ def main(analysis_dir, method="analyzePRF", task='bairprf', input='ieegprocpsd',
             p.starmap(arg[0], arg[1:])
 
 
-def estimate_ieeg_prf(ieeg_file, method):
+def estimate_ieeg_prf(ieeg_file, method, freq=(60, 80)):
     with ieeg_file.open('rb') as f:
         data = load(f)
 
     stimuli = data.attr['stimuli']
 
-    data = select(data, freq=(60, 80))
+    data = select(data, freq=freq)
     data = math(data, operator_name='mean', axis='time')
     data = math(data, operator_name='mean', axis='freq')
     data = concatenate(data, 'trial')
 
     compute_prf(ieeg_file, data.data[0], data.chan[0], stimuli, method)
+
+    return replace_extension(ieeg_file, 'prf.tsv')
 
 
 def estimate_bold_prf(bold_file, method):
