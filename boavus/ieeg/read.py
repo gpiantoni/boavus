@@ -54,6 +54,7 @@ def main(bids_dir, analysis_dir, task='motor', acquisition='*regions', markers_o
                     markers_on, markers_off, minimalduration, reject_chan_thresh)
             except FileNotFoundError as err:
                 lg.warning(err)
+                continue
             conds = ['move', 'rest']
 
         elif output_task.task.startswith('bair'):
