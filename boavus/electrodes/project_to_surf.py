@@ -37,6 +37,7 @@ def main(bids_dir, freesurfer_dir, analysis_dir, acquisition='clinical',
     for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=acquisition, modality='electrodes', extension='.tsv'):
         elec = Electrodes(electrode_path)
         fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
+        print(electrode_path)
 
         args.append((elec, fs, analysis_dir))
 

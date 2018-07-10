@@ -37,7 +37,7 @@ def main(bids_dir, analysis_dir):
     feats = []
     for fmri_path in bids_dir.rglob('*_bold.nii.gz'):
         task = Task(fmri_path)
-        if task.task != 'motor':
+        if not task.task.startswith('motor'):
             continue
 
         feat_path = run_feat(analysis_dir, task)
