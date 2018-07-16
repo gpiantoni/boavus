@@ -11,8 +11,7 @@ from bidso.find import find_in_bids, find_root
 lg = getLogger(__name__)
 
 
-def main(bids_dir, analysis_dir, task='motor', acquisition='*regions', markers_on='49',
-         markers_off='48', minimalduration=20, reject_chan_thresh=3,
+def main(bids_dir, analysis_dir, task='motor', acquisition='*regions',
          prestim=0.5, poststim=1.5):
     """
     read in the data for move and rest
@@ -75,19 +74,30 @@ def main(bids_dir, analysis_dir, task='motor', acquisition='*regions', markers_o
         else:
             raise ValueError(f'Unknown task "{output_task.task}" for {ieeg_file}')
 
-        for cond, data in zip(conds, all_data):
-            output_task = Task(ieeg_file)
-            output_task.extension = '.pkl'
-            output_task.task += cond
-            output_file = output_task.get_filename(analysis_dir)
 
-            output_file.parent.mkdir(exist_ok=True, parents=True)
-            with output_file.open('wb') as f:
-                dump(data, f)
+def read_motor_data(analysis_dir, filename, electrode_file):
+    all_data = read_ieeg(filename, electrode_file)
+    conds = ['move', 'rest']
+
+    outputs = []
+    for cond, data in zip(conds, all_data):
+        output_task = Task(filename)
+        output_task.extension = '.pkl'
+        output_task.task += cond
+        output_file = output_task.get_filename(analysis_dir)
+
+        output_file.parent.mkdir(exist_ok=True, parents=True)
+        with output_file.open('wb') as f:
+            dump(data, f)
+
+        outputs.append(output_file)
+
+    return outputs
 
 
-def read_ieeg(filename, electrode_file, markers_on, markers_off, minimalduration,
-              reject_chan_thresh):
+def read_ieeg(filename, electrode_file, markers_on='49', markers_off='48',
+              minimalduration=20, reject_chan_thresh=3):
+
     d = Dataset(filename, bids=True)
     s_freq = d.header['s_freq']
     electrodes = Electrodes(electrode_file)

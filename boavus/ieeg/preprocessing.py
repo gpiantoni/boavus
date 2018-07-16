@@ -40,7 +40,7 @@ def main(analysis_dir, reref='average', duration=2, noparallel=False):
             p.starmap(preprocess_ecog, args)
 
 
-def preprocess_ecog(ieeg_file, reref, duration):
+def preprocess_ecog(ieeg_file, reref='average', duration=2):
     """
     TODO
     ----
@@ -57,6 +57,8 @@ def preprocess_ecog(ieeg_file, reref, duration):
     output_file = replace_extension(ieeg_file, 'proc.pkl')
     with output_file.open('wb') as f:
         dump(data, f)
+
+    return output_file
 
 
 def make_segments(dat, duration=2):
