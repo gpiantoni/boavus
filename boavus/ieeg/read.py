@@ -86,16 +86,10 @@ def main(bids_dir, analysis_dir, task='motor', acquisition='*regions', markers_o
                 dump(data, f)
 
 
-def read_ieeg(filename, acquisition, markers_on, markers_off, minimalduration,
+def read_ieeg(filename, electrode_file, markers_on, markers_off, minimalduration,
               reject_chan_thresh):
     d = Dataset(filename, bids=True)
     s_freq = d.header['s_freq']
-
-    # this might be in bids or in wonambi
-    bids_root = find_root(d.filename)
-    electrode_file = find_in_bids(bids_root, subject=d.dataset.task.subject,
-                                  acquisition=acquisition,
-                                  modality='electrodes', extension='.tsv')
     electrodes = Electrodes(electrode_file)
 
     move_times, rest_times = read_markers(

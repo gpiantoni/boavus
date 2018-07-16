@@ -1,15 +1,12 @@
-from os import setpgrp
 from pathlib import Path
 from nibabel import load as niload
-from time import sleep
-from subprocess import Popen
 
 from bidso import file_Core, Task
-from bidso.utils import bids_mkdir, replace_underscore, read_tsv, replace_extension, remove_extension
-from bidso.find import find_in_bids
+from bidso.utils import bids_mkdir, replace_underscore, read_tsv, remove_extension
+
+from nipype import Node, Function
 
 from .misc import run_bet, run_reorient2std
-from ..utils import ENVIRON
 
 
 EVENT_VALUE = {
@@ -20,63 +17,22 @@ EVENT_VALUE = {
 DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fsf'
 
 
-def main(bids_dir, analysis_dir):
-    """
-    run FEAT using the events.tsv information
+def prepare_design(analysis_dir, func, anat):
 
-    Parameters
-    ----------
-    bids_dir : path
+    task = Task(func)
+    run_reorient2std(func)  # TODO: this modifies the BIDS
 
-    analysis_dir : path
-
-    """
-
-    analysis_dir.mkdir(exist_ok=True)
-
-    feats = []
-    for fmri_path in bids_dir.rglob('*_bold.nii.gz'):
-        task = Task(fmri_path)
-        if not task.task.startswith('motor'):
-            continue
-
-        feat_path = run_feat(analysis_dir, task)
-        feats.append(feat_path)
-
-    # wait for it to end
-    while True:
-        tsplots = [(x / 'tsplot' / 'tsplot_zstat1.png').exists() for x in feats]
-        if all(tsplots):
-            break
-        sleep(1)
-
-
-def run_feat(FEAT_OUTPUT, task, dry_run=False):
-
-    run_reorient2std(task.filename)  # TODO: this modifies the BIDS
-
-    subj_design = prepare_design(FEAT_OUTPUT, task)
-    cmd = ['feat', str(subj_design)]
-
-    if not dry_run:
-        Popen(cmd, env=ENVIRON, preexec_fn=setpgrp)
-
-    feat_path = bids_mkdir(FEAT_OUTPUT, task)
-    return feat_path / replace_extension(task.filename.name, '.feat')
-
-
-def prepare_design(FEAT_OUTPUT, task):
-    feat_path = bids_mkdir(FEAT_OUTPUT, task)
+    feat_path = bids_mkdir(analysis_dir, task)
 
     events_fsl = feat_path / task.events.filename.name
     _write_events(task.events.filename, events_fsl)
 
-    anat_path = find_in_bids(task.filename, modality='T1w', extension='.nii.gz', upwards=True)
-    anat_task = file_Core(anat_path)
+    anat_task = file_Core(anat)
     run_reorient2std(anat_task.filename)  # TODO: this modifies the BIDS
-    bids_mkdir(FEAT_OUTPUT, anat_task)
+    bids_mkdir(analysis_dir, anat_task)
 
-    bet_nii = run_bet(FEAT_OUTPUT, anat_task)
+    # TODO: bet in nipype
+    bet_nii = run_bet(analysis_dir, anat_task)
 
     # collect info
     img = niload(str(task.filename))
