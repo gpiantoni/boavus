@@ -1,10 +1,9 @@
 from pathlib import Path
+from shutil import rmtree
 from nibabel import load as niload
 
 from bidso import file_Core, Task
-from bidso.utils import bids_mkdir, replace_underscore, read_tsv, remove_extension
-
-from nipype import Node, Function
+from bidso.utils import bids_mkdir, replace_underscore, read_tsv, replace_extension
 
 from .misc import run_bet, run_reorient2std
 
@@ -42,7 +41,11 @@ def prepare_design(analysis_dir, func, anat):
     with DESIGN_TEMPLATE.open('r') as f:
         design = f.read()
 
-    output_dir = feat_path / remove_extension(Path(task.filename).name)
+    output_dir = feat_path / replace_extension(Path(task.filename).name, '.feat')
+    try:
+        rmtree(output_dir)
+    except:
+        pass
 
     design_values = {
         'XXX_OUTPUTDIR': str(output_dir),
