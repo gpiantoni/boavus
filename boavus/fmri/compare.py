@@ -28,16 +28,21 @@ def main(analysis_dir, measure='percent', normalize_to_mean=False):
     for feat_path in find_in_bids(analysis_dir, generator=True, extension='.feat'):
         lg.debug(f'Reading {feat_path}')
 
-        if measure == 'percent':
-            fmri_stat = compute_percent(feat_path, normalize_to_mean)
-        elif measure == 'zstat':
-            fmri_stat = compute_zstat(feat_path)
-        else:
-            raise ValueError(f'Unknown measure: {measure}')
 
-        feat = file_Core(feat_path)
-        task_path = bids_mkdir(analysis_dir, feat) / (feat.filename.stem + '_compare.nii.gz')
-        nsave(fmri_stat, str(task_path))
+def compare_fmri(analysis_dir, feat_path, measure='percent', normalize_to_mean=False):
+
+    if measure == 'percent':
+        fmri_stat = compute_percent(feat_path, normalize_to_mean)
+    elif measure == 'zstat':
+        fmri_stat = compute_zstat(feat_path)
+    else:
+        raise ValueError(f'Unknown measure: {measure}')
+
+    feat = file_Core(feat_path)
+    task_path = bids_mkdir(analysis_dir, feat) / (feat.filename.stem + '_compare.nii.gz')
+    nsave(fmri_stat, str(task_path))
+
+    return task_path
 
 
 def compute_percent(feat_path, normalize_to_mean):

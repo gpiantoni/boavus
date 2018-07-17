@@ -78,7 +78,6 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
         raise ValueError('You need to specify "freesurfer_dir" if you select the gray matter')
 
     n_processes = len(list(find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True)))
-    kernels = arange(kernel_start, kernel_end, kernel_step)
 
     processes = []
     for measure_nii in find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True):
@@ -98,9 +97,7 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
     [p.join() for p in processes]
 
 
-def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
-                      upsample, acquisition, kernels, graymatter, distance,
-                      n_cpu=None):
+def calc_fmri_at_elec(measure_nii, electrodes, freesurfer_dir, upsample, kernels, graymatter, distance):
 
     if upsample:
         upsampled_measure_nii = replace_underscore(measure_nii, 'comparehd.nii.gz')
@@ -113,12 +110,6 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
     mri[mri == 0] = NaN
 
     task_fmri = file_Core(measure_nii)
-
-    try:
-        electrodes = Electrodes(find_in_bids(bids_dir, subject=task_fmri.subject, acquisition=acquisition, modality='electrodes', extension='.tsv'))
-    except FileNotFoundError as err:
-        lg.debug(err)
-        return None
 
     labels = electrodes.electrodes.get(map_lambda=lambda x: x['name'])
     chan_xyz = array(electrodes.get_xyz())
@@ -142,7 +133,7 @@ def calc_fmri_at_elec(measure_nii, bids_dir, freesurfer_dir, analysis_dir,
         mri[~gm_mri] = NaN
 
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
-    fmri_vals, n_voxels = compute_kernels(kernels, chan_xyz, mri, ndi, distance, n_cpu)
+    fmri_vals, n_voxels = compute_kernels(kernels, chan_xyz, mri, ndi, distance)
 
     # TODO: it might be better to create a separate folder
     for old_tsv in measure_nii.parent.glob(replace_underscore(measure_nii.name, '*.tsv')):

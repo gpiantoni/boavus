@@ -13,8 +13,7 @@ from bidso.find import find_in_bids
 MODALITY = 'ieegprocpsd'
 
 
-def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
-         frequency_high=96, baseline=False, method='dh2012', measure='dh2012_r2'):
+def main(analysis_dir, taskA='*move', taskB='*rest', ):
     """
     compare the two conditions in percent change or zstat
 
@@ -37,64 +36,60 @@ def main(analysis_dir, taskA='*move', taskB='*rest', frequency_low=65,
     measure : str
         "dh2012_r2"
     """
+    pass
+
+
+def compare_ieeg_freq(file_A, file_B, analysis_dir, frequency_low=65, frequency_high=96,
+                      baseline=False, method='dh2012', measure='dh2012_r2'):
+    ieeg_A = file_Core(file_A)
+    ieeg_B = file_Core(file_B)
     frequency = [frequency_low, frequency_high]
-    for file_A in find_in_bids(analysis_dir, task=taskA, modality=MODALITY, extension='.pkl', generator=True):
 
-        ieeg_A = file_Core(file_A)
-        file_B = find_in_bids(
-            analysis_dir,
-            subject=ieeg_A.subject,
-            session=ieeg_A.session,
-            run=ieeg_A.run,
-            acquisition=ieeg_A.acquisition,
-            task=taskB,
-            modality=MODALITY,
-            extension='.pkl')
-        ieeg_B = file_Core(file_B)
+    with file_A.open('rb') as f:
+        dat_A = load(f)
+    with file_B.open('rb') as f:
+        dat_B = load(f)
 
-        with file_A.open('rb') as f:
-            dat_A = load(f)
-        with file_B.open('rb') as f:
-            dat_B = load(f)
+    if baseline:
+        dat_A, dat_B = correct_baseline(dat_A, dat_B, frequency)
 
-        if baseline:
-            dat_A, dat_B = correct_baseline(dat_A, dat_B, frequency)
+    hfa_A = merge(dat_A, method, frequency)
+    hfa_B = merge(dat_B, method, frequency)
 
-        hfa_A = merge(dat_A, method, frequency)
-        hfa_B = merge(dat_B, method, frequency)
+    if measure == 'diff':
+        ecog_stats = compute_diff(hfa_A, hfa_B)
+    elif measure == 'percent':
+        ecog_stats = compute_percent(hfa_A, hfa_B)
+    elif measure in ('zstat', 'dh2012_t'):  # identical
+        ecog_stats = compute_zstat(hfa_A, hfa_B)
+        if measure == 'dh2012_t':
+            ecog_stats.data[0] *= -1  # opposite sign in dh2012's script
 
-        if measure == 'diff':
-            ecog_stats = compute_diff(hfa_A, hfa_B)
-        elif measure == 'percent':
-            ecog_stats = compute_percent(hfa_A, hfa_B)
-        elif measure in ('zstat', 'dh2012_t'):  # identical
-            ecog_stats = compute_zstat(hfa_A, hfa_B)
-            if measure == 'dh2012_t':
-                ecog_stats.data[0] *= -1  # opposite sign in dh2012's script
+    elif measure == 'dh2012_r2':
+        ecog_stats = calc_dh2012_values(hfa_A, hfa_B, measure)
 
-        elif measure == 'dh2012_r2':
-            ecog_stats = calc_dh2012_values(hfa_A, hfa_B, measure)
+    # need to check pvalues
+    if True:
+        pvalues = calc_dh2012_values(hfa_A, hfa_B, 'dh2012_pv')
+    else:
+        pvalues = [NaN, ] * ecog_stats.number_of('chan')[0]
 
-        # need to check pvalues
-        if True:
-            pvalues = calc_dh2012_values(hfa_A, hfa_B, 'dh2012_pv')
-        else:
-            pvalues = [NaN, ] * ecog_stats.number_of('chan')[0]
+    output = file_Core(
+        subject=ieeg_A.subject,
+        session=ieeg_A.session,
+        run=ieeg_A.run,
+        acquisition=ieeg_A.acquisition,
+        modality=MODALITY + 'compare',
+        extension='.tsv',
+        task=find_longest_match(ieeg_A.task, ieeg_B.task),
+        )
+    compare_file = output.get_filename(analysis_dir, 'ieeg')
+    with compare_file.open('w') as f:
+        f.write('channel\tmeasure\tpvalue\n')
+        for i, chan in enumerate(ecog_stats.chan[0]):
+            f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\t{pvalues(trial=0, chan=chan)}\n')
 
-        output = file_Core(
-            subject=ieeg_A.subject,
-            session=ieeg_A.session,
-            run=ieeg_A.run,
-            acquisition=ieeg_A.acquisition,
-            modality=MODALITY + 'compare',
-            extension='.tsv',
-            task=find_longest_match(ieeg_A.task, ieeg_B.task),
-            )
-        compare_file = output.get_filename(analysis_dir, 'ieeg')
-        with compare_file.open('w') as f:
-            f.write('channel\tmeasure\tpvalue\n')
-            for i, chan in enumerate(ecog_stats.chan[0]):
-                f.write(f'{chan}\t{ecog_stats(trial=0, chan=chan)}\t{pvalues(trial=0, chan=chan)}\n')
+    return compare_file
 
 
 def merge(freq, method, frequency):

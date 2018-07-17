@@ -84,32 +84,21 @@ def main(bids_dir, analysis_dir, output_dir, acquisition='*regions',
             plot_results(results, output_dir)
 
 
-def compute_corr_ecog_fmri(fmri_file, bids_dir, analysis_dir, output_dir,
-                           acquisition, regions, PVALUE, PLOT):
-    fmri_tsv = read_tsv(fmri_file.filename)
-
-    electrodes_file = find_in_bids(
-        bids_dir,
-        wildcard=True,
-        subject=fmri_file.subject,
-        acquisition=acquisition,
-        modality='electrodes',
-        extension='.tsv')
-    electrodes = Electrodes(electrodes_file)
-
-    ecog_file = find_in_bids(
-        analysis_dir,
-        subject=fmri_file.subject,
-        task=fmri_file.task,
-        modality=IEEG_MODALITY,
-        extension='.tsv')
+def compute_corr_ecog_fmri(fmri_file, ecog_file, electrodes_file, output_dir,
+                           regions, PVALUE, PLOT):
+    fmri_tsv = read_tsv(fmri_file)
     ecog_tsv = read_tsv(ecog_file)
+
+    electrodes = Electrodes(electrodes_file)
     n_all_elec = len(ecog_tsv)
 
+    """
+    TODO
     # use only values from electrodes which are in the ROI
     labels_in_roi = find_labels_in_regions(electrodes, regions)
     ecog_tsv = list(filter(lambda x: x['channel'] in labels_in_roi, ecog_tsv))
     lg.debug(f'Using {len(ecog_tsv)}/{n_all_elec} electrodes in ROI')
+    """
 
     KERNELS = array([col for col in fmri_tsv[0] if col != 'channel'])
 

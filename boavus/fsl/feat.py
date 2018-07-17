@@ -5,7 +5,7 @@ from nibabel import load as niload
 from bidso import file_Core, Task
 from bidso.utils import bids_mkdir, replace_underscore, read_tsv, replace_extension
 
-from .misc import run_bet, run_reorient2std
+from .misc import run_bet
 
 
 EVENT_VALUE = {
@@ -19,7 +19,6 @@ DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fs
 def prepare_design(analysis_dir, func, anat):
 
     task = Task(func)
-    run_reorient2std(func)  # TODO: this modifies the BIDS
 
     feat_path = bids_mkdir(analysis_dir, task)
 
@@ -27,7 +26,6 @@ def prepare_design(analysis_dir, func, anat):
     _write_events(task.events.filename, events_fsl)
 
     anat_task = file_Core(anat)
-    run_reorient2std(anat_task.filename)  # TODO: this modifies the BIDS
     bids_mkdir(analysis_dir, anat_task)
 
     # TODO: bet in nipype
