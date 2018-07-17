@@ -89,11 +89,10 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, electrodes_file, output_dir,
     fmri_tsv = read_tsv(fmri_file)
     ecog_tsv = read_tsv(ecog_file)
 
-    electrodes = Electrodes(electrodes_file)
-    n_all_elec = len(ecog_tsv)
-
     """
     TODO
+    electrodes = Electrodes(electrodes_file)
+    n_all_elec = len(ecog_tsv)
     # use only values from electrodes which are in the ROI
     labels_in_roi = find_labels_in_regions(electrodes, regions)
     ecog_tsv = list(filter(lambda x: x['channel'] in labels_in_roi, ecog_tsv))

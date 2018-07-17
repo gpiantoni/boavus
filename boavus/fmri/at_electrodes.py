@@ -97,7 +97,9 @@ def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
     [p.join() for p in processes]
 
 
-def calc_fmri_at_elec(measure_nii, electrodes, freesurfer_dir, upsample, kernels, graymatter, distance):
+def calc_fmri_at_elec(measure_nii, electrodes_file, freesurfer_dir, upsample, kernels, graymatter, distance):
+
+    electrodes = Electrodes(electrodes_file)
 
     if upsample:
         upsampled_measure_nii = replace_underscore(measure_nii, 'comparehd.nii.gz')
@@ -152,6 +154,8 @@ def calc_fmri_at_elec(measure_nii, electrodes, freesurfer_dir, upsample, kernels
         f.write('channel\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
         for one_label, val_at_elec in zip(labels, n_voxels):
             f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
+
+    return fmri_vals_tsv, n_voxels_tsv
 
 
 def from_chan_to_mrifile(img, xyz):

@@ -52,7 +52,8 @@ def wrapper_at_elec(measure_nii, electrodes, freesurfer_dir='', upsample=False, 
 
     kernels = arange(kernel_start, kernel_end, kernel_step)
 
-    return str(calc_fmri_at_elec(Path(measure_nii), Path(electrodes), Path(freesurfer_dir), upsample, kernels, graymatter, distance))
+    output = calc_fmri_at_elec(Path(measure_nii), Path(electrodes), Path(freesurfer_dir), upsample, kernels, graymatter, distance)
+    return [str(x) for x in output]
 
 
 def wrapper_corr(fmri_file, ecog_file, electrodes='', output_dir='', regions=[], PVALUE=0.05, PLOT=False):
@@ -157,7 +158,8 @@ function_fmri_atelec = Function(
         'kernel_step',
     ],
     output_names=[
-        'out_file',
+        'fmri_vals',
+        'n_voxels',
     ],
     function=wrapper_at_elec,
     )
