@@ -1,81 +1,16 @@
-from pickle import dump
-from wonambi.trans import math, filter_
 from logging import getLogger
-from numpy import array, mean, std, load
-from scipy.io import loadmat
+from numpy import mean, std
+from pickle import dump
 from wonambi import Dataset
+from wonambi.trans import math, filter_
 
 from bidso import Task, Electrodes
-from bidso.find import find_in_bids, find_root
 
 lg = getLogger(__name__)
 
 
-def main(bids_dir, analysis_dir, task='motor', acquisition='*regions',
-         prestim=0.5, poststim=1.5):
-    """
-    read in the data for move and rest
+def read_bids_data(filename, electrode_file, analysis_dir='.'):
 
-    Notch filter here
-
-    Parameters
-    ----------
-    bids_dir : path
-
-    analysis_dir : path
-
-    task : str
-        task to read in
-    acquisition : str
-        (motor) type of electrodes
-    markers_on : str
-        (motor) marker start
-    markers_off : str
-        (motor) marker end
-    minimalduration : float
-        (motor) minimal duration of each block
-    reject_chan_thresh : float
-        (motor) threshold std to reject channels
-    prestim : float
-        (bair) prestimulus time
-    poststim : float
-        (bair) poststimulus time
-    """
-    for ieeg_file in find_in_bids(bids_dir, task=task, modality='ieeg', extension='.eeg', generator=True):
-        lg.debug(f'reading {ieeg_file}')
-
-        output_task = Task(ieeg_file)
-        if output_task.task.startswith('motor'):
-
-            try:
-                all_data = read_ieeg(
-                    ieeg_file, acquisition,
-                    markers_on, markers_off, minimalduration, reject_chan_thresh)
-            except FileNotFoundError as err:
-                lg.warning(err)
-                continue
-            conds = ['move', 'rest']
-
-        elif output_task.task.startswith('bair'):
-
-            prestim = float(prestim)
-            poststim = float(poststim)
-
-            d = Dataset(ieeg_file, bids=True)
-            events = array([x['start'] for x in d.read_markers()])
-
-            data = d.read_data(
-                begtime=list(events - prestim),
-                endtime=list(events + poststim + 1 / d.header['s_freq']))
-            data.attr['stimuli'] = read_prf_stimuli(d.dataset.task)
-            all_data = (data, )
-            conds = ['', ]
-
-        else:
-            raise ValueError(f'Unknown task "{output_task.task}" for {ieeg_file}')
-
-
-def read_motor_data(analysis_dir, filename, electrode_file):
     all_data = read_ieeg(filename, electrode_file)
     conds = ['move', 'rest']
 
@@ -146,27 +81,3 @@ def read_markers(d, marker_on, marker_off, minimalduration):
     rest_start = [mrk['start'] for mrk in markers if mrk['name'] == marker_off if (mrk['end'] - mrk['start']) > minimalduration]
     rest_end = [mrk['end'] for mrk in markers if mrk['name'] == marker_off if (mrk['end'] - mrk['start']) > minimalduration]
     return (move_start, move_end), (rest_start, rest_end)
-
-
-def read_prf_stimuli(task):
-    """Read stimuli to compute the PRF
-
-    Parameters
-    ----------
-    task : instance of bidso.Task
-        task containing the events and filename
-    """
-    stimuli_dir = find_root(task.filename) / 'stimuli'
-
-    stim_file = stimuli_dir / task.events.tsv[0]['stim_file']
-    if stim_file.suffix == '.npy':
-        stimuli = load(stim_file)
-
-    elif stim_file.suffix == '.mat':
-        mat = loadmat(stim_file)
-        stimuli = mat['stimulus'][0, 0]['images']
-
-    stim_file_index = array([int(x['stim_file_index']) - 1 for x in task.events.tsv])
-    stimuli = stimuli[:, :, stim_file_index]
-
-    return stimuli
