@@ -13,7 +13,7 @@ def wrapper_fmri_compare(feat_path, measure, normalize_to_mean):
     return str(output)
 
 
-def wrapper_at_elec(in_file, electrodes, distance, kernel_sizes, upsample, graymatter, freesurfer_dir):
+def wrapper_at_elec(in_file, electrodes, distance, kernel_sizes, graymatter=False):
     # measure_nii, electrodes, freesurfer_dir='', upsample=False, graymatter=False, distance='guassian', kernel_sizes):
     from pathlib import Path
     from boavus.fmri.at_electrodes import calc_fmri_at_elec
@@ -23,9 +23,7 @@ def wrapper_at_elec(in_file, electrodes, distance, kernel_sizes, upsample, graym
         Path(electrodes),
         distance,
         kernel_sizes,
-        upsample,
         graymatter,
-        Path(freesurfer_dir),
         Path('.').resolve())
     return [str(x) for x in output]
 

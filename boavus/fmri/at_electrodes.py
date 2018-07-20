@@ -24,12 +24,9 @@ from nibabel import load as nload
 
 from bidso import file_Core, Electrodes
 from bidso.find import find_in_bids
-from bidso.utils import replace_underscore, replace_extension
+from bidso.utils import replace_underscore
 
-from .utils import ribbon2graymatter
-from ..fsl.misc import (run_flirt_resample,
-                        run_flirt_feat,
-                        run_fslmaths_threshold,
+from ..fsl.misc import (run_fslmaths_threshold,
                         )
 
 
@@ -37,12 +34,11 @@ lg = getLogger(__name__)
 
 COUNT_THRESHOLD = 0.5
 # 1 sigma = 0.6065306597126334
-UPSAMPLE_RESOLUTION = 1
 DOWNSAMPLE_RESOLUTION = 4
 GRAYMATTER_THRESHOLD = 0.5
 
 
-def calc_fmri_at_elec(measure_nii, electrodes_file, distance, kernels, upsample, graymatter, freesurfer_dir, output_dir):
+def calc_fmri_at_elec(measure_nii, electrodes_file, distance, kernels, graymatter, output_dir):
     """
     Calculate the (weighted) average of fMRI values at electrode locations
     """
@@ -52,27 +48,21 @@ def calc_fmri_at_elec(measure_nii, electrodes_file, distance, kernels, upsample,
     mri = img.get_data()
     mri[mri == 0] = NaN
 
-    task_fmri = file_Core(measure_nii)
-
     labels = electrodes.electrodes.get(map_lambda=lambda x: x['name'])
     chan_xyz = array(electrodes.get_xyz())
 
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, nd)
 
+    """
+    if not upsample:
+        gm_lowres_file = replace_extension(gm_file, '_downsample.nii.gz')
+        run_flirt_resample(gm_file, gm_lowres_file, DOWNSAMPLE_RESOLUTION)
+        gm_file = run_fslmaths_threshold(gm_lowres_file, .5)
+        lg.debug(f'Same resolution as fMRI: {gm_lowres_file}')
+    """
     if graymatter:
-        gm_file = ribbon2graymatter(task_fmri, freesurfer_dir)
-        lg.debug(f'High-resolution graymatter file: {gm_file}')
-
-        if not upsample:
-            gm_lowres_file = replace_extension(gm_file, '_downsample.nii.gz')
-            run_flirt_resample(gm_file, gm_lowres_file, DOWNSAMPLE_RESOLUTION)
-            gm_file = run_fslmaths_threshold(gm_lowres_file, .5)
-            lg.debug(f'Same resolution as fMRI: {gm_lowres_file}')
-
-        gm_feat_file = run_flirt_feat(task_fmri, gm_file)
-        lg.debug(f'Same affine as fMRI: {gm_feat_file}')
-        gm_mri = nload(str(gm_feat_file)).get_data().astype(bool)
+        gm_mri = nload(str(graymatter)).get_data().astype(bool)
         mri[~gm_mri] = NaN
 
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
