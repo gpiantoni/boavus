@@ -8,23 +8,6 @@ from bidso.utils import bids_mkdir, replace_underscore, replace_extension
 from ..utils import check_subprocess, ENVIRON
 
 
-def run_bet(BET_PATH, task):
-    bet_path = bids_mkdir(BET_PATH, task)
-    bet_nii = bet_path / replace_underscore(Path(task.filename).name, 'bet.nii.gz')
-
-    p = run([
-        'bet',
-        str(task.filename),
-        str(bet_nii),
-        '-R',
-        '-f', '0.5',
-        '-g', '0',
-        ], stdout=PIPE, stderr=PIPE, env=ENVIRON)
-    check_subprocess(p)
-
-    return bet_nii
-
-
 def run_reorient2std(nii):
     """This function simply reorients nifti, so that FSL can work with it
     more easily (reg works much better after running this function).

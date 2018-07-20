@@ -1,13 +1,6 @@
 from nipype import Function
 
 
-def wrapper_prepare_design(analysis_dir, func, anat):
-    from pathlib import Path
-    from boavus.fsl.feat import prepare_design
-
-    return str(prepare_design(Path(analysis_dir), Path(func), Path(anat)))
-
-
 def wrapper_compare_fmri(analysis_dir, feat_path, measure='percent', normalize_to_mean=False):
     from pathlib import Path
     from boavus.fmri.compare import compare_fmri
@@ -31,20 +24,6 @@ def wrapper_corr(fmri_file, ecog_file, electrodes='', output_dir='', regions=[],
     from boavus.ieeg.corrfmri import compute_corr_ecog_fmri
 
     return str(compute_corr_ecog_fmri(Path(fmri_file), Path(ecog_file), Path(electrodes), Path(output_dir), regions, PVALUE, PLOT))
-
-
-
-FEAT_model = Function(
-    input_names=[
-        'analysis_dir',
-        'func',
-        'anat',
-    ],
-    output_names=[
-        'fsf_file',
-    ],
-    function=wrapper_prepare_design,
-    )
 
 
 function_fmri_compare = Function(
