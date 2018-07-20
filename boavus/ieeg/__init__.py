@@ -13,6 +13,18 @@ def wrapper_read_ieeg_block(ieeg, electrodes, conditions, minimalduration):
     return [str(x) for x in outputs]
 
 
+def wrapper_preprocess(ieeg, reref, duration):
+    from pathlib import Path
+    from boavus.ieeg.preprocessing import preprocess_ecog
+
+    outputs = preprocess_ecog(
+        Path(ieeg),
+        reref,
+        duration,
+        Path('.').resolve())
+    return [str(x) for x in outputs]
+
+
 function_ieeg_read = Function(
     input_names=[
         'ieeg',
@@ -24,4 +36,17 @@ function_ieeg_read = Function(
         'ieeg',
     ],
     function=wrapper_read_ieeg_block,
+    )
+
+
+function_ieeg_preprocess = Function(
+    input_names=[
+        'ieeg',
+        'reref',
+        'duration',
+    ],
+    output_names=[
+        'ieeg',
+    ],
+    function=wrapper_preprocess,
     )

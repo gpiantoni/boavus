@@ -1,12 +1,6 @@
 from nipype import Function
 
 
-def wrapper_preprocess_ecog(ieeg):
-    from pathlib import Path
-    from boavus.ieeg.preprocessing import preprocess_ecog
-
-    return preprocess_ecog(Path(ieeg))
-
 
 def wrapper_frequency(ieeg, method, taper, duration):
     from pathlib import Path
@@ -53,17 +47,6 @@ def wrapper_corr(fmri_file, ecog_file, electrodes='', output_dir='', regions=[],
     from boavus.ieeg.corrfmri import compute_corr_ecog_fmri
 
     return str(compute_corr_ecog_fmri(Path(fmri_file), Path(ecog_file), Path(electrodes), Path(output_dir), regions, PVALUE, PLOT))
-
-
-function_ieeg_preprocess = Function(
-    input_names=[
-        'ieeg',
-    ],
-    output_names=[
-        'ieeg',
-    ],
-    function=wrapper_preprocess_ecog,
-    )
 
 
 function_ieeg_frequency = Function(

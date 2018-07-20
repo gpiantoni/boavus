@@ -1,47 +1,25 @@
-from multiprocessing import Pool
 from logging import getLogger
 from pickle import load, dump
 from numpy import empty, arange
 from wonambi.trans import montage
 from wonambi.trans.select import _create_subepochs
 
-from bidso.find import find_in_bids
 from bidso.utils import replace_extension
 
 
 lg = getLogger(__name__)
 
 
-def main(analysis_dir, reref='average', duration=2, noparallel=False):
+def preprocess_ecog(ieeg_file, reref, duration, output_dir):
     """
-    preprocess the data (no notch filter here, it's done when reading the data)
 
     Parameters
     ----------
-    analysis_dir : path
-
     reref : str
         'average' or 'regression'
     duration : int
         length of the segments
-    noparallel : bool
-        if it should run serially (i.e. not parallely, mostly for debugging)
-    """
-    args = []
-    for ieeg_file in find_in_bids(analysis_dir, modality='ieeg', extension='.pkl', generator=True):
-        lg.debug(f'reading {ieeg_file}')
-        args.append((ieeg_file, reref, float(duration)))
 
-    if noparallel:
-        for arg in args:
-            preprocess_ecog(*arg)
-    else:
-        with Pool() as p:
-            p.starmap(preprocess_ecog, args)
-
-
-def preprocess_ecog(ieeg_file, reref='average', duration=2):
-    """
     TODO
     ----
     labels_in_roi = find_labels_in_regions(electrodes, regions)
@@ -54,7 +32,7 @@ def preprocess_ecog(ieeg_file, reref='average', duration=2):
     data = montage(data, ref_to_avg=True, method=reref)
     data = make_segments(data, duration)
 
-    output_file = replace_extension(ieeg_file, 'proc.pkl')
+    output_file = output_dir / replace_extension(ieeg_file.name, 'proc.pkl')
     with output_file.open('wb') as f:
         dump(data, f)
 
