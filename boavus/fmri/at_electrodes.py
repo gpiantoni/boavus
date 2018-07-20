@@ -34,8 +34,6 @@ lg = getLogger(__name__)
 
 COUNT_THRESHOLD = 0.5
 # 1 sigma = 0.6065306597126334
-DOWNSAMPLE_RESOLUTION = 4
-GRAYMATTER_THRESHOLD = 0.5
 
 
 def calc_fmri_at_elec(measure_nii, electrodes_file, distance, kernels, graymatter, output_dir):
@@ -54,13 +52,6 @@ def calc_fmri_at_elec(measure_nii, electrodes_file, distance, kernels, graymatte
     nd = array(list(ndindex(mri.shape)))
     ndi = from_mrifile_to_chan(img, nd)
 
-    """
-    if not upsample:
-        gm_lowres_file = replace_extension(gm_file, '_downsample.nii.gz')
-        run_flirt_resample(gm_file, gm_lowres_file, DOWNSAMPLE_RESOLUTION)
-        gm_file = run_fslmaths_threshold(gm_lowres_file, .5)
-        lg.debug(f'Same resolution as fMRI: {gm_lowres_file}')
-    """
     if graymatter:
         gm_mri = nload(str(graymatter)).get_data().astype(bool)
         mri[~gm_mri] = NaN
