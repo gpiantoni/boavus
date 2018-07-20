@@ -5,31 +5,13 @@ from nibabel import load as nload
 from nibabel import save as nsave
 from nibabel import Nifti1Image
 
-from bidso import file_Core
-from bidso.find import find_in_bids
-from bidso.utils import bids_mkdir
+from bidso.utils import replace_extension
 
 lg = getLogger(__name__)
 
 
-def main(analysis_dir, measure='percent', normalize_to_mean=False):
-    """
-    compute percent change of the BOLD signal
-
-    Parameters
-    ----------
-    analysis_dir : path
-
-    measure : str
-        "percent", "zstat"
-    normalize_to_mean : bool
-
-    """
-    for feat_path in find_in_bids(analysis_dir, generator=True, extension='.feat'):
-        lg.debug(f'Reading {feat_path}')
-
-
-def compare_fmri(analysis_dir, feat_path, measure='percent', normalize_to_mean=False):
+def compare_fmri(feat_path, measure, normalize_to_mean, output_dir):
+    # measure='percent', normalize_to_mean=False):
 
     if measure == 'percent':
         fmri_stat = compute_percent(feat_path, normalize_to_mean)
@@ -38,8 +20,7 @@ def compare_fmri(analysis_dir, feat_path, measure='percent', normalize_to_mean=F
     else:
         raise ValueError(f'Unknown measure: {measure}')
 
-    feat = file_Core(feat_path)
-    task_path = bids_mkdir(analysis_dir, feat) / (feat.filename.stem + '_compare.nii.gz')
+    task_path = output_dir / replace_extension(feat_path.name, '_compare.nii.gz')
     nsave(fmri_stat, str(task_path))
 
     return task_path
