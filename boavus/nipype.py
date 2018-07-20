@@ -1,22 +1,6 @@
 from nipype import Function
 
 
-
-def wrapper_frequency(ieeg, method, taper, duration):
-    from pathlib import Path
-    from boavus.ieeg.psd import save_frequency
-
-    return str(save_frequency(Path(ieeg), method, taper, duration))
-
-
-def wrapper_ieeg_compare(analysis_dir, in_files, frequency_low=65, frequency_high=96,
-                         baseline=False, method='dh2012', measure='dh2012_r2'):
-    from pathlib import Path
-    from boavus.ieeg.compare import compare_ieeg_freq
-
-    return str(compare_ieeg_freq(Path(in_files[0]), Path(in_files[1]), Path(analysis_dir), frequency_low, frequency_high, baseline, method, measure))
-
-
 def wrapper_prepare_design(analysis_dir, func, anat):
     from pathlib import Path
     from boavus.fsl.feat import prepare_design
@@ -48,22 +32,6 @@ def wrapper_corr(fmri_file, ecog_file, electrodes='', output_dir='', regions=[],
 
     return str(compute_corr_ecog_fmri(Path(fmri_file), Path(ecog_file), Path(electrodes), Path(output_dir), regions, PVALUE, PLOT))
 
-
-function_ieeg_compare = Function(
-    input_names=[
-        'analysis_dir',
-        'in_files',
-        'frequency_low',
-        'frequency_high',
-        'baseline',
-        'method',
-        'measure',
-    ],
-    output_names=[
-        'tsv_compare',
-    ],
-    function=wrapper_ieeg_compare,
-    )
 
 
 FEAT_model = Function(

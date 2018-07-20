@@ -8,27 +8,13 @@ from wonambi.trans import math, concatenate, select
 from wonambi.datatype import Data
 
 from bidso import file_Core
-from bidso.find import find_in_bids
-
-MODALITY = 'ieegprocpsd'
 
 
-def main(analysis_dir, taskA='*move', taskB='*rest', ):
+def compare_ieeg_freq(file_A, file_B, frequency, baseline, method, measure,
+                      output_dir):
     """
-    compare the two conditions in percent change or zstat
-
     Parameters
     ----------
-    analysis_dir : path
-
-    taskA : str
-
-    taskB : str
-
-    frequency_low : float
-
-    frequency_high : float
-
     baseline : bool
         if you want to substract baseline
     method : str
@@ -36,14 +22,8 @@ def main(analysis_dir, taskA='*move', taskB='*rest', ):
     measure : str
         "dh2012_r2"
     """
-    pass
-
-
-def compare_ieeg_freq(file_A, file_B, analysis_dir, frequency_low=65, frequency_high=96,
-                      baseline=False, method='dh2012', measure='dh2012_r2'):
     ieeg_A = file_Core(file_A)
     ieeg_B = file_Core(file_B)
-    frequency = [frequency_low, frequency_high]
 
     with file_A.open('rb') as f:
         dat_A = load(f)
@@ -79,11 +59,11 @@ def compare_ieeg_freq(file_A, file_B, analysis_dir, frequency_low=65, frequency_
         session=ieeg_A.session,
         run=ieeg_A.run,
         acquisition=ieeg_A.acquisition,
-        modality=MODALITY + 'compare',
+        modality='compare',
         extension='.tsv',
         task=find_longest_match(ieeg_A.task, ieeg_B.task),
         )
-    compare_file = output.get_filename(analysis_dir, 'ieeg')
+    compare_file = output_dir / output.get_filename()
     with compare_file.open('w') as f:
         f.write('channel\tmeasure\tpvalue\n')
         for i, chan in enumerate(ecog_stats.chan[0]):

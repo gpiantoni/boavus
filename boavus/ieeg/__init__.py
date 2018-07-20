@@ -38,6 +38,22 @@ def wrapper_powerspectrum(ieeg, method, taper, duration):
     return str(output)
 
 
+def wrapper_ieeg_compare(in_files, frequency, baseline=False, method='dh2012',
+                         measure='dh2012_r2'):
+    from pathlib import Path
+    from boavus.ieeg.compare import compare_ieeg_freq
+
+    output = compare_ieeg_freq(
+        Path(in_files[0]),
+        Path(in_files[1]),
+        frequency,
+        baseline,
+        method,
+        measure,
+        Path('.').resolve())
+    return str(output)
+
+
 function_ieeg_read = Function(
     input_names=[
         'ieeg',
@@ -76,4 +92,19 @@ function_ieeg_powerspectrum = Function(
         'ieeg',
     ],
     function=wrapper_powerspectrum,
+    )
+
+
+function_ieeg_compare = Function(
+    input_names=[
+        'in_files',
+        'frequency',
+        'baseline',
+        'method',
+        'measure',
+    ],
+    output_names=[
+        'tsv_compare',
+    ],
+    function=wrapper_ieeg_compare,
     )
