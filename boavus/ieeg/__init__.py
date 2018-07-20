@@ -17,12 +17,25 @@ def wrapper_preprocess(ieeg, reref, duration):
     from pathlib import Path
     from boavus.ieeg.preprocessing import preprocess_ecog
 
-    outputs = preprocess_ecog(
+    output = preprocess_ecog(
         Path(ieeg),
         reref,
         duration,
         Path('.').resolve())
-    return [str(x) for x in outputs]
+    return str(output)
+
+
+def wrapper_powerspectrum(ieeg, method, taper, duration):
+    from pathlib import Path
+    from boavus.ieeg.psd import compute_powerspectrum
+
+    output = compute_powerspectrum(
+        Path(ieeg),
+        method,
+        taper,
+        duration,
+        Path('.').resolve())
+    return str(output)
 
 
 function_ieeg_read = Function(
@@ -49,4 +62,18 @@ function_ieeg_preprocess = Function(
         'ieeg',
     ],
     function=wrapper_preprocess,
+    )
+
+
+function_ieeg_powerspectrum = Function(
+    input_names=[
+        'ieeg',
+        'method',
+        'taper',
+        'duration',
+    ],
+    output_names=[
+        'ieeg',
+    ],
+    function=wrapper_powerspectrum,
     )

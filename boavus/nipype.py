@@ -49,20 +49,6 @@ def wrapper_corr(fmri_file, ecog_file, electrodes='', output_dir='', regions=[],
     return str(compute_corr_ecog_fmri(Path(fmri_file), Path(ecog_file), Path(electrodes), Path(output_dir), regions, PVALUE, PLOT))
 
 
-function_ieeg_frequency = Function(
-    input_names=[
-        'ieeg',
-        'method',
-        'taper',
-        'duration',
-    ],
-    output_names=[
-        'ieeg',
-    ],
-    function=wrapper_frequency,
-    )
-
-
 function_ieeg_compare = Function(
     input_names=[
         'analysis_dir',

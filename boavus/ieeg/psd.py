@@ -1,12 +1,10 @@
 from pickle import load, dump
 from logging import getLogger
-from multiprocessing import Pool
 from numpy import empty, array
 from scipy.signal import welch
 
 from wonambi.trans import timefrequency
 from wonambi.datatype import ChanTimeFreq
-from bidso.find import find_in_bids
 from bidso.utils import replace_extension
 
 lg = getLogger(__name__)
@@ -14,39 +12,20 @@ lg = getLogger(__name__)
 HALFBANDWIDTH = 2
 
 
-def main(analysis_dir, method="spectrogram", taper='dpss', duration=1,
-         input='ieegproc', noparallel=False):
+def compute_powerspectrum(ieeg_file, method, taper, duration, output_dir):
     """
-    compute psd for two conditions
+    compute psd
 
     Parameters
     ----------
-    analysis_dir : path
-
     method : str
         "spectrogram" or "dh2012"
     taper : str
         "dpss", "boxcar", "hann" (only if method=='spectrogram')
     duration : float
         duration of the trials
-    input : str
-        name of the modality of the preceding step
-    noparallel : bool
-        if it should run serially (i.e. not parallely, mostly for debugging)
     """
-    args = []
-    for ieeg_file in find_in_bids(analysis_dir, modality=input, extension='.pkl', generator=True):
-        args.append((ieeg_file, method, taper, float(duration)))
 
-    if noparallel:
-        for arg in args:
-            save_frequency(*arg)
-    else:
-        with Pool() as p:
-            p.starmap(save_frequency, args)
-
-
-def save_frequency(ieeg_file, method, taper, duration):
     with ieeg_file.open('rb') as f:
         dat = load(f)
 
@@ -55,8 +34,7 @@ def save_frequency(ieeg_file, method, taper, duration):
     elif method == 'dh2012':
         freq = compute_welch_dh2012(dat, duration)
 
-    output_file = replace_extension(ieeg_file, 'psd.pkl')
-    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir / replace_extension(ieeg_file.name, 'psd.pkl')
     with output_file.open('wb') as f:
         dump(freq, f)
 
