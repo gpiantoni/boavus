@@ -1,7 +1,7 @@
 """Various functions, that I don't know where to place
 """
 from nibabel import load as nload
-from numpy import array, isnan, zeros
+from numpy import array, isnan
 from nibabel import Nifti1Image
 from pathlib import Path
 from tempfile import mkstemp
@@ -25,17 +25,16 @@ def get_vox2ras_tkr(filename):
     return vox2ras_tkr
 
 
-def ribbon2graymatter(task_fmri, freesurfer_dir):
-    ribbon_file = freesurfer_dir / ('sub-' + task_fmri.subject) / 'mri' / 'ribbon.mgz'
-    graymatter_file = task_fmri.filename.parents[1] / 'anat' / 'ribbon_graymatter.nii.gz'
+def ribbon2graymatter(ribbon_files, output_dir):
+    graymatter_file = output_dir / 'graymatter.nii.gz'
 
-    ribbon = nload(str(ribbon_file))
-    ribbon_mri = ribbon.get_data()
+    ribbon_rh = nload(str(ribbon_files[1]))
+    ribbon_lh = nload(str(ribbon_files[2]))
+    graymatter = ribbon_rh.get_data() + ribbon_lh.get_data()
 
-    graymatter = zeros(ribbon_mri.shape)
-    graymatter[(ribbon_mri == 42) | (ribbon_mri == 3)] = 1
-    nifti = Nifti1Image(graymatter, ribbon.affine)
+    nifti = Nifti1Image(graymatter, ribbon_rh.affine)
     nifti.to_filename(str(graymatter_file))
+
     return graymatter_file
 
 

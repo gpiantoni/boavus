@@ -13,6 +13,34 @@ def wrapper_fmri_compare(feat_path, measure, normalize_to_mean):
     return str(output)
 
 
+def wrapper_at_elec(in_file, electrodes, distance, kernel_sizes, upsample, graymatter, freesurfer_dir):
+    # measure_nii, electrodes, freesurfer_dir='', upsample=False, graymatter=False, distance='guassian', kernel_sizes):
+    from pathlib import Path
+    from boavus.fmri.at_electrodes import calc_fmri_at_elec
+
+    output = calc_fmri_at_elec(
+        Path(in_file),
+        Path(electrodes),
+        distance,
+        kernel_sizes,
+        upsample,
+        graymatter,
+        Path(freesurfer_dir),
+        Path('.').resolve())
+    return [str(x) for x in output]
+
+
+def wrapper_fmri_graymatter(ribbon):
+    from pathlib import Path
+    from boavus.fmri.utils import ribbon2graymatter
+    print(ribbon)
+
+    output = ribbon2graymatter(
+        ribbon,
+        Path('.').resolve())
+    return str(output)
+
+
 function_fmri_compare = Function(
     input_names=[
         'feat_path',
@@ -23,4 +51,31 @@ function_fmri_compare = Function(
         'out_file',
     ],
     function=wrapper_fmri_compare,
+    )
+
+
+function_fmri_atelec = Function(
+    input_names=[
+        'in_file',
+        'electrodes',
+        'distance',
+        'kernel_sizes',
+        'graymatter',
+    ],
+    output_names=[
+        'fmri_vals',
+        'n_voxels',
+    ],
+    function=wrapper_at_elec,
+    )
+
+
+function_fmri_graymatter = Function(
+    input_names=[
+        'ribbon',
+    ],
+    output_names=[
+        'out_file',
+    ],
+    function=wrapper_fmri_graymatter,
     )

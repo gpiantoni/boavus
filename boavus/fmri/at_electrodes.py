@@ -42,70 +42,11 @@ DOWNSAMPLE_RESOLUTION = 4
 GRAYMATTER_THRESHOLD = 0.5
 
 
-def main(bids_dir, analysis_dir, freesurfer_dir=None, graymatter=False,
-         distance='gaussian', acquisition='*regions', noparallel=False,
-         upsample=False, kernel_start=6, kernel_end=8,
-         kernel_step=1):
+def calc_fmri_at_elec(measure_nii, electrodes_file, distance, kernels, upsample, graymatter, freesurfer_dir, output_dir):
     """
     Calculate the (weighted) average of fMRI values at electrode locations
-
-    Parameters
-    ----------
-    bids_dir : path
-
-    analysis_dir : path
-
-    freesurfer_dir : path
-        only necessary if you include gray matter
-    graymatter : bool
-
-    distance : str
-
-    acquisition : str
-
-    noparallel : bool
-
-    upsample : bool
-
-    kernel_start : int
-
-    kernel_end : int
-
-    kernel_step : float
-
     """
-    if graymatter and freesurfer_dir is None:
-        raise ValueError('You need to specify "freesurfer_dir" if you select the gray matter')
-
-    n_processes = len(list(find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True)))
-
-    processes = []
-    for measure_nii in find_in_bids(analysis_dir, modality='compare', extension='.nii.gz', generator=True):
-        lg.debug(f'adding {measure_nii}')
-        if not noparallel:
-            n_cpu = ceil(cpu_count() / n_processes) - 1
-        else:
-            n_cpu = None
-        processes.append(Process(target=calc_fmri_at_elec,
-                                 args=(measure_nii, bids_dir, freesurfer_dir,
-                                       analysis_dir, upsample, acquisition,
-                                       kernels, graymatter, distance,
-                                       n_cpu),
-                                 daemon=False))  # make sure daemon is False, otherwise no children
-
-    [p.start() for p in processes]
-    [p.join() for p in processes]
-
-
-def calc_fmri_at_elec(measure_nii, electrodes_file, freesurfer_dir, upsample, kernels, graymatter, distance):
-
     electrodes = Electrodes(electrodes_file)
-
-    if upsample:
-        upsampled_measure_nii = replace_underscore(measure_nii, 'comparehd.nii.gz')
-        lg.debug(f'Upsampling measure file: {upsampled_measure_nii}')
-        run_flirt_resample(measure_nii, upsampled_measure_nii, UPSAMPLE_RESOLUTION)
-        measure_nii = upsampled_measure_nii
 
     img = nload(str(measure_nii))
     mri = img.get_data()
@@ -137,19 +78,14 @@ def calc_fmri_at_elec(measure_nii, electrodes_file, freesurfer_dir, upsample, ke
     lg.debug(f'Computing fMRI values for {measure_nii.name} at {len(labels)} electrodes and {len(kernels)} "{distance}" kernels')
     fmri_vals, n_voxels = compute_kernels(kernels, chan_xyz, mri, ndi, distance)
 
-    # TODO: it might be better to create a separate folder
-    for old_tsv in measure_nii.parent.glob(replace_underscore(measure_nii.name, '*.tsv')):
-        old_tsv.unlink()
-
-    fmri_vals_tsv = replace_underscore(measure_nii, 'compare.tsv')
-    lg.debug(f'Saving {fmri_vals_tsv}')
+    fmri_vals_tsv = output_dir / replace_underscore(measure_nii.name, 'compare.tsv')
+    n_voxels_tsv = output_dir / replace_underscore(measure_nii.name, 'nvoxels.tsv')
 
     with fmri_vals_tsv.open('w') as f:
         f.write('channel\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
         for one_label, val_at_elec in zip(labels, fmri_vals):
             f.write(one_label + '\t' + '\t'.join(str(one_val) for one_val in val_at_elec) + '\n')
 
-    n_voxels_tsv = replace_underscore(measure_nii, 'nvoxels.tsv')
     with n_voxels_tsv.open('w') as f:
         f.write('channel\t' + '\t'.join(str(one_k) for one_k in kernels) + '\n')
         for one_label, val_at_elec in zip(labels, n_voxels):
