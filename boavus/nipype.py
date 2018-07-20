@@ -1,14 +1,6 @@
 from nipype import Function
 
 
-def wrapper_read_motor_data(analysis_dir, ieeg, electrodes):
-    from pathlib import Path
-    from boavus.ieeg.read import read_motor_data
-
-    outputs = read_motor_data(Path(analysis_dir), Path(ieeg), Path(electrodes))
-    return [str(x) for x in outputs]
-
-
 def wrapper_preprocess_ecog(ieeg):
     from pathlib import Path
     from boavus.ieeg.preprocessing import preprocess_ecog
@@ -61,19 +53,6 @@ def wrapper_corr(fmri_file, ecog_file, electrodes='', output_dir='', regions=[],
     from boavus.ieeg.corrfmri import compute_corr_ecog_fmri
 
     return str(compute_corr_ecog_fmri(Path(fmri_file), Path(ecog_file), Path(electrodes), Path(output_dir), regions, PVALUE, PLOT))
-
-
-function_ieeg_read = Function(
-    input_names=[
-        'analysis_dir',
-        'ieeg',
-        'electrodes',
-    ],
-    output_names=[
-        'ieeg_files',
-    ],
-    function=wrapper_read_motor_data,
-    )
 
 
 function_ieeg_preprocess = Function(

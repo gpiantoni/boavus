@@ -8,13 +8,7 @@ from bidso import Task, Electrodes
 lg = getLogger(__name__)
 
 
-COND = {
-    'move': '49',
-    'rest': '48',
-    }
-
-
-def read_ieeg_block(filename, electrode_file, cond, minimalduration):
+def read_ieeg_block(filename, electrode_file, cond, minimalduration, output_dir):
     d = Dataset(filename, bids=True)
     markers = d.read_markers()
 
@@ -24,11 +18,11 @@ def read_ieeg_block(filename, electrode_file, cond, minimalduration):
 
     clean_labels = _reject_channels(d, elec_names, cond, minimalduration)
 
-    block_beg = []
-    block_end = []
-
     outputs = []
     for cond_name, cond_mrk in cond.items():
+        block_beg = []
+        block_end = []
+
         for mrk in markers:
 
             if mrk['name'] in cond_mrk:
@@ -42,7 +36,7 @@ def read_ieeg_block(filename, electrode_file, cond, minimalduration):
         output_task = Task(filename)
         output_task.extension = '.pkl'
         output_task.task += cond_name
-        output_file = output_task.get_filename()
+        output_file = output_dir / output_task.get_filename()
         with output_file.open('wb') as f:
             dump(data, f)
         outputs.append(output_file)
@@ -55,7 +49,7 @@ def _reject_channels(d, elec_names, cond, minimalduration):
     block_beg = []
     block_end = []
     for mrk in markers:
-        if mrk['name'] in COND.values():
+        if mrk['name'] in cond.values():
             dur = (mrk['end'] - mrk['start'])
             if dur >= minimalduration:
 
@@ -69,7 +63,7 @@ def _reject_channels(d, elec_names, cond, minimalduration):
     return clean_labels
 
 
-def read_bids_data(filename, electrode_file, cond=COND):
+def read_bids_data(filename, electrode_file, cond):
 
     all_data = read_ieeg(filename, electrode_file)
     conds = ['move', 'rest']
