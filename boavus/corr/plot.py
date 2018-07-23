@@ -1,20 +1,45 @@
+from numpy import argmax, isnan
+from scipy.stats import linregress
+from bidso.utils import read_tsv
 
-def plot_single_points(ecog_tsv, fmri_tsv):
-    best_kernel = KERNELS[argmax(all_r2)]
+import plotly.graph_objs as go
+from exportimages import export_plotly
+
+from .corrfmri import select_channels
+
+
+def compute_corr_ecog_fmri(fmri_file, ecog_file, corr_file, img_dir, PVALUE):
+
+    fmri_tsv = read_tsv(fmri_file)
+    ecog_tsv = read_tsv(ecog_file)
+    fmri_tsv = select_channels(fmri_tsv, ecog_tsv)
+    kernel_sizes = fmri_tsv.dtype.names[1:]
+
+    corr_tsv = read_tsv(corr_file)
+    best_kernel = kernel_sizes[argmax(corr_tsv['Rsquared'])]
     fig = scatter_single_points(ecog_tsv, fmri_tsv, best_kernel, PVALUE)
-    singlepoints_png = output_dir / SINGLE_POINTS_DIR / (results_tsv.stem + '.png')
+
+    img_dir.mkdir(exist_ok=True, parents=True)
+    singlepoints_png = img_dir / (corr_file.stem + '.png')
+
     export_plotly(fig, singlepoints_png)
 
-def scatter_single_points(ecog_tsv, fmri_tsv, kernel, pvalue):
-    ecog_val, p_val, fmri_val = read_measures(ecog_tsv, fmri_tsv, kernel)
-    mask = ~isnan(ecog_val) & ~isnan(fmri_val) & (p_val <= pvalue)
-    lr = linregress(ecog_val[mask], fmri_val[mask])
+    return singlepoints_png
+
+
+def scatter_single_points(ecog_val, fmri_val, kernel, pvalue):
+
+    x_ecog = ecog_val['measure']
+    y_fmri = fmri_val[kernel]
+
+    mask = ~isnan(x_ecog) & ~isnan(y_fmri) & (ecog_val['pvalue'] <= pvalue)
+    lr = linregress(x_ecog[mask], y_fmri[mask])
 
     traces = [
         go.Scatter(
             name='not significant',
-            x=ecog_val[p_val > pvalue],
-            y=fmri_val[p_val > pvalue],
+            x=x_ecog[ecog_val['pvalue'] > pvalue],
+            y=y_fmri[ecog_val['pvalue'] > pvalue],
             mode='markers',
             marker=go.Marker(
                 color='cyan',
@@ -22,16 +47,16 @@ def scatter_single_points(ecog_tsv, fmri_tsv, kernel, pvalue):
             ),
         go.Scatter(
             name='significant',
-            x=ecog_val[p_val <= pvalue],
-            y=fmri_val[p_val <= pvalue],
+            x=x_ecog[ecog_val['pvalue'] <= pvalue],
+            y=y_fmri[ecog_val['pvalue'] <= pvalue],
             mode='markers',
             marker=go.Marker(
                 color='magenta',
                 )
             ),
         go.Scatter(
-            x=ecog_val,
-            y=lr.slope * ecog_val + lr.intercept,
+            x=x_ecog,
+            y=lr.slope * x_ecog + lr.intercept,
             mode='lines',
             marker=go.Marker(
                 color='magenta'
@@ -55,5 +80,3 @@ def scatter_single_points(ecog_tsv, fmri_tsv, kernel, pvalue):
         )
 
     return fig
-
-
