@@ -1,5 +1,4 @@
 from pathlib import Path
-from shutil import rmtree
 from nibabel import load as niload
 
 from bidso import Task

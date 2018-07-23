@@ -1,25 +1,11 @@
-from boavus import boavus
+from boavus.fsl.feat import prepare_design
 
-from .paths import BIDS_PATH, ANALYSIS_PATH, FREESURFER_PATH
+from .paths import task_anat, task_fmri, ANALYSIS_PATH, BIDS_PATH
 
 
 def test_main_fsl_feat():
 
-    boavus([
-        'fsl',
-        'feat',
-        '--bids_dir', str(BIDS_PATH),
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        ])
+    anat = task_anat.get_filename(BIDS_PATH)
+    func = task_fmri.get_filename(BIDS_PATH)
 
-
-def test_main_fsl_coreg():
-
-    boavus([
-        'fsl',
-        'coreg',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--freesurfer_dir', str(FREESURFER_PATH),
-        '--log', 'debug',
-        ])
+    prepare_design(func, anat, ANALYSIS_PATH)
