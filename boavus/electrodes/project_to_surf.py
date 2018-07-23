@@ -15,40 +15,6 @@ from ..mri.surface import fill_surface
 lg = getLogger(__name__)
 
 
-def main(bids_dir, freesurfer_dir, analysis_dir, acquisition='clinical',
-         noparallel=False):
-    """
-    Project electrodes
-
-    Parameters
-    ----------
-    bids_dir : path
-
-    freesurfer_dir : path
-
-    analysis_dir : path
-
-    acquisition : str
-        acquisition type of the electrode files
-    noparallel : bool
-        if it should run serially (i.e. not parallely, mostly for debugging)
-    """
-    args = []
-    for electrode_path in find_in_bids(bids_dir, generator=True, acquisition=acquisition, modality='electrodes', extension='.tsv'):
-        elec = Electrodes(electrode_path)
-        fs = Freesurfer(freesurfer_dir / ('sub-' + elec.subject))
-        print(electrode_path)
-
-        args.append((elec, fs, analysis_dir))
-
-    if noparallel:
-        for arg in args:
-            project_electrodes(*arg)
-    else:
-        with Pool(processes=4) as p:
-            p.starmap(project_electrodes, args)
-
-
 def project_electrodes(elec, freesurfer, analysis_dir):
 
     elec.acquisition += 'projected'

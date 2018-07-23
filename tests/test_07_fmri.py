@@ -14,16 +14,6 @@ output_nii = replace_underscore(task_fmri.get_filename(ANALYSIS_PATH),
                                 'bold_compare.nii.gz')
 
 
-def test_fmri_compare_error():
-
-    with raises(ValueError):
-        boavus([
-            'fmri',
-            'compare',
-            '--analysis_dir', str(ANALYSIS_PATH),
-            '--measure', 'xxx',
-            ])
-
 
 def test_fmri_compare_zstat():
 
