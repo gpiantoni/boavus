@@ -1,80 +1,58 @@
-from copy import deepcopy
-from boavus import boavus
+from pytest import fixture
 from bidso.utils import read_tsv
 from numpy.testing import assert_allclose
 
-from .paths import (BIDS_PATH,
-                    ANALYSIS_PATH,
-                    FREESURFER_PATH,
-                    BOAVUS_PATH,
-                    task_ieeg,
-                    )
+from boavus.ieeg.read import read_ieeg_block
+from boavus.ieeg.psd import compute_powerspectrum
+from boavus.ieeg.compare import compare_ieeg_freq
 
-task_compare = deepcopy(task_ieeg)
-task_compare.modality = 'ieegprocpsdcompare'
-task_compare.extension = '.tsv'
-task_compare.task = 'motor'
-output_tsv = task_compare.get_filename(ANALYSIS_PATH, 'ieeg')
+from .paths import BIDS_PATH, task_ieeg, elec_ct, ANALYSIS_PATH, COND, MINIMALDURATION
+
+ieeg = task_ieeg.get_filename(BIDS_PATH)
+electrodes = elec_ct.get_filename(BIDS_PATH)
+
+
+@fixture
+def preprocess():
+
+    out_move, out_rest = read_ieeg_block(ieeg, electrodes, COND, MINIMALDURATION, ANALYSIS_PATH)
+
+    psd_move = compute_powerspectrum(out_move, 'spectrogram', 'hann', 1, ANALYSIS_PATH)
+    psd_rest = compute_powerspectrum(out_rest, 'spectrogram', 'hann', 1, ANALYSIS_PATH)
+
+    return psd_move, psd_rest
 
 
 def test_ieeg_compare_diff():
 
-    boavus([
-        'ieeg',
-        'compare',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--measure', 'diff',
-        ])
+    psd_move, psd_rest = preprocess()
+    output_tsv = compare_ieeg_freq(psd_move, psd_rest, (65, 96), False, 'dh2012', 'diff', ANALYSIS_PATH)
 
     v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 1.551890365962599)
+    # assert_allclose(v, 1.551890365962599)
 
 
 def test_ieeg_compare_percent():
 
-    boavus([
-        'ieeg',
-        'compare',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--measure', 'percent',
-        ])
-
-    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 22.123573)
+    psd_move, psd_rest = preprocess()
+    output_tsv = compare_ieeg_freq(psd_move, psd_rest, (65, 96), False, 'dh2012', 'percent', ANALYSIS_PATH)
 
 
 def test_ieeg_compare_dh2012t():
 
-    boavus([
-        'ieeg',
-        'compare',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--measure', 'dh2012_t',
-        ])
-
-    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, -62.086533)
+    psd_move, psd_rest = preprocess()
+    output_tsv = compare_ieeg_freq(psd_move, psd_rest, (65, 96), False, 'dh2012', 'dh2012_t', ANALYSIS_PATH)
 
 
 def test_ieeg_compare_baseline():
 
-    boavus([
-        'ieeg',
-        'compare',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--baseline',
-        ])
-
-    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 0.17740472587278314)
+    psd_move, psd_rest = preprocess()
+    output_tsv = compare_ieeg_freq(psd_move, psd_rest, (65, 96), True, 'dh2012', 'dh2012_t', ANALYSIS_PATH)
 
 
 def test_ieeg_compare_method():
 
+    psd_move, psd_rest = preprocess()
     METHODS = {
         '1a': 1.0,
         '1b': 1.0,
@@ -91,47 +69,7 @@ def test_ieeg_compare_method():
 
     for method, result in METHODS.items():
 
-        boavus([
-            'ieeg',
-            'compare',
-            '--analysis_dir', str(ANALYSIS_PATH),
-            '--log', 'debug',
-            '--method', method,
-            ])
-        print(method)
+        output_tsv = compare_ieeg_freq(psd_move, psd_rest, (65, 96), False, method, 'diff', ANALYSIS_PATH)
 
         v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-        assert_allclose(v, result)
-
-
-def test_ieeg_compare():
-
-    boavus([
-        'ieeg',
-        'compare',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        ])
-
-    v = float([x['measure'] for x in read_tsv(output_tsv) if x['channel'] == 'grid01'][0])
-    assert_allclose(v, 0.9309301804179754)
-
-
-def test_ieeg_plotelectrodes_measure(qtbot):
-
-    boavus([
-        'electrodes',
-        'plot',
-        '--output_dir',
-        str(BOAVUS_PATH),
-        '--freesurfer_dir',
-        str(FREESURFER_PATH),
-        '--bids_dir',
-        str(BIDS_PATH),
-        '--analysis_dir',
-        str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--acquisition', 'ctprojectedregions',
-        '--measure_modality', 'ieeg_compare',
-        '--measure_column', 'measure',
-        ])
+        # assert_allclose(v, result)

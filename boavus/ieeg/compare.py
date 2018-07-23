@@ -10,14 +10,14 @@ from wonambi.datatype import Data
 from bidso import file_Core
 
 
-def compare_ieeg_freq(file_A, file_B, frequency, baseline, method, measure,
+def compare_ieeg_freq(file_A, file_B, frequency, baseline, merge_method, measure,
                       output_dir):
     """
     Parameters
     ----------
     baseline : bool
         if you want to substract baseline
-    method : str
+    merge_method : str
         "dh2012"
     measure : str
         "dh2012_r2"
@@ -33,8 +33,8 @@ def compare_ieeg_freq(file_A, file_B, frequency, baseline, method, measure,
     if baseline:
         dat_A, dat_B = correct_baseline(dat_A, dat_B, frequency)
 
-    hfa_A = merge(dat_A, method, frequency)
-    hfa_B = merge(dat_B, method, frequency)
+    hfa_A = merge(dat_A, merge_method, frequency)
+    hfa_B = merge(dat_B, merge_method, frequency)
 
     if measure == 'diff':
         ecog_stats = compute_diff(hfa_A, hfa_B)

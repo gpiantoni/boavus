@@ -58,3 +58,10 @@ elec_ct = file_Core(
     acquisition='ct',
     extension='.tsv',
     )
+
+
+COND = {
+    'move': 'move',
+    'rest': 'rest',
+    }
+MINIMALDURATION = 15

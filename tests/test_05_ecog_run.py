@@ -6,21 +6,16 @@ from boavus.ieeg.read import read_ieeg_block
 from boavus.ieeg.preprocessing import preprocess_ecog
 from boavus.ieeg.psd import compute_powerspectrum
 
-from .paths import BIDS_PATH, task_ieeg, elec_ct, ANALYSIS_PATH
+from .paths import BIDS_PATH, task_ieeg, elec_ct, ANALYSIS_PATH, COND, MINIMALDURATION
 
 ieeg = task_ieeg.get_filename(BIDS_PATH)
 electrodes = elec_ct.get_filename(BIDS_PATH)
-cond = {
-    'move': 'move',
-    'rest': 'rest',
-    }
-MINIMALDURATION = 15
 
 
 @fixture
 def test_ieeg_read():
 
-    out_move, out_rest = read_ieeg_block(ieeg, electrodes, cond, MINIMALDURATION, ANALYSIS_PATH)
+    out_move, out_rest = read_ieeg_block(ieeg, electrodes, COND, MINIMALDURATION, ANALYSIS_PATH)
 
     with out_move.open('rb') as f:
         data = load(f)
@@ -90,4 +85,3 @@ def notest_ieeg_broadband():
     with output_broadband.open('rb') as f:
         data = load(f)
     assert_allclose(data.data[0].sum(), 1393445261.229699)
-
