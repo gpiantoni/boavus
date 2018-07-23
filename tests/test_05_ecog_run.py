@@ -1,126 +1,82 @@
-from copy import deepcopy
-from boavus import boavus
 from numpy.testing import assert_allclose
 from pickle import load
+from pytest import fixture
 
-from .paths import (BIDS_PATH,
-                    ANALYSIS_PATH,
-                    task_ieeg,
-                    )
+from boavus.ieeg.read import read_ieeg_block
+from boavus.ieeg.preprocessing import preprocess_ecog
+from boavus.ieeg.psd import compute_powerspectrum
 
+from .paths import BIDS_PATH, task_ieeg, elec_ct, ANALYSIS_PATH
 
-task_move = deepcopy(task_ieeg)
-task_move.task += 'move'
-task_move.extension = '.pkl'
-output_data = task_move.get_filename(ANALYSIS_PATH)
-
-task_move.modality += 'proc'
-output_proc = task_move.get_filename(ANALYSIS_PATH, 'ieeg')
-
-task_move.modality += 'psd'
-output_freq = task_move.get_filename(ANALYSIS_PATH, 'ieeg')
-
-task_move.modality = task_move.modality[:-3] + 'broadband'
-output_broadband = task_move.get_filename(ANALYSIS_PATH, 'ieeg')
+ieeg = task_ieeg.get_filename(BIDS_PATH)
+electrodes = elec_ct.get_filename(BIDS_PATH)
+cond = {
+    'move': 'move',
+    'rest': 'rest',
+    }
+MINIMALDURATION = 15
 
 
+@fixture
 def test_ieeg_read():
 
-    boavus([
-        'ieeg',
-        'read',
-        '--bids_dir', str(BIDS_PATH),
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--markers_on', 'move',
-        '--markers_off', 'rest',
-        ])
+    out_move, out_rest = read_ieeg_block(ieeg, electrodes, cond, MINIMALDURATION, ANALYSIS_PATH)
 
-    with output_data.open('rb') as f:
+    with out_move.open('rb') as f:
         data = load(f)
     assert_allclose(abs(data.data[0]).sum(), 229309580.97038913)
+
+    with out_rest.open('rb') as f:
+        data = load(f)
+    assert_allclose(abs(data.data[0]).sum(), 114692807.74778011)
+
+    return out_move
 
 
 def test_ieeg_preprocessing_regression():
 
-    boavus([
-        'ieeg',
-        'preprocessing',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--noparallel',
-        '--log', 'debug',
-        '--reref', 'regression',
-        '--duration', '4',
-        ])
+    out_move = test_ieeg_read()
+    out_prepr = preprocess_ecog(out_move, 'regression', 2, ANALYSIS_PATH)
 
-    with output_proc.open('rb') as f:
+    with out_prepr.open('rb') as f:
         data = load(f)
-    assert_allclose(abs(data.data[0]).sum(), 13962283.42361395)
+    assert_allclose(abs(data.data[0]).sum(), 6944731.825136112)
 
 
+@fixture
 def test_ieeg_preprocessing():
 
-    boavus([
-        'ieeg',
-        'preprocessing',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--noparallel',
-        '--log', 'debug',
-        '--duration', '4',
-        ])
+    out_move = test_ieeg_read()
+    out_prepr = preprocess_ecog(out_move, 'average', 2, ANALYSIS_PATH)
 
-    with output_proc.open('rb') as f:
+    with out_prepr.open('rb') as f:
         data = load(f)
-    assert_allclose(abs(data.data[0]).sum(), 13963593.33152158)
+    assert_allclose(abs(data.data[0]).sum(), 6945108.024372008)
+
+    return out_prepr
 
 
 def test_ieeg_psd_spectrogram():
 
-    boavus([
-        'ieeg',
-        'psd',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--noparallel',
-        ])
+    out_prepr = test_ieeg_preprocessing()
+    out_psd = compute_powerspectrum(out_prepr, 'spectrogram', 'hann', 1, ANALYSIS_PATH)
 
-    with output_freq.open('rb') as f:
+    with out_psd.open('rb') as f:
         data = load(f)
-    assert_allclose(data.data[0].sum(), 53484510.01552996)
+    assert_allclose(data.data[0].sum(), 17443757.375675)
 
 
 def test_ieeg_psd_dh2012():
 
-    boavus([
-        'ieeg',
-        'psd',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--noparallel',
-        '--log', 'info',
-        '--method', 'dh2012',
-        ])
+    out_prepr = test_ieeg_preprocessing()
+    out_psd = compute_powerspectrum(out_prepr, 'dh2012', '', 2, ANALYSIS_PATH)
 
-    with output_freq.open('rb') as f:
+    with out_psd.open('rb') as f:
         data = load(f)
-    assert_allclose(data.data[0].sum(), 9024920.18128)
+    assert_allclose(data.data[0].sum(), 17938632.464411)
 
 
-def test_ieeg_psd_parallel():
-
-    boavus([
-        'ieeg',
-        'psd',
-        '--analysis_dir', str(ANALYSIS_PATH),
-        '--log', 'debug',
-        '--noparallel',
-        ])
-
-    with output_freq.open('rb') as f:
-        data = load(f)
-    assert_allclose(data.data[0].sum(), 53484510.01552996)
-
-
-def test_ieeg_broadband():
+def notest_ieeg_broadband():
 
     boavus([
         'ieeg',
@@ -134,3 +90,4 @@ def test_ieeg_broadband():
     with output_broadband.open('rb') as f:
         data = load(f)
     assert_allclose(data.data[0].sum(), 1393445261.229699)
+
