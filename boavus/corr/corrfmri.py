@@ -23,6 +23,7 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, output_dir, PVALUE):
     ecog_tsv = list(filter(lambda x: x['channel'] in labels_in_roi, ecog_tsv))
     lg.debug(f'Using {len(ecog_tsv)}/{n_all_elec} electrodes in ROI')
     """
+    output_dir.mkdir(exist_ok=True, parents=True)
 
     fmri_tsv = read_tsv(fmri_file)
     ecog_tsv = read_tsv(ecog_file)
@@ -44,7 +45,7 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, output_dir, PVALUE):
             except Exception:
                 r2 = NaN
 
-            f.write(f'{kernel:.2f}\t{r2}\n')
+            f.write(f'{float(kernel):.2f}\t{r2}\n')
 
     return results_tsv
 
