@@ -44,7 +44,7 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, output_dir, PVALUE):
             except Exception:
                 r2 = NaN
 
-            f.write(f'{kernel}\t{r2}\n')
+            f.write(f'{kernel:.2f}\t{r2}\n')
 
     return results_tsv
 
