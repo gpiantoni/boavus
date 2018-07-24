@@ -1,12 +1,10 @@
 from functools import partial
 from itertools import product
 from logging import getLogger
-from math import ceil
-from multiprocessing import Pool, Process, cpu_count
+from multiprocessing import Pool
 import warnings
 
-from numpy import (arange,
-                   ndindex,
+from numpy import (ndindex,
                    array,
                    sum,
                    power,
@@ -22,12 +20,8 @@ from scipy.stats import norm as normdistr
 from nibabel.affines import apply_affine
 from nibabel import load as nload
 
-from bidso import file_Core, Electrodes
-from bidso.find import find_in_bids
+from bidso import Electrodes
 from bidso.utils import replace_underscore
-
-from ..fsl.misc import (run_fslmaths_threshold,
-                        )
 
 
 lg = getLogger(__name__)
