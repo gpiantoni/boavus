@@ -7,7 +7,7 @@ from bidso.utils import read_tsv
 from exportimages import export_plotly, Webdriver
 
 
-def plot_corr_all(results_tsv, img_dir):
+def plot_corr_all(results_tsv, img_dir, image='png'):
 
     img_dir.mkdir(exist_ok=True, parents=True)
 
@@ -22,7 +22,7 @@ def plot_corr_all(results_tsv, img_dir):
             acquisition = file_Core(one_tsv).acquisition
 
             fig = _plot_fit_over_kernel(results, acquisition)
-            output_png = img_dir / (one_tsv.stem + '.png')
+            output_png = img_dir / (one_tsv.stem + '.' + image)
             export_plotly(fig, output_png, driver=d)
 
             rsquared.append(
@@ -33,11 +33,11 @@ def plot_corr_all(results_tsv, img_dir):
                 )
 
         fig = _plot_histogram(rsquared, 'r2', 1)
-        png_r2 = img_dir / 'histogram_rsquared.png'
+        png_r2 = img_dir / ('histogram_rsquared.' + image)
         export_plotly(fig, png_r2, driver=d)
 
         fig = _plot_histogram(peaks, 'peak', max(results['Kernel']))
-        png_peaks = img_dir / 'histogram_peak.png'
+        png_peaks = img_dir / ('histogram_peak.' + image)
         export_plotly(fig, png_peaks, driver=d)
 
     return png_r2, png_peaks

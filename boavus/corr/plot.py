@@ -8,7 +8,7 @@ from exportimages import export_plotly
 from .corrfmri import select_channels
 
 
-def compute_corr_ecog_fmri(fmri_file, ecog_file, corr_file, img_dir, PVALUE):
+def compute_corr_ecog_fmri(fmri_file, ecog_file, corr_file, img_dir, PVALUE, image):
 
     fmri_tsv = read_tsv(fmri_file)
     ecog_tsv = read_tsv(ecog_file)
@@ -20,7 +20,7 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, corr_file, img_dir, PVALUE):
     fig = scatter_single_points(ecog_tsv, fmri_tsv, best_kernel, PVALUE)
 
     img_dir.mkdir(exist_ok=True, parents=True)
-    singlepoints_png = img_dir / (corr_file.stem + '.png')
+    singlepoints_png = img_dir / (corr_file.stem + '.' + image)
 
     export_plotly(fig, singlepoints_png)
 
