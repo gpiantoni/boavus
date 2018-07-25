@@ -33,6 +33,8 @@ def compute_powerspectrum(ieeg_file, method, taper, duration, output_dir):
         freq = compute_frequency(dat, taper, duration)
     elif method == 'dh2012':
         freq = compute_welch_dh2012(dat, duration)
+    else:
+        raise ValueError(f'Unknown method "{method}"')
 
     output_file = output_dir / replace_extension(ieeg_file.name, 'psd.pkl')
     with output_file.open('wb') as f:

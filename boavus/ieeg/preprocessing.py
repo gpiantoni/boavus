@@ -10,7 +10,7 @@ from bidso.utils import replace_extension
 lg = getLogger(__name__)
 
 
-def preprocess_ecog(ieeg_file, reref, duration, output_dir):
+def preprocess_ecog(ieeg_file, reref, duration, offset, output_dir):
     """
 
     Parameters
@@ -19,6 +19,8 @@ def preprocess_ecog(ieeg_file, reref, duration, output_dir):
         'average' or 'regression'
     duration : int
         length of the segments
+    offset : bool
+        remove one sample for whole duration
 
     TODO
     ----
@@ -30,7 +32,7 @@ def preprocess_ecog(ieeg_file, reref, duration, output_dir):
         data = load(f)
 
     data = montage(data, ref_to_avg=True, method=reref)
-    data = make_segments(data, duration)
+    data = make_segments(data, duration, offset)
 
     output_file = output_dir / replace_extension(ieeg_file.name, 'proc.pkl')
     with output_file.open('wb') as f:
@@ -39,9 +41,12 @@ def preprocess_ecog(ieeg_file, reref, duration, output_dir):
     return output_file
 
 
-def make_segments(dat, duration=2):
+def make_segments(dat, duration=2, offset=True):
 
-    dur_smp = int(dat.s_freq * duration) - 1
+    dur_smp = int(dat.s_freq * duration)
+    if offset:
+        dur_smp -= 1
+
     trials = []
     for d in dat.data:
         v = _create_subepochs(d, dur_smp, dur_smp)
