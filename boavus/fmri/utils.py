@@ -28,8 +28,11 @@ def get_vox2ras_tkr(filename):
 def ribbon2graymatter(ribbon_files, output_dir):
     graymatter_file = output_dir / 'graymatter.nii.gz'
 
-    ribbon_rh = nload(str(ribbon_files[1]))
-    ribbon_lh = nload(str(ribbon_files[2]))
+    ribbon_rh_file = [x for x in ribbon_files if x.endswith('rh.ribbon.mgz')][0]
+    ribbon_lh_file = [x for x in ribbon_files if x.endswith('lh.ribbon.mgz')][0]
+
+    ribbon_rh = nload(str(ribbon_rh_file))
+    ribbon_lh = nload(str(ribbon_lh_file))
     graymatter = ribbon_rh.get_data() + ribbon_lh.get_data()
 
     nifti = Nifti1Image(graymatter, ribbon_rh.affine)
