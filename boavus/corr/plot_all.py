@@ -6,6 +6,8 @@ from bidso import file_Core
 from bidso.utils import read_tsv
 from exportimages import export_plotly, Webdriver
 
+SIZE = int(8 * 96), int(6 * 96)
+
 
 def plot_corr_all(results_tsv, img_dir, image='png'):
 
@@ -34,11 +36,11 @@ def plot_corr_all(results_tsv, img_dir, image='png'):
 
         fig = _plot_histogram(rsquared, 'r2', 1)
         png_r2 = img_dir / ('histogram_rsquared.' + image)
-        export_plotly(fig, png_r2, driver=d)
+        export_plotly(fig, png_r2, width=SIZE[0], height=SIZE[1], driver=d)
 
         fig = _plot_histogram(peaks, 'peak', max(results['Kernel']))
         png_peaks = img_dir / ('histogram_peak.' + image)
-        export_plotly(fig, png_peaks, driver=d)
+        export_plotly(fig, png_peaks, width=SIZE[0], height=SIZE[1], driver=d)
 
     return png_r2, png_peaks
 
