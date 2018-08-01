@@ -115,7 +115,9 @@ def compute_chan(pos, KERNEL, ndi, mri, distance):
     m[isnan(mri)] = NaN
     n_vox = _count_voxels(m)
 
-    m /= sum(m[isfinite(m)])  # normalize so that the sum of the finite numbers is 1
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        m /= sum(m[isfinite(m)])  # normalize so that the sum of the finite numbers is 1
 
     mq = m * mri
     return nansum(mq), n_vox
