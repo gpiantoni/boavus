@@ -7,7 +7,7 @@ from exportimages import export_plotly
 
 from .corrfmri import select_channels
 
-SIZE = int(8 * 96), int(6 * 96)
+SIZE = int(6 * 96), int(4 * 96)
 
 def compute_corr_ecog_fmri(fmri_file, ecog_file, corr_file, img_dir, PVALUE, image):
 
@@ -66,13 +66,13 @@ def scatter_single_points(ecog_val, fmri_val, kernel, pvalue):
             ),
         ]
 
+    # title=f'Correlation with {float(kernel):.2f}mm kernel size<br />R<sup>2</sup> = {lr.rvalue ** 2:.3f}<br />Y = {lr.slope:.3f}X + {lr.intercept:.3f}',
     layout = go.Layout(
-        title=f'Correlation with {float(kernel):.2f}mm kernel size<br />R<sup>2</sup> = {lr.rvalue ** 2:.3f}<br />Y = {lr.slope:.3f}X + {lr.intercept:.3f}',
         xaxis=go.XAxis(
-            title='ECoG values',
+            title='ECoG',
             ),
         yaxis=go.YAxis(
-            title='fMRI values',
+            title='fMRI',
             ),
         )
     fig = go.Figure(

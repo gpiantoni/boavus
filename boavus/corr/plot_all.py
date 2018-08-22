@@ -6,7 +6,11 @@ from bidso import file_Core
 from bidso.utils import read_tsv
 from exportimages import export_plotly, Webdriver
 
-SIZE = int(8 * 96), int(6 * 96)
+SIZE = int(6 * 96), int(4 * 96)
+
+
+SIZE_TITLE = 'kernel size (mm)'
+R2_TITLE = 'explained variance (r<sup>2</sup>)'
 
 
 def plot_corr_all(results_tsv, img_dir, image='png'):
@@ -57,11 +61,11 @@ def _plot_fit_over_kernel(results, acquisition):
     layout = go.Layout(
         title=acquisition,
         xaxis=dict(
-            title='mm',
+            title=SIZE_TITLE,
             range=(min(k), max(k)),
             ),
         yaxis=dict(
-            title='r<sup>2</sup>',
+            title=R2_TITLE,
             rangemode='tozero',
             ),
         )
@@ -73,10 +77,10 @@ def _plot_fit_over_kernel(results, acquisition):
 def _plot_histogram(values, value_type, max_val=1):
     if value_type == 'peak':
         bin_size = 1
-        xaxis_title = 'mm'
+        xaxis_title = SIZE_TITLE,
     elif value_type == 'r2':
         bin_size = .1
-        xaxis_title = 'r<sup>2</sup>'
+        xaxis_title = R2_TITLE,
 
     xbins = dict(
         start=-.5,
