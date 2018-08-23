@@ -29,7 +29,7 @@ def plot_corr_all(results_tsv, img_dir, image='png'):
 
             fig = _plot_fit_over_kernel(results, acquisition)
             output_png = img_dir / (one_tsv.stem + '.' + image)
-            export_plotly(fig, output_png, driver=d)
+            export_plotly(fig, output_png, width=SIZE[0], height=SIZE[1], driver=d)
 
             rsquared.append(
                 max(results['Rsquared'])
@@ -58,8 +58,8 @@ def _plot_fit_over_kernel(results, acquisition):
         },
         ]
 
+    # title=acquisition,
     layout = go.Layout(
-        title=acquisition,
         xaxis=dict(
             title=SIZE_TITLE,
             range=(min(k), max(k)),

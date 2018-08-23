@@ -69,10 +69,10 @@ def scatter_single_points(ecog_val, fmri_val, kernel, pvalue):
     # title=f'Correlation with {float(kernel):.2f}mm kernel size<br />R<sup>2</sup> = {lr.rvalue ** 2:.3f}<br />Y = {lr.slope:.3f}X + {lr.intercept:.3f}',
     layout = go.Layout(
         xaxis=go.XAxis(
-            title='ECoG',
+            title='ECoG (z-statistic)',
             ),
         yaxis=go.YAxis(
-            title='fMRI',
+            title='fMRI (z-statistic)',
             ),
         )
     fig = go.Figure(
