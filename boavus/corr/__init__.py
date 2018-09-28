@@ -1,21 +1,21 @@
 from nipype import Function
 
 
-def wrapper_corr(fmri_file, ecog_file, output_dir='.', pvalue=0.05):
+def wrapper_corr(fmri_file, ecog_file, output_dir='./corr_values', pvalue=0.05):
     from pathlib import Path
     from boavus.corr.corrfmri import compute_corr_ecog_fmri
 
     return str(compute_corr_ecog_fmri(Path(fmri_file), Path(ecog_file), Path(output_dir), pvalue))
 
 
-def wrapper_plot(fmri_file, ecog_file, corr_file, images_dir='.', pvalue=0.05, image='png'):
+def wrapper_plot(fmri_file, ecog_file, corr_file, images_dir='./best_kernel', pvalue=0.05, image='png'):
     from pathlib import Path
     from boavus.corr.plot import compute_corr_ecog_fmri
 
     return str(compute_corr_ecog_fmri(Path(fmri_file), Path(ecog_file), Path(corr_file), Path(images_dir), pvalue, image))
 
 
-def wrapper_plot_all(in_files, images_dir, image='png'):
+def wrapper_plot_all(in_files, images_dir='./corr_size', image='png'):
     from pathlib import Path
     from boavus.corr.plot_all import plot_corr_all
 

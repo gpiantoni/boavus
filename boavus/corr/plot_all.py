@@ -1,5 +1,5 @@
 from pathlib import Path
-from numpy import argmax, max
+from numpy import argmax, max, gradient
 import plotly.graph_objs as go
 
 from bidso import file_Core
@@ -25,6 +25,8 @@ def plot_corr_all(results_tsv, img_dir, image='png'):
 
             one_tsv = Path(one_tsv)
             results = read_tsv(one_tsv)
+            results_rsquared = results['Rsquared']
+            results_rsquared = -1 * gradient(gradient(results_rsquared))
             acquisition = file_Core(one_tsv).acquisition
 
             fig = _plot_fit_over_kernel(results, acquisition)
@@ -32,10 +34,10 @@ def plot_corr_all(results_tsv, img_dir, image='png'):
             export_plotly(fig, output_png, width=SIZE[0], height=SIZE[1], driver=d)
 
             rsquared.append(
-                max(results['Rsquared'])
+                max(results_rsquared)
                 )
             peaks.append(
-                results['Kernel'][argmax(results['Rsquared'])]
+                results['Kernel'][argmax(results_rsquared)]
                 )
 
         fig = _plot_histogram(rsquared, 'r2', 1)

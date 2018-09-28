@@ -1,4 +1,4 @@
-from numpy import argmax, isnan
+from numpy import argmax, isnan, gradient
 from scipy.stats import linregress
 from bidso.utils import read_tsv
 
@@ -17,7 +17,9 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, corr_file, img_dir, PVALUE, ima
     kernel_sizes = fmri_tsv.dtype.names[1:]
 
     corr_tsv = read_tsv(corr_file)
-    best_kernel = kernel_sizes[argmax(corr_tsv['Rsquared'])]
+    corr_tsv_rsquared = corr_tsv['Rsquared']
+    corr_tsv_rsquared = -1 * gradient(gradient(corr_tsv_rsquared))
+    best_kernel = kernel_sizes[argmax(corr_tsv_rsquared)]
     fig = scatter_single_points(ecog_tsv, fmri_tsv, best_kernel, PVALUE)
 
     img_dir.mkdir(exist_ok=True, parents=True)
@@ -66,8 +68,8 @@ def scatter_single_points(ecog_val, fmri_val, kernel, pvalue):
             ),
         ]
 
-    # title=f'Correlation with {float(kernel):.2f}mm kernel size<br />R<sup>2</sup> = {lr.rvalue ** 2:.3f}<br />Y = {lr.slope:.3f}X + {lr.intercept:.3f}',
     layout = go.Layout(
+        title=f'Correlation with {float(kernel):.2f}mm kernel size<br />R<sup>2</sup> = {lr.rvalue ** 2:.3f}<br />Y = {lr.slope:.3f}X + {lr.intercept:.3f}',
         xaxis=go.XAxis(
             title='ECoG (z-statistic)',
             ),
