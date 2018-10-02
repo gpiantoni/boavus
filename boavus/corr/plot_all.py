@@ -26,7 +26,7 @@ def plot_corr_all(results_tsv, img_dir, image='png'):
             one_tsv = Path(one_tsv)
             results = read_tsv(one_tsv)
             results_rsquared = results['Rsquared']
-            results_rsquared = -1 * gradient(gradient(results_rsquared))
+            # results_rsquared = -1 * gradient(gradient(results_rsquared))
             acquisition = file_Core(one_tsv).acquisition
 
             fig = _plot_fit_over_kernel(results, acquisition)
@@ -44,7 +44,7 @@ def plot_corr_all(results_tsv, img_dir, image='png'):
         png_r2 = img_dir / ('histogram_rsquared.' + image)
         export_plotly(fig, png_r2, width=SIZE[0], height=SIZE[1], driver=d)
 
-        fig = _plot_histogram(peaks, 'peak', max(results['Kernel']))
+        fig = _plot_histogram(peaks, 'peak', max(results['Kernel']) + 1)
         png_peaks = img_dir / ('histogram_peak.' + image)
         export_plotly(fig, png_peaks, width=SIZE[0], height=SIZE[1], driver=d)
 
@@ -65,6 +65,7 @@ def _plot_fit_over_kernel(results, acquisition):
         xaxis=dict(
             title=SIZE_TITLE,
             range=(min(k), max(k)),
+            dtick=4,
             ),
         yaxis=dict(
             title=R2_TITLE,
@@ -80,9 +81,11 @@ def _plot_histogram(values, value_type, max_val=1):
     if value_type == 'peak':
         bin_size = 1
         xaxis_title = SIZE_TITLE,
+        dtick = 4
     elif value_type == 'r2':
         bin_size = .1
         xaxis_title = R2_TITLE,
+        dtick = 0.2
 
     xbins = dict(
         start=-.5,
@@ -100,9 +103,10 @@ def _plot_histogram(values, value_type, max_val=1):
         xaxis=dict(
             title=xaxis_title,
             range=(0, max_val),
+            dtick=dtick,
             ),
         yaxis=dict(
-            title='# tasks',
+            title='# participants',
             ),
         )
 
