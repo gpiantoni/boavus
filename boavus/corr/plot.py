@@ -9,6 +9,7 @@ from .corrfmri import select_channels
 
 SIZE = int(6 * 96), int(4 * 96)
 
+
 def compute_corr_ecog_fmri(fmri_file, ecog_file, corr_file, img_dir, PVALUE, image):
 
     fmri_tsv = read_tsv(fmri_file)

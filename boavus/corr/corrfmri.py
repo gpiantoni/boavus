@@ -14,15 +14,6 @@ SINGLE_POINTS_DIR = 'corr_ieeg_fmri_point'
 
 
 def compute_corr_ecog_fmri(fmri_file, ecog_file, output_dir, PVALUE):
-    """
-    TODO
-    electrodes = Electrodes(electrodes_file)
-    n_all_elec = len(ecog_tsv)
-    # use only values from electrodes which are in the ROI
-    labels_in_roi = find_labels_in_regions(electrodes, regions)
-    ecog_tsv = list(filter(lambda x: x['channel'] in labels_in_roi, ecog_tsv))
-    lg.debug(f'Using {len(ecog_tsv)}/{n_all_elec} electrodes in ROI')
-    """
     output_dir.mkdir(exist_ok=True, parents=True)
 
     fmri_tsv = read_tsv(fmri_file)

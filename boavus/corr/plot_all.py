@@ -60,7 +60,6 @@ def _plot_fit_over_kernel(results, acquisition):
         },
         ]
 
-    # title=acquisition,
     layout = go.Layout(
         xaxis=dict(
             title=SIZE_TITLE,
