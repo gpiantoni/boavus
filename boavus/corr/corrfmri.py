@@ -9,9 +9,6 @@ from bidso.utils import read_tsv, replace_underscore
 
 lg = getLogger(__name__)
 
-PNG_DIR = 'corr_ieeg_fmri_png'
-SINGLE_POINTS_DIR = 'corr_ieeg_fmri_point'
-
 
 def compute_corr_ecog_fmri(fmri_file, ecog_file, output_dir, PVALUE):
     output_dir.mkdir(exist_ok=True, parents=True)
@@ -23,20 +20,20 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, output_dir, PVALUE):
 
     results_tsv = output_dir / replace_underscore(ecog_file.stem, 'bold_r2.tsv')
     with results_tsv.open('w') as f:
-        f.write('Kernel\tRsquared\n')
+        f.write('Kernel\tRsquared\tSlope\tIntercept\n')
 
         for kernel in kernel_sizes:
             try:
-                r2 = compute_rsquared(
+                r2, slope, intercept = compute_rsquared(
                     ecog_tsv['measure'],
                     fmri_tsv[kernel],
                     ecog_tsv['pvalue'],
                     PVALUE)
 
             except Exception:
-                r2 = NaN
+                r2 = slope = intercept = NaN
 
-            f.write(f'{float(kernel):.2f}\t{r2}\n')
+            f.write(f'{float(kernel):.2f}\t{r2}\t{slope}\t{intercept}\n')
 
     return results_tsv
 
@@ -55,7 +52,7 @@ def compute_rsquared(x, y, p_val, PVALUE):
     mask = ~isnan(x) & ~isnan(y) & (p_val <= PVALUE)
 
     lr = linregress(x[mask], y[mask])
-    return lr.rvalue ** 2
+    return lr.rvalue ** 2, lr.slope, lr.intercept
 
 
 def read_shape(one_tsv):

@@ -19,7 +19,6 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, corr_file, img_dir, PVALUE, ima
 
     corr_tsv = read_tsv(corr_file)
     corr_tsv_rsquared = corr_tsv['Rsquared']
-    corr_tsv_rsquared = -1 * gradient(gradient(corr_tsv_rsquared))
     best_kernel = kernel_sizes[argmax(corr_tsv_rsquared)]
     fig = scatter_single_points(ecog_tsv, fmri_tsv, best_kernel, PVALUE)
 
