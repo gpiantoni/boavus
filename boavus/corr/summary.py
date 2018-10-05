@@ -33,16 +33,16 @@ def _compute_summary(in_files, output_dir):
 
     with summary_file.open('w') as f:
 
-        f.write(f'subject\tsession\ttask\tacquisition\tsize_at_peak\tr2_at_peak\tsize_at_concave\tr2_at_concave\tdiff_r2\n')
+        f.write(f'subject\tsession\ttask\tacquisition\tsize_at_peak\tr2_at_peak\tslope_at_peak\tintercept_at_peak\tsize_at_concave\tr2_at_concave\tdiff_r2\n')
 
         for corr_file in in_files:
 
             corr_tsv = read_tsv(corr_file)
-            size_max, r2_max = corr_tsv[argmax(corr_tsv['Rsquared'])]
+            size_max, r2_max, slope, intercept = corr_tsv[argmax(corr_tsv['Rsquared'])]
 
             deriv = gradient(gradient(corr_tsv['Rsquared']))
-            size_deriv, r2_deriv = corr_tsv[argmin(deriv)]
+            size_deriv, r2_deriv, *dummy = corr_tsv[argmin(deriv)]
 
             file_info = file_Core(corr_file)
 
-            f.write(f'{file_info.subject}\t{file_info.session}\t{file_info.task}\t{file_info.acquisition}\t{size_max}\t{r2_max}\t{size_deriv}\t{r2_deriv}\t{r2_max - r2_deriv}\n')
+            f.write(f'{file_info.subject}\t{file_info.session}\t{file_info.task}\t{file_info.acquisition}\t{size_max}\t{r2_max}\t{slope}\t{intercept}\t{size_deriv}\t{r2_deriv}\t{r2_max - r2_deriv}\n')
