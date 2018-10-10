@@ -41,7 +41,7 @@ def test_ieeg_preprocessing_regression():
 @fixture
 def test_ieeg_preprocessing():
 
-    out_move = test_ieeg_read()
+    out_move = test_ieeg_read
     out_prepr = preprocess_ecog(out_move, 'average', 2, ANALYSIS_PATH)
 
     with out_prepr.open('rb') as f:

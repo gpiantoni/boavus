@@ -3,14 +3,14 @@ from numpy.testing import assert_array_equal
 from scipy.io import savemat
 from wonambi import Dataset
 
-from boavus.ieeg.read import read_prf_stimuli
+# from boavus.ieeg.read import read_prf_stimuli
 
 from .paths import (BIDS_PATH,
                     task_prf,
                     )
 
 
-def test_read_prf():
+def notest_read_prf():
     _convert_numpy_to_matlab()
 
     ieeg_file = task_prf.get_filename(BIDS_PATH)

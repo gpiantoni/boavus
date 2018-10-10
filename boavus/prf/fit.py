@@ -16,7 +16,7 @@ from sanajeh.data import data_aparc
 from sanajeh.fmri import select_region
 from .core.least_squares import fit_analyzePRF
 from .core.popeye import fit_popeye
-from ..ieeg.read import read_prf_stimuli
+# from ..ieeg.read import read_prf_stimuli
 
 lg = getLogger(__name__)
 
