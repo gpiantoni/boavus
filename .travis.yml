@@ -24,6 +24,7 @@ install:
   - pip install numpy scipy pyqt5
   - pip install cython
   - pip install nibabel vispy wonambi bidso plotly popeye sanajeh scikit-image
+  - pip install nipype
   - pip install -e git+https://github.com/gpiantoni/exportimages.git#egg=exportimages  # this should be in pypi
   - pip install pytest pytest-qt pytest-cov codecov
   - pip install -e .
