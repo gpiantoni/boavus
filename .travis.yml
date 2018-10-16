@@ -31,7 +31,8 @@ before_install:
 
 install:
   # install requirements
-  - pip install numpy scipy pyqt5
+  - pip install numpy -U
+  - pip install scipy pyqt5
   - pip install cython
   - pip install nibabel vispy wonambi bidso plotly popeye sanajeh scikit-image
   - pip install nipype
