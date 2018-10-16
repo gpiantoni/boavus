@@ -4,18 +4,14 @@ from bidso import file_Core
 
 TEST_PATH = Path(__file__).resolve().parent
 DATA_PATH = TEST_PATH / 'data'
+
 BIDS_PATH = DATA_PATH / 'bids'
 BIDS_PATH.mkdir(parents=True, exist_ok=True)
-DERIVATIVES_PATH = DATA_PATH / 'derivatives'
-FREESURFER_PATH = DERIVATIVES_PATH / 'freesurfer'
+FREESURFER_PATH = DATA_PATH / 'freesurfer'
+FREESURFER_PATH.mkdir(parents=True, exist_ok=True)
 
-# addition to bidso/tests/paths.py
-ANALYSIS_PATH = DERIVATIVES_PATH / 'analysis'
+ANALYSIS_PATH = DATA_PATH / 'analysis'
 ANALYSIS_PATH.mkdir(parents=True, exist_ok=True)
-BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
-BOAVUS_PATH.mkdir(parents=True, exist_ok=True)
-
-SIMULATE_PATH = DATA_PATH / 'simulate'
 
 subject = 'bert'
 task_ieeg = file_Core(
