@@ -1,5 +1,5 @@
 from shutil import rmtree
-from nipype import Workflow, Node, MapNode, config, logging, JoinNode
+from nipype import Workflow, Node, MapNode, config, logging
 from ..ieeg import (function_ieeg_read,
                     function_ieeg_preprocess,
                     function_ieeg_powerspectrum,

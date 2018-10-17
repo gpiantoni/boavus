@@ -142,10 +142,6 @@ def _tests():
 
     output = run(CMD)
 
-    run([
-        'coverage',
-        'combine',
-        ])
     if not environ.get('CI', False):
         run([
             'coverage',
