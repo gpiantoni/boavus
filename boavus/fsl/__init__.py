@@ -1,5 +1,3 @@
-from .misc import run_reorient2std
-
 from nipype import Function
 
 
