@@ -34,6 +34,7 @@ before_install:
 
 install:
   # install requirements
+  - pip install -e git+https://github.com/wonambi-python/wonambi.git#egg=wonambi
   - pip install pytest pytest-cov codecov
   - pip install -e .
 
