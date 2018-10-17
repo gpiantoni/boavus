@@ -34,6 +34,7 @@ setup(
         'bidso',
         'nibabel',
         'wonambi',
+        'nipype',
         ],
     extras_require={
         'test': [  # to run tests
