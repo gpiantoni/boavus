@@ -1,6 +1,7 @@
 from shutil import rmtree
 from nipype import Workflow, Node, config, logging
 from nipype.interfaces.fsl import FEAT, BET, FLIRT, Threshold
+from nipype.interfaces.freesurfer import ReconAll
 from numpy import arange
 
 from ..fsl import function_prepare_design
@@ -14,7 +15,7 @@ DOWNSAMPLE_RESOLUTION = 4
 GRAYMATTER_THRESHOLD = 0.2
 
 
-def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter):
+def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter, FREESURFER_PATH):
     """TODO: input and output"""
 
     LOG_PATH = NIPYPE_PATH / 'log'
@@ -73,6 +74,10 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter):
     node_atelec.inputs.kernel_sizes = list(kernel_sizes)
     node_atelec.inputs.graymatter = graymatter
 
+    node_reconall = Node(ReconAll(), name='freesurfer')
+    node_reconall.inputs.subjects_dir = str(FREESURFER_PATH)
+    node_reconall.inputs.flags = ['-cw256', ]
+
     w = Workflow('fmri')
     w.base_dir = str(NIPYPE_PATH)
     w.connect(node_bet, 'out_file', node_featdesign, 'anat')
@@ -103,6 +108,8 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter):
             w.connect(node_downsample, 'out_file', node_threshold, 'in_file')
 
         w.connect(node_threshold, 'out_file', node_atelec, 'graymatter')
+
+        w.connect(node_reconall, 'ribbon', node_graymatter, 'ribbon')
 
     w.write_graph(
         graph2use='flat',

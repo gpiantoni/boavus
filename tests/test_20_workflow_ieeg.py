@@ -7,19 +7,19 @@ d = {
         'duration': 2,
         'reref': 'average',
         'offset': False,
-    },
+        },
     'powerspectrum': {
         'method': 'spectrogram',
         'taper': 'hann',
         'duration': 2,
-    },
+        },
     'ecog_compare': {
         'frequency': [65, 95],
         'baseline': True,
         'measure': 'zstat',
         'method': '3c',
+        }
     }
-}
 
 
 def test_workflow_ieeg():
