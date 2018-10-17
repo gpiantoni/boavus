@@ -37,7 +37,6 @@ setup(
         ],
     extras_require={
         'test': [  # to run tests
-            'sanajeh',
             'pytest',
             'pytest-cov',
             'codecov',

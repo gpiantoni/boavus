@@ -6,9 +6,7 @@ TEST_PATH = Path(__file__).resolve().parent
 DATA_PATH = TEST_PATH / 'data'
 
 BIDS_PATH = DATA_PATH / 'bids'
-BIDS_PATH.mkdir(parents=True, exist_ok=True)
 FREESURFER_PATH = DATA_PATH / 'freesurfer'
-FREESURFER_PATH.mkdir(parents=True, exist_ok=True)
 
 ANALYSIS_PATH = DATA_PATH / 'analysis'
 ANALYSIS_PATH.mkdir(parents=True, exist_ok=True)

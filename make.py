@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
 from argparse import ArgumentParser
-from subprocess import run
+from os import environ
+from pathlib import Path
 from shutil import rmtree
-from os import putenv, environ
+from subprocess import run
+from tempfile import mkstemp
+from urllib.request import urlopen
+from zipfile import ZipFile
 
 PACKAGE = 'boavus'
-putenv('CI', 'true')  # make sure putenv is supported
 
 
 parser = ArgumentParser(prog='make',
@@ -16,6 +18,8 @@ parser.add_argument('-r', '--release', action='store_true',
                     help='create a point release')
 parser.add_argument('-m', '--major_release', action='store_true',
                     help='create a major release')
+parser.add_argument('-g', '--get_files', action='store_true',
+                    help='download datasets to run tests')
 parser.add_argument('-t', '--tests', action='store_true',
                     help='run tests')
 parser.add_argument('-d', '--docs', action='store_true',
@@ -39,10 +43,7 @@ API_PATH = SOURCE_PATH / 'api'
 
 TEST_PATH = BASE_PATH / 'tests'
 DATA_PATH = TEST_PATH / 'data'
-BIDS_PATH = DATA_PATH / 'bids'
-DERIVATIVES_PATH = DATA_PATH / 'derivatives'
-ANALYSIS_PATH = DERIVATIVES_PATH / 'analysis'
-BOAVUS_PATH = DERIVATIVES_PATH / 'boavus'
+ANALYSIS_PATH = DATA_PATH / 'analysis'
 
 
 def _new_version(level):
@@ -129,11 +130,33 @@ def _release(level):
              ])
 
 
+def _get_files():
+
+    url_data = environ.get('DATA_BOAVUS', False)  # raise error if it doesn't exist print('missing URL, please contact developers')
+    if not url_data:
+        print('You need to specify the environment variable DATA_BOAVUS containing the link to the data repository.')
+        print('Contact the developer for the link')
+        return 1
+
+    if environ.get('CI', False) and environ.get('DOWNLOADS', False):
+        tmp_file = Path(environ.get('DOWNLOADS')) / 'boavus.zip'
+    else:
+        tmp_file = Path(mkstemp(suffix='.zip')[1])
+
+    with urlopen(url_data) as u, tmp_file.open('wb') as f:
+        f.write(u.read())
+
+    with ZipFile(tmp_file) as zf:
+        zf.extractall(path=TEST_PATH)
+
+    (TEST_PATH / 'boavus').rename(DATA_PATH)
+
+    return 0
+
+
 def _tests():
 
-    rmtree(BIDS_PATH, ignore_errors=True)
     rmtree(ANALYSIS_PATH, ignore_errors=True)
-    rmtree(BOAVUS_PATH, ignore_errors=True)
 
     CMD = ['pytest',
            f'--cov={PACKAGE}',
@@ -177,9 +200,8 @@ def _docs():
 def _clean_all():
     rmtree(BUILD_PATH, ignore_errors=True)
     rmtree(API_PATH, ignore_errors=True)
-    rmtree(BIDS_PATH, ignore_errors=True)
+    rmtree(DATA_PATH, ignore_errors=True)
     rmtree(ANALYSIS_PATH, ignore_errors=True)
-    rmtree(BOAVUS_PATH, ignore_errors=True)
 
 
 if __name__ == '__main__':
@@ -187,6 +209,9 @@ if __name__ == '__main__':
 
     if args.clean:
         _clean_all()
+
+    if args.get_files:
+        returncode = _get_files()
 
     if args.tests:
         returncode = _tests()

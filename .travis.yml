@@ -8,8 +8,6 @@ env:
   global:
     - DOWNLOADS=$HOME/downloads
     - LIB=$HOME/lib
-    - DERIVATIVES=tests/data/derivatives
-    - INSTALL=$HOME/bin
     - SOURCE_PATH=$TRAVIS_BUILD_DIR/docs/source
     - API_PATH=$SOURCE_PATH/api
     - BUILD_PATH=$TRAVIS_BUILD_DIR/docs/build
@@ -17,6 +15,7 @@ env:
 
 cache: 
  - directories:
+   - $DOWNLOADS
    - $HOME/.cache/pip
 
 before_install:
@@ -30,13 +29,11 @@ before_install:
   # necessary for nipype plots
   - sudo apt-get install -y -qq graphviz
 
+  # get the correct files
+  - python make.py --get_files
+
 install:
   # install requirements
-  - pip install scipy pyqt5
-  - pip install cython
-  - pip install nibabel vispy wonambi bidso plotly popeye sanajeh scikit-image
-  - pip install nipype
-  - pip install -e git+https://github.com/gpiantoni/exportimages.git#egg=exportimages  # this should be in pypi
   - pip install pytest pytest-qt pytest-cov codecov
   - pip install -e .
 
