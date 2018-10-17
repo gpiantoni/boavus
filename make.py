@@ -143,8 +143,9 @@ def _get_files():
     else:
         tmp_file = Path(mkstemp(suffix='.zip')[1])
 
-    with urlopen(url_data) as u, tmp_file.open('wb') as f:
-        f.write(u.read())
+    if not tmp_file.exists():
+        with urlopen(url_data) as u, tmp_file.open('wb') as f:
+            f.write(u.read())
 
     with ZipFile(tmp_file) as zf:
         zf.extractall(path=TEST_PATH)
