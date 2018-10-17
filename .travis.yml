@@ -40,7 +40,6 @@ install:
 
 script:
   - py.test --cov=boavus tests
-  - find tests/data -type f -printf "\n%TY/%Tm/%Td %TH:%TM:%TS\t%s\n" -exec md5sum \{\} \;
 
 after_success:
   - codecov
