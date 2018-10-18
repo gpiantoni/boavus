@@ -15,7 +15,7 @@ d = {
         },
     }
 
-def notest_workflow_fmri():
+def test_workflow_fmri():
 
     w = workflow_fmri(ANALYSIS_PATH, d, False, True, FREESURFER_PATH)
 
