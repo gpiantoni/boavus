@@ -15,7 +15,7 @@ d = {
         },
     }
 
-def test_workflow_ieeg():
+def notest_workflow_fmri():
 
     w = workflow_fmri(ANALYSIS_PATH, d, False, True, FREESURFER_PATH)
 
