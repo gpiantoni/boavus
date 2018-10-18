@@ -30,6 +30,6 @@ def test_workflow_ieeg():
     node.inputs.func = str(BIDS_PATH / 'sub-bert/ses-day01/func/sub-bert_ses-day01_task-motor_run-1_bold.nii.gz')
 
     node = w.get_node('at_elec')
-    node.inputs.func = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_acq-ct_electrodes.tsv')
+    node.inputs.electrodes = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_acq-ct_electrodes.tsv')
 
     w.run()
