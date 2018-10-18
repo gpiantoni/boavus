@@ -161,6 +161,7 @@ def _tests():
 
     CMD = ['pytest',
            f'--cov={PACKAGE}',
+           '--disable-warnings',
            'tests',
            ]
 
