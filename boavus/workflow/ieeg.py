@@ -1,5 +1,6 @@
 from shutil import rmtree
 from nipype import Workflow, Node, MapNode, config, logging
+from nipype.interfaces.utility import IdentityInterface
 from ..ieeg import (function_ieeg_read,
                     function_ieeg_preprocess,
                     function_ieeg_powerspectrum,
@@ -8,7 +9,6 @@ from ..ieeg import (function_ieeg_read,
 
 
 def workflow_ieeg(NIPYPE_PATH, PARAMETERS):
-    """TODO: input and output"""
 
     LOG_PATH = NIPYPE_PATH / 'log'
     config.update_config({
@@ -22,6 +22,8 @@ def workflow_ieeg(NIPYPE_PATH, PARAMETERS):
             'remove_unnecessary_outputs': 'false',
             },
         })
+
+    input = Node(IdentityInterface(fields=['ieeg', 'electrodes']), name='input')
 
     node_read = Node(function_ieeg_read, name='read')
     node_read.inputs.conditions = {'move': 'move', 'rest': 'rest'}
@@ -46,6 +48,7 @@ def workflow_ieeg(NIPYPE_PATH, PARAMETERS):
     w = Workflow('ieeg')
     w.base_dir = str(NIPYPE_PATH)
 
+    w.connect(input, 'ieeg', node_read, 'ieeg')
     w.connect(node_read, 'ieeg', node_preprocess, 'ieeg')
     w.connect(node_preprocess, 'ieeg', node_frequency, 'ieeg')
     w.connect(node_frequency, 'ieeg', node_compare, 'in_files')

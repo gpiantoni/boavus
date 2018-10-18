@@ -2,6 +2,7 @@ from shutil import rmtree
 from nipype import Workflow, Node, config, logging
 from nipype.interfaces.fsl import FEAT, BET, FLIRT, Threshold
 from nipype.interfaces.freesurfer import ReconAll
+from nipype.interfaces.utility import IdentityInterface
 from numpy import arange
 
 from ..fsl import function_prepare_design
@@ -30,6 +31,8 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter, FREESURFER_PATH
             'remove_unnecessary_outputs': 'false',
             },
         })
+
+    input = Node(IdentityInterface(fields=['subject', 'T1w', 'bold', 'electrodes']), name='input')
 
     node_bet = Node(BET(), name='bet')
     node_bet.inputs.frac = 0.5
@@ -74,12 +77,13 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter, FREESURFER_PATH
     node_atelec.inputs.kernel_sizes = list(kernel_sizes)
     node_atelec.inputs.graymatter = graymatter
 
-    node_reconall = Node(ReconAll(), name='freesurfer')
-    node_reconall.inputs.subjects_dir = str(FREESURFER_PATH)
-    node_reconall.inputs.flags = ['-cw256', ]
-
     w = Workflow('fmri')
     w.base_dir = str(NIPYPE_PATH)
+
+    w.connect(input, 'T1w', node_bet, 'in_file')
+    w.connect(input, 'bold', node_featdesign, 'func')
+    w.connect(input, 'electrodes', node_atelec, 'electrodes')
+
     w.connect(node_bet, 'out_file', node_featdesign, 'anat')
 
     w.connect(node_featdesign, 'fsf_file', node_feat, 'fsf_file')
@@ -97,6 +101,9 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter, FREESURFER_PATH
         node_reconall = Node(ReconAll(), name='freesurfer')
         node_reconall.inputs.subjects_dir = str(FREESURFER_PATH)
         node_reconall.inputs.flags = ['-cw256', ]
+
+        w.connect(input, 'T1w', node_reconall, 'T1_files')
+        w.connect(input, 'subject', node_reconall, 'subject_id')
 
         if upsample:
             w.connect(node_graymatter, 'out_file', node_realign_gm, 'in_file')

@@ -26,8 +26,8 @@ def test_workflow_ieeg():
 
     w = workflow_ieeg(ANALYSIS_PATH, d)
 
-    r = w.get_node('read')
-    r.inputs.ieeg = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_task-motor_run-1_acq-clinical_ieeg.eeg')
-    r.inputs.electrodes = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_acq-ct_electrodes.tsv')
+    node = w.get_node('input')
+    node.inputs.ieeg = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_task-motor_run-1_acq-clinical_ieeg.eeg')
+    node.inputs.electrodes = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_acq-ct_electrodes.tsv')
 
     w.run()
