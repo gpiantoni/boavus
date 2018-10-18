@@ -35,7 +35,7 @@ before_install:
   - sudo apt-get install -y -qq graphviz
 
   # install freesurfer
-  - wget -q --directory-prefix=$DOWNLOADS https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz ;
+  - travis_retry wget -q --directory-prefix=$DOWNLOADS https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz ;
   - mkdir $LIB -p
   - tar 
     -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz 
