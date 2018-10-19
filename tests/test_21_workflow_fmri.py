@@ -19,9 +19,8 @@ d = {
 def test_workflow_fmri():
 
     node = ReconAll()
-    node.inputs.subject = 'bert'
-    node.inputs.T1w = str(BIDS_PATH / 'sub-bert/ses-day01/anat/sub-bert_ses-day01_acq-wholebrain_T1w.nii.gz')
-    node.inputs.subjects_dir = FREESURFER_PATH
+    node.inputs.subject_id = 'bert'
+    node.inputs.subjects_dir = str(FREESURFER_PATH)
     node.run()
 
 
