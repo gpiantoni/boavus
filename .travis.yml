@@ -34,31 +34,8 @@ before_install:
   # necessary for nipype plots
   - sudo apt-get install -y -qq graphviz
 
-  # install freesurfer
-  - travis_retry wget -q --directory-prefix=$DOWNLOADS https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.1/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz ;
-  - mkdir $LIB -p
-  - tar 
-    -xf $DOWNLOADS/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.1.tar.gz 
-    -C $LIB 
-    --exclude='freesurfer/trctrain' 
-    --exclude='freesurfer/subjects/fsaverage_sym' 
-    --exclude='freesurfer/subjects/fsaverage3' 
-    --exclude='freesurfer/subjects/fsaverage4'
-    --exclude='freesurfer/subjects/fsaverage5' 
-    --exclude='freesurfer/subjects/fsaverage6' 
-    --exclude='freesurfer/subjects/cvs_avg35' 
-    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' 
-    --exclude='freesurfer/subjects/V1_average' 
-    --exclude='freesurfer/average/mult-comp-cor' 
-    --exclude='freesurfer/lib/cuda' 
-    --exclude='freesurfer/lib/qt' 
-    --exclude='freesurfer/lib/tcltktixblt'
-    --exclude='freesurfer/lib/vtk' 
-    --exclude='freesurfer/diffusion' 
-    freesurfer ;
-  - echo -e $FREESURFER_LICENSE > $LIB/freesurfer/license.txt
-  - export FREESURFER_HOME=$LIB/freesurfer
-  - source $FREESURFER_HOME/SetUpFreeSurfer.sh
+  # do not install freesurfer (but nipype checks if recon-all exists)
+  - recon-all(){ return 0; }
 
   # get the correct files
   - python make.py --get_files
