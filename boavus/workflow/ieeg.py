@@ -49,6 +49,7 @@ def workflow_ieeg(NIPYPE_PATH, PARAMETERS):
     w.base_dir = str(NIPYPE_PATH)
 
     w.connect(input, 'ieeg', node_read, 'ieeg')
+    w.connect(input, 'electrodes', node_read, 'electrodes')
     w.connect(node_read, 'ieeg', node_preprocess, 'ieeg')
     w.connect(node_preprocess, 'ieeg', node_frequency, 'ieeg')
     w.connect(node_frequency, 'ieeg', node_compare, 'in_files')
