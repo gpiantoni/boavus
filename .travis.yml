@@ -12,6 +12,8 @@ env:
     - API_PATH=$SOURCE_PATH/api
     - BUILD_PATH=$TRAVIS_BUILD_DIR/docs/build
     - HTML_PATH=$TRAVIS_BUILD_DIR/docs/build/html
+    # stand-in functions without installing the whole package
+    - PATH=$PATH:bin 
 
 cache: 
  - directories:
@@ -33,9 +35,6 @@ before_install:
 
   # necessary for nipype plots
   - sudo apt-get install -y -qq graphviz
-
-  # do not install freesurfer (but nipype checks if recon-all exists)
-  - recon-all(){ return 0; }
 
   # get the correct files
   - python make.py --get_files
