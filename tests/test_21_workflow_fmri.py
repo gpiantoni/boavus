@@ -1,4 +1,5 @@
 from boavus.workflow.fmri import workflow_fmri
+from nipype.interfaces.freesurfer import ReconAll
 
 from .paths import ANALYSIS_PATH, BIDS_PATH, FREESURFER_PATH
 
@@ -16,6 +17,15 @@ d = {
     }
 
 def test_workflow_fmri():
+
+    node = ReconAll()
+    node.inputs.subject = 'bert'
+    node.inputs.T1w = str(BIDS_PATH / 'sub-bert/ses-day01/anat/sub-bert_ses-day01_acq-wholebrain_T1w.nii.gz')
+    node.inputs.subjects_dir = FREESURFER_PATH
+    node.run()
+
+
+def notest_workflow_fmri():
 
     w = workflow_fmri(ANALYSIS_PATH, d, False, True, FREESURFER_PATH)
 
