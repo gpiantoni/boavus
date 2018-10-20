@@ -1,0 +1,22 @@
+boavus.prf package
+==================
+
+.. automodule:: boavus.prf
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    boavus.prf.core
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.prf.fit
+

@@ -1,0 +1,24 @@
+boavus.electrodes package
+=========================
+
+.. automodule:: boavus.electrodes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    boavus.electrodes.elec
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.electrodes.assign_regions
+   boavus.electrodes.plot
+   boavus.electrodes.project_to_surf
+

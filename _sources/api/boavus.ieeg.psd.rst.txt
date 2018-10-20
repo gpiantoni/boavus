@@ -1,0 +1,7 @@
+boavus.ieeg.psd module
+======================
+
+.. automodule:: boavus.ieeg.psd
+    :members:
+    :undoc-members:
+    :show-inheritance:

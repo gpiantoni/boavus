@@ -1,0 +1,7 @@
+boavus.corr.corrfmri module
+===========================
+
+.. automodule:: boavus.corr.corrfmri
+    :members:
+    :undoc-members:
+    :show-inheritance:

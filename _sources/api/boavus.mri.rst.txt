@@ -1,0 +1,15 @@
+boavus.mri package
+==================
+
+.. automodule:: boavus.mri
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.mri.surface
+

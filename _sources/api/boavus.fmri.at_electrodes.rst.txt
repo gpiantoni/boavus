@@ -1,0 +1,7 @@
+boavus.fmri.at\_electrodes module
+=================================
+
+.. automodule:: boavus.fmri.at_electrodes
+    :members:
+    :undoc-members:
+    :show-inheritance:

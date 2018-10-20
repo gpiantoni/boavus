@@ -1,0 +1,20 @@
+boavus.ieeg package
+===================
+
+.. automodule:: boavus.ieeg
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.ieeg.broadband
+   boavus.ieeg.compare
+   boavus.ieeg.preprocessing
+   boavus.ieeg.psd
+   boavus.ieeg.read
+   boavus.ieeg.utils
+

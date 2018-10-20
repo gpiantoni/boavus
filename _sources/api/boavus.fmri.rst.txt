@@ -1,0 +1,17 @@
+boavus.fmri package
+===================
+
+.. automodule:: boavus.fmri
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.fmri.at_electrodes
+   boavus.fmri.compare
+   boavus.fmri.utils
+

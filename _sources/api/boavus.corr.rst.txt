@@ -1,0 +1,16 @@
+boavus.corr package
+===================
+
+.. automodule:: boavus.corr
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.corr.corrfmri
+   boavus.corr.summary
+

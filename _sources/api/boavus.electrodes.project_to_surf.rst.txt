@@ -1,0 +1,7 @@
+boavus.electrodes.project\_to\_surf module
+==========================================
+
+.. automodule:: boavus.electrodes.project_to_surf
+    :members:
+    :undoc-members:
+    :show-inheritance:

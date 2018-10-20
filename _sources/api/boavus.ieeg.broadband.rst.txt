@@ -1,0 +1,7 @@
+boavus.ieeg.broadband module
+============================
+
+.. automodule:: boavus.ieeg.broadband
+    :members:
+    :undoc-members:
+    :show-inheritance:

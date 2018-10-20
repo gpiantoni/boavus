@@ -1,0 +1,7 @@
+boavus.fsl.misc module
+======================
+
+.. automodule:: boavus.fsl.misc
+    :members:
+    :undoc-members:
+    :show-inheritance:

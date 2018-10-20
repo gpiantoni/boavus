@@ -1,0 +1,7 @@
+boavus.fmri.utils module
+========================
+
+.. automodule:: boavus.fmri.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+boavus.ieeg.compare module
+==========================
+
+.. automodule:: boavus.ieeg.compare
+    :members:
+    :undoc-members:
+    :show-inheritance:

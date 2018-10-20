@@ -1,0 +1,16 @@
+boavus.workflow package
+=======================
+
+.. automodule:: boavus.workflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.workflow.fmri
+   boavus.workflow.ieeg
+

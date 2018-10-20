@@ -1,0 +1,7 @@
+boavus.utils module
+===================
+
+.. automodule:: boavus.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

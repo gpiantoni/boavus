@@ -1,0 +1,7 @@
+boavus.ieeg.preprocessing module
+================================
+
+.. automodule:: boavus.ieeg.preprocessing
+    :members:
+    :undoc-members:
+    :show-inheritance:

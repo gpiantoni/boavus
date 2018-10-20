@@ -1,0 +1,7 @@
+boavus.prf.core.least\_squares module
+=====================================
+
+.. automodule:: boavus.prf.core.least_squares
+    :members:
+    :undoc-members:
+    :show-inheritance:

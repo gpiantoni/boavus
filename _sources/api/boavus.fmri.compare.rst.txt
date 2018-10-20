@@ -1,0 +1,7 @@
+boavus.fmri.compare module
+==========================
+
+.. automodule:: boavus.fmri.compare
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+boavus.bidso module
+===================
+
+.. automodule:: boavus.bidso
+    :members:
+    :undoc-members:
+    :show-inheritance:

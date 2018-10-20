@@ -1,0 +1,7 @@
+boavus.workflow.ieeg module
+===========================
+
+.. automodule:: boavus.workflow.ieeg
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,18 @@
+boavus.fsl package
+==================
+
+.. automodule:: boavus.fsl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.fsl.coreg
+   boavus.fsl.feat
+   boavus.fsl.feat_on_surf
+   boavus.fsl.misc
+

@@ -1,0 +1,7 @@
+boavus.electrodes.plot module
+=============================
+
+.. automodule:: boavus.electrodes.plot
+    :members:
+    :undoc-members:
+    :show-inheritance:

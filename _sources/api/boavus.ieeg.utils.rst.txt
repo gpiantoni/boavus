@@ -1,0 +1,7 @@
+boavus.ieeg.utils module
+========================
+
+.. automodule:: boavus.ieeg.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:

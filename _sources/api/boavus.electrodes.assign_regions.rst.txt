@@ -1,0 +1,7 @@
+boavus.electrodes.assign\_regions module
+========================================
+
+.. automodule:: boavus.electrodes.assign_regions
+    :members:
+    :undoc-members:
+    :show-inheritance:

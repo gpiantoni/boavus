@@ -1,0 +1,7 @@
+boavus.prf.fit module
+=====================
+
+.. automodule:: boavus.prf.fit
+    :members:
+    :undoc-members:
+    :show-inheritance:

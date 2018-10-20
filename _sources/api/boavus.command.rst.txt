@@ -1,0 +1,7 @@
+boavus.command module
+=====================
+
+.. automodule:: boavus.command
+    :members:
+    :undoc-members:
+    :show-inheritance:

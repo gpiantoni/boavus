@@ -1,0 +1,7 @@
+boavus.mri.surface module
+=========================
+
+.. automodule:: boavus.mri.surface
+    :members:
+    :undoc-members:
+    :show-inheritance:

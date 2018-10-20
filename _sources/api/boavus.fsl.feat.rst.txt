@@ -1,0 +1,7 @@
+boavus.fsl.feat module
+======================
+
+.. automodule:: boavus.fsl.feat
+    :members:
+    :undoc-members:
+    :show-inheritance:

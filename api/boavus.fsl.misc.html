@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>boavus.fsl.misc module &mdash; boavus 0.02 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="boavus.ieeg package" href="boavus.ieeg.html" />
+    <link rel="prev" title="boavus.fsl.feat_on_surf module" href="boavus.fsl.feat_on_surf.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> boavus
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.02
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">BOAVUS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="boavus.bidso.html">boavus.bidso module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.command.html">boavus.command module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.corr.html">boavus.corr package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.corr.corrfmri.html">boavus.corr.corrfmri module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.corr.summary.html">boavus.corr.summary module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.electrodes.html">boavus.electrodes package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.electrodes.assign_regions.html">boavus.electrodes.assign_regions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.electrodes.elec.html">boavus.electrodes.elec package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.electrodes.elec.annealing.html">boavus.electrodes.elec.annealing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.electrodes.plot.html">boavus.electrodes.plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.electrodes.project_to_surf.html">boavus.electrodes.project_to_surf module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.fmri.html">boavus.fmri package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.fmri.at_electrodes.html">boavus.fmri.at_electrodes module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.fmri.compare.html">boavus.fmri.compare module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.fmri.utils.html">boavus.fmri.utils module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="boavus.fsl.html">boavus.fsl package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.fsl.coreg.html">boavus.fsl.coreg module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.fsl.feat.html">boavus.fsl.feat module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.fsl.feat_on_surf.html">boavus.fsl.feat_on_surf module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">boavus.fsl.misc module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.ieeg.html">boavus.ieeg package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.ieeg.broadband.html">boavus.ieeg.broadband module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.ieeg.compare.html">boavus.ieeg.compare module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.ieeg.preprocessing.html">boavus.ieeg.preprocessing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.ieeg.psd.html">boavus.ieeg.psd module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.ieeg.read.html">boavus.ieeg.read module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.ieeg.utils.html">boavus.ieeg.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.mri.html">boavus.mri package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.mri.surface.html">boavus.mri.surface module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.prf.html">boavus.prf package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.prf.core.html">boavus.prf.core package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.prf.core.least_squares.html">boavus.prf.core.least_squares module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.prf.core.popeye.html">boavus.prf.core.popeye module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.prf.fit.html">boavus.prf.fit module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.utils.html">boavus.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.workflow.html">boavus.workflow package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.workflow.fmri.html">boavus.workflow.fmri module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="boavus.workflow.ieeg.html">boavus.workflow.ieeg module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">TODO</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">boavus</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API Documentation</a> &raquo;</li>
+        
+          <li><a href="boavus.fsl.html">boavus.fsl package</a> &raquo;</li>
+        
+      <li>boavus.fsl.misc module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-boavus.fsl.misc">
+<span id="boavus-fsl-misc-module"></span><h1>boavus.fsl.misc module<a class="headerlink" href="#module-boavus.fsl.misc" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="boavus.fsl.misc.run_flirt_feat">
+<code class="descclassname">boavus.fsl.misc.</code><code class="descname">run_flirt_feat</code><span class="sig-paren">(</span><em>task_fmri</em>, <em>gm_file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/boavus/fsl/misc.html#run_flirt_feat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boavus.fsl.misc.run_flirt_feat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="boavus.fsl.misc.run_flirt_resample">
+<code class="descclassname">boavus.fsl.misc.</code><code class="descname">run_flirt_resample</code><span class="sig-paren">(</span><em>nii_in</em>, <em>nii_out</em>, <em>target_resolution</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/boavus/fsl/misc.html#run_flirt_resample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boavus.fsl.misc.run_flirt_resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downsample and upsample mri</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="boavus.fsl.misc.run_fslmaths_threshold">
+<code class="descclassname">boavus.fsl.misc.</code><code class="descname">run_fslmaths_threshold</code><span class="sig-paren">(</span><em>gm_file</em>, <em>threshold</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/boavus/fsl/misc.html#run_fslmaths_threshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boavus.fsl.misc.run_fslmaths_threshold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="boavus.fsl.misc.run_reorient2std">
+<code class="descclassname">boavus.fsl.misc.</code><code class="descname">run_reorient2std</code><span class="sig-paren">(</span><em>nii</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/boavus/fsl/misc.html#run_reorient2std"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boavus.fsl.misc.run_reorient2std" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function simply reorients nifti, so that FSL can work with it
+more easily (reg works much better after running this function).</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="boavus.ieeg.html" class="btn btn-neutral float-right" title="boavus.ieeg package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="boavus.fsl.feat_on_surf.html" class="btn btn-neutral" title="boavus.fsl.feat_on_surf module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017-2018, Gio Piantoni
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

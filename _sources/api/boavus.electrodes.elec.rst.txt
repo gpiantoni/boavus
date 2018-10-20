@@ -1,0 +1,15 @@
+boavus.electrodes.elec package
+==============================
+
+.. automodule:: boavus.electrodes.elec
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.electrodes.elec.annealing
+

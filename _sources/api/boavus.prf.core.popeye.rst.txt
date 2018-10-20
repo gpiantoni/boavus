@@ -1,0 +1,7 @@
+boavus.prf.core.popeye module
+=============================
+
+.. automodule:: boavus.prf.core.popeye
+    :members:
+    :undoc-members:
+    :show-inheritance:

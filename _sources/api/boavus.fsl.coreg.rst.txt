@@ -1,0 +1,7 @@
+boavus.fsl.coreg module
+=======================
+
+.. automodule:: boavus.fsl.coreg
+    :members:
+    :undoc-members:
+    :show-inheritance:

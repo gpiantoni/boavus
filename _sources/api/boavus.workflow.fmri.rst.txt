@@ -1,0 +1,7 @@
+boavus.workflow.fmri module
+===========================
+
+.. automodule:: boavus.workflow.fmri
+    :members:
+    :undoc-members:
+    :show-inheritance:

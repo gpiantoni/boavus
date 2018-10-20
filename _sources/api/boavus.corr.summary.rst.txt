@@ -1,0 +1,7 @@
+boavus.corr.summary module
+==========================
+
+.. automodule:: boavus.corr.summary
+    :members:
+    :undoc-members:
+    :show-inheritance:

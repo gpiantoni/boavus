@@ -1,0 +1,7 @@
+boavus.electrodes.elec.annealing module
+=======================================
+
+.. automodule:: boavus.electrodes.elec.annealing
+    :members:
+    :undoc-members:
+    :show-inheritance:

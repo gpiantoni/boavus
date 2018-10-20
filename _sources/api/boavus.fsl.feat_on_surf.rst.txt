@@ -1,0 +1,7 @@
+boavus.fsl.feat\_on\_surf module
+================================
+
+.. automodule:: boavus.fsl.feat_on_surf
+    :members:
+    :undoc-members:
+    :show-inheritance:

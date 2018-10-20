@@ -1,0 +1,16 @@
+boavus.prf.core package
+=======================
+
+.. automodule:: boavus.prf.core
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   boavus.prf.core.least_squares
+   boavus.prf.core.popeye
+
