@@ -46,6 +46,8 @@ install:
   - pip install -e .
 
 script:
+  - bin/recon-all
+  - recon-all
   - py.test --cov=boavus --disable-warnings tests
 
 after_success:
