@@ -22,7 +22,7 @@ d = {
     }
 
 
-def notest_workflow_ieeg():
+def test_workflow_ieeg():
 
     w = workflow_ieeg(ANALYSIS_PATH, d)
 
