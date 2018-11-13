@@ -23,9 +23,8 @@ cache:
 before_install:
   - sudo apt-get update -qq
   - wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py
-  - python2 fslinstaller.py -l
-  - mkdir fsl
-  - python2 fslinstaller.py -d fsl -V 6.0.0
+  - python --version
+  - travis_wait 100 sudo python2 fslinstaller.py -V 5.0.10 -d /usr/local/fsl -q ; 
   - export FSLOUTPUTTYPE=NIFTI_GZ
 
   # necessary for nipype plots
