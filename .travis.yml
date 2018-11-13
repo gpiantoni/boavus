@@ -24,6 +24,7 @@ before_install:
   - sudo apt-get update -qq
   - wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py
   - python2 fslinstaller.py -l
+  - mkdir fsl
   - python2 fslinstaller.py -d fsl -V 6.0.0
   - export FSLOUTPUTTYPE=NIFTI_GZ
 
