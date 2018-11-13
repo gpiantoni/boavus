@@ -27,6 +27,8 @@ before_install:
 
   # necessary for nipype plots
   - sudo apt-get install -y -qq graphviz
+  - PATH=/usr/lib/fsl/5.0:$PATH
+  - bet -h
 
   # get the correct files
   - python make.py --get_files
