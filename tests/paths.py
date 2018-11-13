@@ -11,51 +11,35 @@ FREESURFER_PATH = DATA_PATH / 'freesurfer'
 ANALYSIS_PATH = DATA_PATH / 'analysis'
 ANALYSIS_PATH.mkdir(parents=True, exist_ok=True)
 
-subject = 'bert'
+subject = 'delft'
 task_ieeg = file_Core(
     subject=subject,
-    session='day02',
+    session='UMCUECOGday01',
     modality='ieeg',
-    task='motor',
-    run='1',
-    acquisition='clinical',
-    extension='.eeg',
-    )
-task_prf = file_Core(
-    subject=subject,
-    session='day04',
-    modality='ieeg',
-    task='bairprf',
+    task='motorHandLeft',
     run='1',
     acquisition='clinical',
     extension='.eeg',
     )
 task_fmri = file_Core(
     subject=subject,
-    session='day01',
+    session='UMCU3Tdaym13',
     modality='bold',
-    task='motor',
+    task='motorHandLeft',
     run='1',
     extension='.nii.gz',
     )
 task_anat = file_Core(
     subject=subject,
-    session='day01',
+    session='UMCU3Tdaym13',
     modality='T1w',
     acquisition='wholebrain',
     extension='.nii.gz',
     )
-elec_ct = file_Core(
+elec = file_Core(
     subject=subject,
-    session='day02',
+    session='UMCUECOGday01',
     modality='electrodes',
-    acquisition='ct',
+    acquisition='clinical',
     extension='.tsv',
     )
-
-
-COND = {
-    'move': 'move',
-    'rest': 'rest',
-    }
-MINIMALDURATION = 15

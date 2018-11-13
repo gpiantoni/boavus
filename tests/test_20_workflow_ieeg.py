@@ -1,8 +1,14 @@
 from boavus.workflow.ieeg import workflow_ieeg
 
-from .paths import ANALYSIS_PATH, BIDS_PATH
+from .paths import ANALYSIS_PATH, BIDS_PATH, task_ieeg, elec
 
 d = {
+    'read': {
+        'conditions': {
+            'move': [49, ],
+            'rest': [48, ],
+            },
+        },
     'preprocess': {
         'duration': 2,
         'reref': 'average',
@@ -27,7 +33,7 @@ def test_workflow_ieeg():
     w = workflow_ieeg(ANALYSIS_PATH, d)
 
     node = w.get_node('input')
-    node.inputs.ieeg = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_task-motor_run-1_acq-clinical_ieeg.eeg')
-    node.inputs.electrodes = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_acq-ct_electrodes.tsv')
+    node.inputs.ieeg = str(task_ieeg.get_filename(BIDS_PATH))
+    node.inputs.electrodes = str(elec.get_filename(BIDS_PATH))
 
     w.run()

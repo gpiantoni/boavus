@@ -1,6 +1,13 @@
 from boavus.workflow.fmri import workflow_fmri
 
-from .paths import ANALYSIS_PATH, BIDS_PATH, FREESURFER_PATH
+from .paths import (ANALYSIS_PATH,
+                    BIDS_PATH,
+                    FREESURFER_PATH,
+                    task_anat,
+                    task_fmri,
+                    elec,
+                    )
+
 
 d = {
     "fmri_compare": {
@@ -21,9 +28,9 @@ def test_workflow_fmri():
     w = workflow_fmri(ANALYSIS_PATH, d, False, True, FREESURFER_PATH)
 
     node = w.get_node('input')
-    node.inputs.subject = 'bert'
-    node.inputs.T1w = str(BIDS_PATH / 'sub-bert/ses-day01/anat/sub-bert_ses-day01_acq-wholebrain_T1w.nii.gz')
-    node.inputs.bold = str(BIDS_PATH / 'sub-bert/ses-day01/func/sub-bert_ses-day01_task-motor_run-1_bold.nii.gz')
-    node.inputs.electrodes = str(BIDS_PATH / 'sub-bert/ses-day02/ieeg/sub-bert_ses-day02_acq-ct_electrodes.tsv')
+    node.inputs.subject = 'sub-delft'
+    node.inputs.T1w = str(task_anat.get_filename(BIDS_PATH))
+    node.inputs.bold = str(task_fmri.get_filename(BIDS_PATH))
+    node.inputs.electrodes = str(elec.get_filename(BIDS_PATH))
 
     w.run()

@@ -26,7 +26,7 @@ def workflow_ieeg(NIPYPE_PATH, PARAMETERS):
     input = Node(IdentityInterface(fields=['ieeg', 'electrodes']), name='input')
 
     node_read = Node(function_ieeg_read, name='read')
-    node_read.inputs.conditions = {'move': 'move', 'rest': 'rest'}
+    node_read.inputs.conditions = PARAMETERS['read']['conditions']
     node_read.inputs.minimalduration = 20
 
     node_preprocess = MapNode(function_ieeg_preprocess, name='preprocess', iterfield=['ieeg', ])
