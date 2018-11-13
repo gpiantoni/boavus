@@ -48,13 +48,13 @@ install:
 script:
   - bin/recon-all
   - recon-all
-  # - py.test --cov=boavus --disable-warnings tests
+  - travis_wait python make.py --tests
 
 after_success:
-  # - codecov
+  - codecov
   - pip install sphinx sphinx_rtd_theme
-  # - sphinx-apidoc -fMeT -o $API_PATH boavus
-  # - sphinx-build -T -b html -d $BUILD_PATH/doctrees $SOURCE_PATH $HTML_PATH
+  - sphinx-apidoc -fMeT -o $API_PATH boavus
+  - sphinx-build -T -b html -d $BUILD_PATH/doctrees $SOURCE_PATH $HTML_PATH
 
 notifications:
   email: false
