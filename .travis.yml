@@ -31,6 +31,7 @@ before_install:
   - . ${FSLDIR}/etc/fslconf/fsl.sh
   - PATH=${FSLDIR}/bin:${PATH}
   - export FSLDIR PATH
+  - sudo mv fsl_exec.tcl $FSLDIR/tcl/fsl_exec.tcl
 
   # get the correct files
   - python make.py --get_files
