@@ -27,7 +27,10 @@ before_install:
 
   # necessary for nipype plots
   - sudo apt-get install -y -qq graphviz
-  - PATH=/usr/lib/fsl/5.0:$PATH
+  - FSLDIR=/usr/share/fsl/5.0
+  - . ${FSLDIR}/etc/fslconf/fsl.sh
+  - PATH=${FSLDIR}/bin:${PATH}
+  - export FSLDIR PATH
 
   # get the correct files
   - python make.py --get_files
@@ -41,6 +44,7 @@ install:
 script:
   - bin/recon-all
   - recon-all
+  - find tests/data -type f -printf "\n%TY/%Tm/%Td %TH:%TM:%TS\t%s\n" -exec md5sum \{\} \;
   - travis_wait python make.py --tests
 
 after_success:
