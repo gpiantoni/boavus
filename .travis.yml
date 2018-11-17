@@ -43,7 +43,6 @@ install:
 script:
   - docker exec running pwd
   - docker exec running bash -c "python3 -V"
-  - docker exec running pip3 install --user nipype
   - docker exec running pip3 install --user -e .
   - docker exec running bash -c "fsl5.0-flirt -version"
 
