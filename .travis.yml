@@ -30,6 +30,7 @@ before_install:
     --add-to-entrypoint='source /etc/fsl/fsl.sh' 
     --user neuro --env USER=neuro 
     > dockerfile
+  - cat dockerfile
   - docker build --tag basic .
 
 install:
