@@ -1,58 +1,54 @@
 language: python
+
 dist: xenial
 
 python:
   - "3.6"
 
+services:
+  - docker
+
 env:
   global:
     - DOWNLOADS=$HOME/downloads
     - LIB=$HOME/lib
+    - DERIVATIVES=tests/data/derivatives
+    - INSTALL=$HOME/bin
     - SOURCE_PATH=$TRAVIS_BUILD_DIR/docs/source
     - API_PATH=$SOURCE_PATH/api
     - BUILD_PATH=$TRAVIS_BUILD_DIR/docs/build
     - HTML_PATH=$TRAVIS_BUILD_DIR/docs/build/html
-    # stand-in functions without installing the whole package
-    - PATH=$PATH:bin 
 
-cache: 
- - directories:
-   - $DOWNLOADS
-   - $HOME/.cache/pip
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install fsl
-  - export FSLOUTPUTTYPE=NIFTI_GZ
-
-  # necessary for nipype plots
-  - sudo apt-get install -y -qq graphviz
-  - FSLDIR=/usr/share/fsl/5.0
-  - . ${FSLDIR}/etc/fslconf/fsl.sh
-  - PATH=${FSLDIR}/bin:${PATH}
-  - export FSLDIR PATH
-  - sudo mv fsl_exec.tcl $FSLDIR/tcl/fsl_exec.tcl
-
-  # get the correct files
-  - python make.py --get_files
+  - chmod o+rwx .
+  - pip install neurodocker
+  - neurodocker generate docker 
+    --base=neurodebian:buster-non-free --pkg-manager=apt 
+    --install apt-utils git ssh python3-pip gcc python3-setuptools python3-dev python3-wheel
+    fsl
+    --add-to-entrypoint='source /etc/fsl/fsl.sh' 
+    --user neuro --env USER=neuro 
+    > dockerfile
+  - docker build --tag basic .
 
 install:
-  # install requirements
-  - pip install -e git+https://github.com/wonambi-python/wonambi.git#egg=wonambi
-  - pip install pytest pytest-cov codecov
-  - pip install -e .
+  - docker run -i -t -d 
+    --name running 
+    --user neuro
+    -v /home/travis/build/gpiantoni/boavus:/home/neuro
+    -w /home/neuro
+    basic 
 
 script:
-  - bin/recon-all
-  - recon-all
-  - find tests/data -type f -printf "\n%TY/%Tm/%Td %TH:%TM:%TS\t%s\n" -exec md5sum \{\} \;
-  - travis_wait python make.py --tests
+  - docker exec running pwd
+  - docker exec running bash -c "python3 -V"
+  - docker exec running pip3 install --user nipype
+  - docker exec running pip3 install --user -e .
+  - docker exec running bash -c "fsl5.0-flirt -version"
 
 after_success:
-  - codecov
-  - pip install sphinx sphinx_rtd_theme
-  - sphinx-apidoc -fMeT -o $API_PATH boavus
-  - sphinx-build -T -b html -d $BUILD_PATH/doctrees $SOURCE_PATH $HTML_PATH
+  - docker exec running pip install sphinx sphinx_rtd_theme
 
 notifications:
   email: false
