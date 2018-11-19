@@ -21,34 +21,34 @@ env:
 
 
 before_install:
-  - chmod o+rwx .
   - pip install neurodocker
   - neurodocker generate docker 
     --base=neurodebian:buster-non-free --pkg-manager=apt 
-    --install apt-utils git ssh python3-pip gcc python3-setuptools python3-dev python3-wheel
-    fsl
+    --install apt-utils git ssh python3-pip gcc python3-setuptools python3-dev python3-wheel 
+    fsl file 
+    graphviz 
     --add-to-entrypoint='source /etc/fsl/fsl.sh' 
-    --user neuro --env USER=neuro 
+    --user neuro 
+    --env USER=neuro 
+    --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/bin' 
     > dockerfile
   - cat dockerfile
   - docker build --tag basic .
 
 install:
-  - docker run -i -t -d 
-    --name running 
-    --user neuro
-    -v /home/travis/build/gpiantoni/boavus:/home/neuro
-    -w /home/neuro
-    basic 
+  - docker build --tag basic .
 
 script:
-  - docker exec running pwd
-  - docker exec running bash -c "python3 -V"
-  - docker exec running pip3 install --user -e .
-  - docker exec running bash -c "fsl5.0-flirt -version"
+  - docker run -i -t --rm \
+    --name running \
+    --user neuro \
+    -v /home/gio/tools/boavus:/home/neuro \
+    -w /home/neuro \
+    basic \
+    bash docker_tests.sh
 
 after_success:
-  - docker exec running pip install sphinx sphinx_rtd_theme
+  - pip install sphinx sphinx_rtd_theme
 
 notifications:
   email: false
