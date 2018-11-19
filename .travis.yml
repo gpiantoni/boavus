@@ -32,11 +32,11 @@ before_install:
     --add-to-entrypoint='source /etc/fsl/fsl.sh' 
     --user neuro 
     --env USER=neuro 
-    --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/bin' 
+    --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/docker' 
     > dockerfile
 
   # use the same user UID for travis / docker
-  - sed -i "s/RUN useradd/& -u $UID/" dockerfile
+  - sed -i "s/RUN useradd/& -u $UID:$UID/" dockerfile
 
   - cat dockerfile
 
@@ -50,9 +50,10 @@ script:
     -w /home/neuro 
     --user neuro 
     basic 
-    bash docker_tests.sh
+    bash docker/tests_in_docker.sh
 
 after_success:
+  - ls tests/data/analysis/fmri -l
   - pip install sphinx sphinx_rtd_theme
 
 notifications:
