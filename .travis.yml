@@ -63,8 +63,10 @@ notifications:
   email: false
 
 deploy:
- - provider: pypi
-   user: $PYPI_USER
-   password: $PYPI_PASSWORD
-   on:
-     tags: true
+  - provider: pypi
+    user: $PYPI_USER
+    password: $PYPI_PASSWORD
+    on:
+      tags: true
+  - provider: script
+    script: bash docker/docker_push
