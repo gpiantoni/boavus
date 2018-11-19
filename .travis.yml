@@ -19,6 +19,10 @@ env:
     - BUILD_PATH=$TRAVIS_BUILD_DIR/docs/build
     - HTML_PATH=$TRAVIS_BUILD_DIR/docs/build/html
 
+  cache: 
+    - directories:   
+    - $DOWNLOADS
+    - $HOME/.cache/pip
 
 before_install:
   - ./make.py --get_files
@@ -36,7 +40,7 @@ before_install:
     > dockerfile
 
   # use the same user UID for travis / docker
-  - sed -i "s/RUN useradd/& -u $UID:$UID/" dockerfile
+  - sed -i "s/RUN useradd/& -u $UID/" dockerfile
 
   - cat dockerfile
 
