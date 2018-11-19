@@ -33,18 +33,17 @@ before_install:
     --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/bin' 
     > dockerfile
   - cat dockerfile
-  - docker build --tag basic .
 
 install:
   - docker build --tag basic .
 
 script:
-  - docker run -i -t --rm \
-    --name running \
-    --user neuro \
-    -v /home/gio/tools/boavus:/home/neuro \
-    -w /home/neuro \
-    basic \
+  - docker run -i -t --rm 
+    --name running 
+    --user neuro 
+    -v /home/gio/tools/boavus:/home/neuro 
+    -w /home/neuro 
+    basic 
     bash docker_tests.sh
 
 after_success:
