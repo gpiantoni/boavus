@@ -45,15 +45,14 @@ before_install:
   - cat dockerfile
 
 install:
-  - docker build --tag basic .
+  - docker build --tag gpiantoni/boavus .
 
 script:
   - docker run -i -t --rm 
-    --name running 
     -v $TRAVIS_BUILD_DIR:/home/neuro 
     -w /home/neuro 
     --user neuro 
-    basic 
+    gpiantoni/boavus 
     bash docker/tests_in_docker.sh
 
 after_success:
