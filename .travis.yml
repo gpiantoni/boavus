@@ -21,6 +21,8 @@ env:
 
 
 before_install:
+  - ./make.py --get_files
+
   - pip install neurodocker
   - neurodocker generate docker 
     --base=neurodebian:buster-non-free --pkg-manager=apt 
@@ -32,6 +34,10 @@ before_install:
     --env USER=neuro 
     --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/bin' 
     > dockerfile
+
+  # use the same user UID for travis / docker
+  - sed -i "s/RUN useradd/& -u $UID/" dockerfile
+
   - cat dockerfile
 
 install:
@@ -40,9 +46,9 @@ install:
 script:
   - docker run -i -t --rm 
     --name running 
-    --user neuro 
     -v $TRAVIS_BUILD_DIR:/home/neuro 
     -w /home/neuro 
+    --user neuro 
     basic 
     bash docker_tests.sh
 

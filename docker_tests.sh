@@ -1,5 +1,10 @@
 #!/bin/bash
 
+
+ls -l
+ls -l /
+id
+
 echo $PATH
 echo $FSLDIR
 
@@ -13,4 +18,4 @@ echo $PATH
 
 pytest --version
 
-~/make.py -t
+~/make.py --tests

@@ -139,7 +139,9 @@ def _get_files():
         return 1
 
     if environ.get('CI', False) and environ.get('DOWNLOADS', False):
-        tmp_file = Path(environ.get('DOWNLOADS')) / 'boavus.zip'
+        DOWNLOADS_DIR = Path(environ.get('DOWNLOADS'))
+        DOWNLOADS_DIR.mkdir(exist_ok=True, parents=True)
+        tmp_file = DOWNLOADS_DIR / 'boavus.zip'
     else:
         tmp_file = Path(mkstemp(suffix='.zip')[1])
 

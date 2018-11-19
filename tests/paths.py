@@ -40,6 +40,6 @@ elec = file_Core(
     subject=subject,
     session='UMCUECOGday01',
     modality='electrodes',
-    acquisition='clinicalctmr',
+    acquisition='clinical',
     extension='.tsv',
     )
