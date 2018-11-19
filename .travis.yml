@@ -41,7 +41,7 @@ script:
   - docker run -i -t --rm 
     --name running 
     --user neuro 
-    -v /home/gio/tools/boavus:/home/neuro 
+    -v $TRAVIS_BUILD_DIR:/home/neuro 
     -w /home/neuro 
     basic 
     bash docker_tests.sh
