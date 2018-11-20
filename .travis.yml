@@ -19,8 +19,8 @@ env:
     - BUILD_PATH=$TRAVIS_BUILD_DIR/docs/build
     - HTML_PATH=$TRAVIS_BUILD_DIR/docs/build/html
 
-  cache: 
-    - directories:   
+cache: 
+  - directories:   
     - $DOWNLOADS
     - $HOME/.cache/pip
 
@@ -57,7 +57,8 @@ script:
 
 after_success:
   - ls tests/data/analysis/fmri -l
-  - pip install sphinx sphinx_rtd_theme
+  - pip install sphinx sphinx_rtd_theme codecov
+  - codecov
 
 notifications:
   email: false
