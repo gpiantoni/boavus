@@ -22,7 +22,7 @@ env:
 cache: 
   directories:   
     - $DOWNLOADS
-    - $HOME/.cache/pip
+    - $TRAVIS_BUILD_DIR/.cache/pip
 
 before_install:
   - ./make.py --get_files
