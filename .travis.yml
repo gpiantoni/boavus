@@ -28,15 +28,16 @@ before_install:
   - ./make.py --get_files
 
   - pip install neurodocker
-  - neurodocker generate docker 
-    --base=neurodebian:buster-non-free --pkg-manager=apt 
-    --install apt-utils git ssh python3-pip gcc python3-setuptools python3-dev python3-wheel 
-    fsl file 
-    graphviz 
-    --add-to-entrypoint='source /etc/fsl/fsl.sh' 
-    --user neuro 
-    --env USER=neuro 
-    --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/docker' 
+  - neurodocker generate docker \
+    --base=neurodebian:buster-non-free --pkg-manager=apt \
+    --install apt-utils git ssh python3-pip gcc python3-setuptools python3-dev python3-wheel \
+    fsl file \
+    graphviz \
+    --add-to-entrypoint='source /etc/fsl/fsl.sh' \
+    --add-to-entrypoint='pip3 install --user -e .[test]' \
+    --user neuro \
+    --env USER=neuro \
+    --env PATH='${PATH}:${HOME}/.local/bin:${HOME}/docker' \
     > dockerfile
 
   # use the same user UID for travis / docker
@@ -53,7 +54,7 @@ script:
     -w /home/neuro 
     --user neuro 
     gpiantoni/boavus 
-    bash docker/tests_in_docker.sh
+    python3 make.py --tests
 
 after_success:
   - ls tests/data/analysis/fmri -l
