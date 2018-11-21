@@ -1,4 +1,5 @@
 from boavus.workflow.fmri import workflow_fmri
+from nipype import config
 
 from .paths import (ANALYSIS_PATH,
                     BIDS_PATH,
@@ -6,28 +7,28 @@ from .paths import (ANALYSIS_PATH,
                     task_anat,
                     task_fmri,
                     elec,
+                    parameters,
                     )
 
 
-d = {
-    "fmri_compare": {
-        "measure": "zstat",
-        "normalize_to_mean": True
+LOG_PATH = ANALYSIS_PATH / 'log'
+config.update_config({
+    'logging': {
+        'log_directory': LOG_PATH,
+        'log_to_file': True,
         },
-    "at_elec": {
-        "distance": "gaussian",
-        "kernel_start": 3,
-        "kernel_end": 10,
-        "kernel_step": 0.5
+    'execution': {
+        'crashdump_dir': LOG_PATH,
+        'keep_inputs': 'false',
+        'remove_unnecessary_outputs': 'false',
         },
-    "upsample": False,
-    "graymatter": True,
-    }
+    })
 
 
 def test_workflow_fmri():
 
-    w = workflow_fmri(ANALYSIS_PATH, d, FREESURFER_PATH)
+    w = workflow_fmri(parameters['fmri'], FREESURFER_PATH)
+    w.base_dir = str(ANALYSIS_PATH)
 
     node = w.get_node('input')
     node.inputs.subject = 'sub-delft'

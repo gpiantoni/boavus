@@ -1,5 +1,4 @@
-from shutil import rmtree
-from nipype import Workflow, Node, MapNode, config, logging
+from nipype import Workflow, Node, MapNode
 from nipype.interfaces.utility import IdentityInterface
 from ..ieeg import (function_ieeg_read,
                     function_ieeg_preprocess,
@@ -8,20 +7,7 @@ from ..ieeg import (function_ieeg_read,
                     )
 
 
-def workflow_ieeg(NIPYPE_PATH, PARAMETERS):
-
-    LOG_PATH = NIPYPE_PATH / 'log'
-    config.update_config({
-        'logging': {
-            'log_directory': LOG_PATH,
-            'log_to_file': True,
-            },
-        'execution': {
-            'crashdump_dir': LOG_PATH,
-            'keep_inputs': 'false',
-            'remove_unnecessary_outputs': 'false',
-            },
-        })
+def workflow_ieeg(PARAMETERS):
 
     input = Node(IdentityInterface(fields=['ieeg', 'electrodes']), name='input')
 
@@ -46,20 +32,11 @@ def workflow_ieeg(NIPYPE_PATH, PARAMETERS):
     node_compare.inputs.measure = PARAMETERS['ecog_compare']['measure']
 
     w = Workflow('ieeg')
-    w.base_dir = str(NIPYPE_PATH)
 
     w.connect(input, 'ieeg', node_read, 'ieeg')
     w.connect(input, 'electrodes', node_read, 'electrodes')
     w.connect(node_read, 'ieeg', node_preprocess, 'ieeg')
     w.connect(node_preprocess, 'ieeg', node_frequency, 'ieeg')
     w.connect(node_frequency, 'ieeg', node_compare, 'in_files')
-
-    w.write_graph(
-        graph2use='flat',
-        )
-
-    rmtree(LOG_PATH, ignore_errors=True)
-    LOG_PATH.mkdir()
-    logging.update_logging(config)
 
     return w

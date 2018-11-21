@@ -1,39 +1,45 @@
+from shutil import rmtree
+
 from boavus.workflow.ieeg import workflow_ieeg
+from nipype import config, logging
 
-from .paths import ANALYSIS_PATH, BIDS_PATH, task_ieeg, elec
+from .paths import (ANALYSIS_PATH,
+                    BIDS_PATH,
+                    task_ieeg,
+                    elec,
+                    parameters,
+                    )
 
-d = {
-    'read': {
-        'conditions': {
-            'move': [49, ],
-            'rest': [48, ],
-            },
+
+LOG_PATH = ANALYSIS_PATH / 'log'
+config.update_config({
+    'logging': {
+        'log_directory': LOG_PATH,
+        'log_to_file': True,
         },
-    'preprocess': {
-        'duration': 2,
-        'reref': 'average',
-        'offset': False,
+    'execution': {
+        'crashdump_dir': LOG_PATH,
+        'keep_inputs': 'false',
+        'remove_unnecessary_outputs': 'false',
         },
-    'powerspectrum': {
-        'method': 'spectrogram',
-        'taper': 'hann',
-        'duration': 2,
-        },
-    'ecog_compare': {
-        'frequency': [65, 95],
-        'baseline': True,
-        'measure': 'zstat',
-        'method': '3c',
-        }
-    }
+    })
 
 
 def test_workflow_ieeg():
 
-    w = workflow_ieeg(ANALYSIS_PATH, d)
+    w = workflow_ieeg(parameters)
+    w.base_dir = str(ANALYSIS_PATH)
 
     node = w.get_node('input')
     node.inputs.ieeg = str(task_ieeg.get_filename(BIDS_PATH))
     node.inputs.electrodes = str(elec.get_filename(BIDS_PATH))
+
+    w.write_graph(
+        graph2use='flat',
+        )
+
+    rmtree(LOG_PATH, ignore_errors=True)
+    LOG_PATH.mkdir()
+    logging.update_logging(config)
 
     w.run()

@@ -16,21 +16,8 @@ DOWNSAMPLE_RESOLUTION = 4
 GRAYMATTER_THRESHOLD = 0.2
 
 
-def workflow_fmri(NIPYPE_PATH, PARAMETERS, FREESURFER_PATH):
+def workflow_fmri(PARAMETERS, FREESURFER_PATH):
     """TODO: input and output"""
-
-    LOG_PATH = NIPYPE_PATH / 'log'
-    config.update_config({
-        'logging': {
-            'log_directory': LOG_PATH,
-            'log_to_file': True,
-            },
-        'execution': {
-            'crashdump_dir': LOG_PATH,
-            'keep_inputs': 'false',
-            'remove_unnecessary_outputs': 'false',
-            },
-        })
 
     input = Node(IdentityInterface(fields=['subject', 'T1w', 'bold', 'electrodes']), name='input')
 
@@ -78,7 +65,6 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, FREESURFER_PATH):
     node_atelec.inputs.graymatter = PARAMETERS['graymatter']
 
     w = Workflow('fmri')
-    w.base_dir = str(NIPYPE_PATH)
 
     w.connect(input, 'T1w', node_bet, 'in_file')
     w.connect(input, 'bold', node_featdesign, 'func')

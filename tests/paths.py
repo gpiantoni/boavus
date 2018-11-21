@@ -43,3 +43,45 @@ elec = file_Core(
     acquisition='clinical',
     extension='.tsv',
     )
+
+
+parameters = {
+    'fmri': {
+        "fmri_compare": {
+            "measure": "zstat",
+            "normalize_to_mean": True
+            },
+        "at_elec": {
+            "distance": "gaussian",
+            "kernel_start": 3,
+            "kernel_end": 10,
+            "kernel_step": 0.5
+            },
+        "upsample": False,
+        "graymatter": True,
+        },
+    'ieeg': {
+        'read': {
+            'conditions': {
+                'move': [49, ],
+                'rest': [48, ],
+                },
+            },
+        'preprocess': {
+            'duration': 2,
+            'reref': 'average',
+            'offset': False,
+            },
+        'powerspectrum': {
+            'method': 'spectrogram',
+            'taper': 'hann',
+            'duration': 2,
+            },
+        'ecog_compare': {
+            'frequency': [65, 95],
+            'baseline': True,
+            'measure': 'zstat',
+            'method': '3c',
+            }
+        }
+    }
