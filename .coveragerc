@@ -1,8 +1,6 @@
 [run]
-concurrency = multiprocessing
+source=boavus
 
 [report]
 exclude_lines =
     pragma: no cover
-    except FileNotFoundError
-    with Pool
