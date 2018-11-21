@@ -37,7 +37,7 @@ before_install:
     --add-to-entrypoint='pip3 install --user -e .[test]' 
     --user neuro 
     --env USER=neuro 
-    --env PATH='${PATH}:${HOME}/.local/bin:${HOME}/docker' 
+    --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/docker' 
     > dockerfile
 
   # use the same user UID for travis / docker
