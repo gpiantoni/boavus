@@ -16,7 +16,7 @@ DOWNSAMPLE_RESOLUTION = 4
 GRAYMATTER_THRESHOLD = 0.2
 
 
-def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter, FREESURFER_PATH):
+def workflow_fmri(NIPYPE_PATH, PARAMETERS, FREESURFER_PATH):
     """TODO: input and output"""
 
     LOG_PATH = NIPYPE_PATH / 'log'
@@ -75,7 +75,7 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter, FREESURFER_PATH
     node_atelec = Node(function_fmri_atelec, name='at_elec')
     node_atelec.inputs.distance = PARAMETERS['at_elec']['distance']
     node_atelec.inputs.kernel_sizes = list(kernel_sizes)
-    node_atelec.inputs.graymatter = graymatter
+    node_atelec.inputs.graymatter = PARAMETERS['graymatter']
 
     w = Workflow('fmri')
     w.base_dir = str(NIPYPE_PATH)
@@ -89,14 +89,14 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter, FREESURFER_PATH
     w.connect(node_featdesign, 'fsf_file', node_feat, 'fsf_file')
     w.connect(node_feat, 'feat_dir', node_compare, 'feat_path')
 
-    if upsample:
+    if PARAMETERS['upsample']:
         w.connect(node_compare, 'out_file', node_upsample, 'in_file')
         w.connect(node_compare, 'out_file', node_upsample, 'reference')
         w.connect(node_upsample, 'out_file', node_atelec, 'in_file')
     else:
         w.connect(node_compare, 'out_file', node_atelec, 'in_file')
 
-    if graymatter:
+    if PARAMETERS['graymatter']:
 
         node_reconall = Node(ReconAll(), name='freesurfer')
         node_reconall.inputs.subjects_dir = str(FREESURFER_PATH)
@@ -105,7 +105,7 @@ def workflow_fmri(NIPYPE_PATH, PARAMETERS, upsample, graymatter, FREESURFER_PATH
         w.connect(input, 'T1w', node_reconall, 'T1_files')
         w.connect(input, 'subject', node_reconall, 'subject_id')
 
-        if upsample:
+        if PARAMETERS['upsample']:
             w.connect(node_graymatter, 'out_file', node_realign_gm, 'in_file')
             w.connect(node_upsample, 'out_file', node_realign_gm, 'reference')
             w.connect(node_realign_gm, 'out_file', node_threshold, 'in_file')

@@ -20,12 +20,14 @@ d = {
         "kernel_end": 10,
         "kernel_step": 0.5
         },
+    "upsample": False,
+    "graymatter": True,
     }
 
 
 def test_workflow_fmri():
 
-    w = workflow_fmri(ANALYSIS_PATH, d, False, True, FREESURFER_PATH)
+    w = workflow_fmri(ANALYSIS_PATH, d, FREESURFER_PATH)
 
     node = w.get_node('input')
     node.inputs.subject = 'sub-delft'
