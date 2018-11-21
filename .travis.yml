@@ -20,7 +20,7 @@ env:
     - HTML_PATH=$TRAVIS_BUILD_DIR/docs/build/html
 
 cache: 
-  - directories:   
+  directories:   
     - $DOWNLOADS
     - $HOME/.cache/pip
 
