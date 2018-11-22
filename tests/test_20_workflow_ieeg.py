@@ -27,7 +27,7 @@ config.update_config({
 
 def test_workflow_ieeg():
 
-    w = workflow_ieeg(parameters)
+    w = workflow_ieeg(parameters['ieeg'])
     w.base_dir = str(ANALYSIS_PATH)
 
     node = w.get_node('input')
