@@ -1,5 +1,4 @@
-from shutil import rmtree
-from nipype import Workflow, Node, config, logging
+from nipype import Workflow, Node
 from nipype.interfaces.fsl import FEAT, BET, FLIRT, Threshold
 from nipype.interfaces.freesurfer import ReconAll
 from nipype.interfaces.utility import IdentityInterface
@@ -103,13 +102,5 @@ def workflow_fmri(PARAMETERS, FREESURFER_PATH):
         w.connect(node_threshold, 'out_file', node_atelec, 'graymatter')
 
         w.connect(node_reconall, 'ribbon', node_graymatter, 'ribbon')
-
-    w.write_graph(
-        graph2use='flat',
-        )
-
-    rmtree(LOG_PATH, ignore_errors=True)
-    LOG_PATH.mkdir(exist_ok=True)
-    logging.update_logging(config)
 
     return w
