@@ -65,8 +65,8 @@ parameters = {
             'conditions': {
                 'move': [49, ],
                 'rest': [48, ],
-                'minimalduration': 1,
                 },
+            'minimalduration': 1,
             },
         'preprocess': {
             'duration': 2,
