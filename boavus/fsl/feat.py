@@ -4,12 +4,6 @@ from nibabel import load as niload
 from bidso import Task
 from bidso.utils import replace_underscore, read_tsv, replace_extension
 
-
-EVENT_VALUE = {
-    'move': 1,
-    'rest': 0,
-    }
-
 DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fsf'
 
 
@@ -36,7 +30,7 @@ def prepare_design(func, anat, output_dir):
         'XXX_TR': str(tr),
         'XXX_FEAT_FILE': str(task.filename),
         'XXX_HIGHRES_FILE': str(anat),
-        'XXX_EV1': 'motor',
+        'XXX_EV1': 'active',
         'XXX_TSVFILE': str(events_fsl),
         }
 
@@ -52,7 +46,18 @@ def prepare_design(func, anat, output_dir):
 
 
 def _write_events(events_input, events_output):
+    """
+    TODO
+    ----
+    EVENTS should be in PARAMETERS
+    """
+    EVENTS = (
+        'move',
+        'verbgen',
+        )
+
     tsv = read_tsv(events_input)
     with events_output.open('w') as f:
         for event in tsv:
-            f.write(f'{event["onset"]}\t{event["duration"]}\t{EVENT_VALUE[event["trial_type"]]}\n')
+            if event['trial_type'] in EVENTS:
+                f.write(f'{event["onset"]}\t{event["duration"]}\t1\n')
