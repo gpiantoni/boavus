@@ -8,6 +8,9 @@ DESIGN_TEMPLATE = Path(__file__).resolve().parents[1] / 'data/design_template.fs
 
 
 def prepare_design(func, anat, output_dir):
+    """You should set remove_unnecessary_outputs to False, otherwise it removes
+    the events.tsv file
+    """
 
     task = Task(func)
 

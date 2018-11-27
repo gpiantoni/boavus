@@ -13,7 +13,7 @@ def workflow_ieeg(PARAMETERS):
 
     node_read = Node(function_ieeg_read, name='read')
     node_read.inputs.conditions = PARAMETERS['read']['conditions']
-    node_read.inputs.minimalduration = 20
+    node_read.inputs.minimalduration = PARAMETERS['read']['minimalduration']
 
     node_preprocess = MapNode(function_ieeg_preprocess, name='preprocess', iterfield=['ieeg', ])
     node_preprocess.inputs.duration = PARAMETERS['preprocess']['duration']
