@@ -46,6 +46,9 @@ elec = file_Core(
 
 
 parameters = {
+    'corr': {
+        'pvalue': 0.05,
+        },
     'fmri': {
         "fmri_compare": {
             "measure": "zstat",

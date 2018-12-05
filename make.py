@@ -165,7 +165,7 @@ def _tests():
            f'--cov={PACKAGE}',
            '--disable-warnings',
            '--capture=no',
-           'tests',
+           'tests/test_22_workflow_grvx.py',
            ]
 
     output = run(CMD)
