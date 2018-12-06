@@ -25,8 +25,9 @@ cache:
     - $TRAVIS_BUILD_DIR/.cache/pip
 
 before_install:
-  # - ./make.py --get_files
+  - ./make.py --get_files
 
+  # remember to change docker/docker_push as well
   - pip install neurodocker
   - neurodocker generate docker 
     --base=neurodebian:buster-non-free --pkg-manager=apt 
