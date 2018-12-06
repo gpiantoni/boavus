@@ -26,6 +26,9 @@ config.update_config({
     })
 
 
+def test_simple():
+    assert True
+
 def notest_workflow_fmri():
 
     w = workflow_corr_ieeg_fmri(parameters, FREESURFER_PATH)
