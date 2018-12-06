@@ -25,7 +25,7 @@ cache:
     - $TRAVIS_BUILD_DIR/.cache/pip
 
 before_install:
-  - ./make.py --get_files
+  # - ./make.py --get_files
 
   - pip install neurodocker
   - neurodocker generate docker 
@@ -46,18 +46,13 @@ before_install:
   - cat dockerfile
 
 install:
-  - docker build --tag gpiantoni/boavus .
+  - docker build --tag testing .
 
 script:
-  - docker run -i -t --rm 
-    -v $TRAVIS_BUILD_DIR:/home/neuro 
-    -w /home/neuro 
-    --user neuro 
-    gpiantoni/boavus 
-    python3 make.py --tests
+  - true
 
 after_success:
-  - ls tests/data/analysis/fmri -l
+  - ls tests  # /data/analysis/fmri -l
   - pip install sphinx sphinx_rtd_theme codecov
   - codecov
 

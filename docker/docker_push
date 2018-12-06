@@ -1,3 +1,20 @@
 #!/bin/bash
+
+neurodocker generate docker \
+  --base=neurodebian:buster-non-free --pkg-manager=apt \
+  --install apt-utils git ssh python3-pip gcc python3-setuptools python3-dev python3-wheel \
+  fsl file \
+  graphviz \
+  --add-to-entrypoint='source /etc/fsl/fsl.sh' \
+  --add-to-entrypoint='pip3 install --user boavus' \
+  --user neuro \
+  --env USER=neuro \
+  --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/docker' \
+  > dockerfile
+
+sed -i "s/RUN useradd/& -u $UID/" dockerfile
+
+docker build --tag gpiantoni/boavus .
+
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 docker push gpiantoni/boavus
