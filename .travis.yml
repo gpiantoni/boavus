@@ -50,7 +50,10 @@ install:
   - docker build --tag testing .
 
 script:
-  - docker run -i -t --rm 
+  - ci_env=`bash <(curl -s https://codecov.io/env)`
+  - docker run 
+    $ci_env
+    -i -t --rm 
     -v $TRAVIS_BUILD_DIR:/home/neuro 
     -w /home/neuro 
     --user neuro 
@@ -59,9 +62,7 @@ script:
 
 after_success:
   - ls tests/data/analysis/fmri -l
-  - pip install sphinx sphinx_rtd_theme
   - ls -la
-  - bash <(curl -s https://codecov.io/bash) -v -f .coverage
 
 notifications:
   email: false
