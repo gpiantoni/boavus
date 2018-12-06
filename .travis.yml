@@ -61,8 +61,8 @@ script:
     python3 make.py --tests
 
 after_success:
-  - ls tests/data/analysis/fmri -l
   - ls -la
+  - pip install sphinx sphinx_rtd_theme
 
 notifications:
   email: false
