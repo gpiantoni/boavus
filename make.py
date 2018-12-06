@@ -170,7 +170,7 @@ def _tests():
 
     output = run(CMD)
 
-    if True or environ.get('CI', False):
+    if environ.get('CI', False):
         codecov_file = Path('codecov.sh')
         with urlopen('https://codecov.io/bash') as u, codecov_file.open('wb') as f:
             f.write(u.read())
