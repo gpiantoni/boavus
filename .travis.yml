@@ -59,8 +59,7 @@ script:
 
 after_success:
   - ls tests/data/analysis/fmri -l
-  - pip install sphinx sphinx_rtd_theme codecov
-  - codecov
+  - pip install sphinx sphinx_rtd_theme
 
 notifications:
   email: false
