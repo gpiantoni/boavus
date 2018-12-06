@@ -64,7 +64,7 @@ def _reject_channels(d, elec_names, cond, minimalduration):
 
 
 def reject_channels(dat, reject_chan_thresh):
-    dat_std = math(dat, operator_name='std', axis='time')
+    dat_std = math(dat, operator_name='nanstd', axis='time')
     THRESHOLD = reject_chan_thresh
     x = dat_std.data[0]
     thres = [mean(x) + THRESHOLD * std(x)]
