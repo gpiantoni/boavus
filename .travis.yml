@@ -49,10 +49,15 @@ install:
   - docker build --tag testing .
 
 script:
-  - true
+  - docker run -i -t --rm 
+    -v $TRAVIS_BUILD_DIR:/home/neuro 
+    -w /home/neuro 
+    --user neuro 
+    testing 
+    python3 make.py --tests
 
 after_success:
-  - ls tests  # /data/analysis/fmri -l
+  - ls tests/data/analysis/fmri -l
   - pip install sphinx sphinx_rtd_theme codecov
   - codecov
 
@@ -60,6 +65,11 @@ notifications:
   email: false
 
 deploy:
+  - provider: pypi
+    user: $PYPI_USER
+    password: $PYPI_PASSWORD
+    on:
+      tags: true
   - provider: script
     script: bash docker/docker_push
     on:
