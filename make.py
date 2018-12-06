@@ -165,12 +165,16 @@ def _tests():
            f'--cov={PACKAGE}',
            '--disable-warnings',
            '--capture=no',
-           'tests/test_22_workflow_grvx.py',
+           'tests',
            ]
 
     output = run(CMD)
 
-    if not environ.get('CI', False):
+    if environ.get('CI', False):
+        run([
+            'codecov',
+            ])
+    else:
         run([
             'coverage',
             'html',
