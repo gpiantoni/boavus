@@ -61,7 +61,7 @@ after_success:
   - ls tests/data/analysis/fmri -l
   - pip install sphinx sphinx_rtd_theme
   - ls -la
-  - bash <(curl -s https://codecov.io/bash) -v 
+  - bash <(curl -s https://codecov.io/bash) -v -f .coverage
 
 notifications:
   email: false
