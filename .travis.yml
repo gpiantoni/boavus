@@ -35,7 +35,7 @@ before_install:
     fsl file 
     graphviz 
     --add-to-entrypoint='source /etc/fsl/fsl.sh' 
-    --add-to-entrypoint='pip3 install --user -e .[test]' 
+    --add-to-entrypoint='pip3 install --user -e .[all]' 
     --user neuro 
     --env USER=neuro 
     --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/docker' 
@@ -61,8 +61,14 @@ script:
     python3 make.py --tests
 
 after_success:
-  - ls -la
-  - pip install sphinx sphinx_rtd_theme
+  - docker run 
+    -i -t --rm 
+    -v $TRAVIS_BUILD_DIR:/home/neuro 
+    -w /home/neuro 
+    --user neuro 
+    testing 
+    python3 make.py --docs
+  - ls docs -la
 
 notifications:
   email: false

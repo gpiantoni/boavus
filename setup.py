@@ -41,6 +41,10 @@ setup(
             'pytest',
             'pytest-cov',
             ],
+        'docs': [  # to run docs
+            'sphinx',
+            'sphinx_rtd_theme',
+            ],
         },
     package_data={
         'boavus': [
