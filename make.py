@@ -170,12 +170,7 @@ def _tests():
 
     output = run(CMD)
 
-    if environ.get('CI', False):
-        output1 = run([
-            'codecov',
-            ])
-        print(output1)
-    else:
+    if not environ.get('CI', False):
         run([
             'coverage',
             'html',
