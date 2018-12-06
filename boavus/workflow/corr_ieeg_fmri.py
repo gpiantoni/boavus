@@ -24,7 +24,7 @@ def workflow_corr_ieeg_fmri(PARAMETERS, FREESURFER_PATH):
     w.connect(input, 'subject', w_fmri, 'input.subject')
     w.connect(input, 'T1w', w_fmri, 'input.T1w')
     w.connect(input, 'bold', w_fmri, 'input.bold')
-    w.connect(input, 'elec', w_fmri, 'input.electrodes')
+    w.connect(input, 'electrodes', w_fmri, 'input.electrodes')
 
     w.connect(w_ieeg, 'ecog_compare.tsv_compare', node_corr, 'ecog_file')
     w.connect(w_fmri, 'at_elec.fmri_vals', node_corr, 'fmri_file')
