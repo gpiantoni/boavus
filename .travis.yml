@@ -55,7 +55,6 @@ after_success:
   - ls tests  # /data/analysis/fmri -l
   - pip install sphinx sphinx_rtd_theme codecov
   - codecov
-  - bash docker/docker_push
 
 notifications:
   email: false
@@ -68,3 +67,5 @@ deploy:
       tags: true
   - provider: script
     script: bash docker/docker_push
+    on:
+      tags: true

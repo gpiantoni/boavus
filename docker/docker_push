@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo $TRAVIS_TAG
+
 neurodocker generate docker \
   --base=neurodebian:buster-non-free --pkg-manager=apt \
   --install apt-utils git ssh python3-pip gcc python3-setuptools python3-dev python3-wheel \
@@ -14,7 +16,7 @@ neurodocker generate docker \
 
 sed -i "s/RUN useradd/& -u $UID/" dockerfile
 
-docker build --tag gpiantoni/boavus .
+docker build --tag gpiantoni/boavus:$TRAVIS_TAG .
 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-docker push gpiantoni/boavus
+docker push gpiantoni/boavus:$TRAVIS_TAG
