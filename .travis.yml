@@ -35,7 +35,7 @@ before_install:
     fsl file 
     graphviz 
     --add-to-entrypoint='source /etc/fsl/fsl.sh' 
-    --add-to-entrypoint='pip3 install --user -e .[all]' 
+    --add-to-entrypoint='pip3 install --user -e .[test,docs]' 
     --user neuro 
     --env USER=neuro 
     --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/docker' 
