@@ -5,11 +5,14 @@ def wrapper_corr(fmri_file, ecog_file, output_dir='./corr_values', pvalue=0.05):
     from pathlib import Path
     from boavus.corr.corrfmri import compute_corr_ecog_fmri
 
-    return str(compute_corr_ecog_fmri(
+    results_tsv, fmri_file, ecog_file = compute_corr_ecog_fmri(
         Path(fmri_file).resolve(),
         Path(ecog_file).resolve(),
         Path(output_dir).resolve(),
-        pvalue))
+        pvalue)
+
+    return str(results_tsv), str(fmri_file), str(ecog_file)
+
 
 def wrapper_summary(in_files, ecog_files, fmri_files, output_dir='./output'):
     from pathlib import Path
@@ -27,6 +30,8 @@ function_corr = Function(
     ],
     output_names=[
         'out_file',
+        'fmri_file',
+        'ecog_file',
     ],
     function=wrapper_corr,
     )

@@ -10,8 +10,8 @@ def workflow_corr_ieeg_fmri(PARAMETERS, FREESURFER_PATH):
 
     input = Node(IdentityInterface(fields=['subject', 'T1w', 'bold', 'ieeg', 'electrodes']), name='input')
 
-    node_corr = Node(function_corr, name='corr_fmri_ecog')
-    node_corr.inputs.pvalue = PARAMETERS['corr']['pvalue']
+    output = Node(function_corr, name='output')
+    output.inputs.pvalue = PARAMETERS['corr']['pvalue']
 
     w_fmri = workflow_fmri(PARAMETERS['fmri'], FREESURFER_PATH)
     w_ieeg = workflow_ieeg(PARAMETERS['ieeg'])
@@ -26,7 +26,7 @@ def workflow_corr_ieeg_fmri(PARAMETERS, FREESURFER_PATH):
     w.connect(input, 'bold', w_fmri, 'input.bold')
     w.connect(input, 'electrodes', w_fmri, 'input.electrodes')
 
-    w.connect(w_ieeg, 'ecog_compare.tsv_compare', node_corr, 'ecog_file')
-    w.connect(w_fmri, 'at_elec.fmri_vals', node_corr, 'fmri_file')
+    w.connect(w_ieeg, 'ecog_compare.tsv_compare', output, 'ecog_file')
+    w.connect(w_fmri, 'at_elec.fmri_vals', output, 'fmri_file')
 
     return w

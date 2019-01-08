@@ -26,7 +26,7 @@ config.update_config({
     })
 
 
-def test_workflow_fmri():
+def test_workflow():
 
     w = workflow_corr_ieeg_fmri(parameters, FREESURFER_PATH)
     w.base_dir = str(ANALYSIS_PATH)

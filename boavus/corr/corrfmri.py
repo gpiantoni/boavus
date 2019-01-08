@@ -35,7 +35,7 @@ def compute_corr_ecog_fmri(fmri_file, ecog_file, output_dir, PVALUE):
 
             f.write(f'{float(kernel):.2f}\t{r2}\t{slope}\t{intercept}\n')
 
-    return results_tsv
+    return results_tsv, fmri_file, ecog_file
 
 
 def select_channels(fmri_vals, ecog_vals):
