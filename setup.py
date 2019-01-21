@@ -40,6 +40,7 @@ setup(
         'test': [  # to run tests
             'pytest',
             'pytest-cov',
+            'neuropythy',
             ],
         },
     package_data={
