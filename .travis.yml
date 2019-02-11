@@ -59,8 +59,8 @@ script:
     testing 
     python3 make.py --tests
   - find . -type d
-  - find tests/data/analysis/neuropythy -type d
-  - cat tests/data/analysis/neuropythy/atlas/_report/report.rst
+  - find tests/data/analysis/atlas
+  - cat tests/data/analysis/atlas/_report/report.rst
 
 after_success:
   - pip install sphinx sphinx_rtd_theme
