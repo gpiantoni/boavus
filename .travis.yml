@@ -12,7 +12,6 @@ env:
   global:
     - DOWNLOADS=$HOME/downloads
     - LIB=$HOME/lib
-    - DERIVATIVES=tests/data/derivatives
     - INSTALL=$HOME/bin
     - SOURCE_PATH=$TRAVIS_BUILD_DIR/docs/source
     - API_PATH=$SOURCE_PATH/api
@@ -59,6 +58,7 @@ script:
     --user neuro 
     testing 
     python3 make.py --tests
+  - find . -type d
   - find tests/data/analysis/neuropythy -type d
   - cat tests/data/analysis/neuropythy/atlas/_report/report.rst
 
