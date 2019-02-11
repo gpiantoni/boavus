@@ -20,4 +20,5 @@ def test_neuropythy_atlas():
 def test_neuropythy_atlas_1():
 
     print(config)
+    config['freesurfer_subject_paths'].append(str(FREESURFER_PATH))
     print(freesurfer_subject('sub-delft'))
