@@ -12,6 +12,7 @@ def wrapper_neuropythy_atlas(subject_id, subjects_dir=None):
     if subjects_dir is not None:
         environ['SUBJECTS_DIR'] = str(subjects_dir)
         config['freesurfer_subject_paths'].append(str(subjects_dir))
+        subject_id = str(Path(subjects_dir).resolve() / subject_id)
 
     print(config)
 

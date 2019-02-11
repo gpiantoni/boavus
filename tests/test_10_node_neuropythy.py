@@ -7,9 +7,6 @@ from .paths import ANALYSIS_PATH, FREESURFER_PATH
 
 def test_neuropythy_atlas():
 
-    print(config)
-    print(freesurfer_subject('sub-delft'))
-
     n = Node(function_neuropythy_atlas, 'atlas')
     n.base_dir = str(ANALYSIS_PATH)
     n.inputs.subject_id = 'sub-delft'
