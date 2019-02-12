@@ -165,7 +165,7 @@ def _tests():
            f'--cov={PACKAGE}',
            '--disable-warnings',
            '--capture=no',
-           'tests/test_10_node_neuropythy.py',
+           'tests',
            ]
 
     output = run(CMD)

@@ -3,18 +3,10 @@ from nipype import Function
 
 def wrapper_neuropythy_atlas(subject_id, subjects_dir=None):
     from pathlib import Path
-    from neuropythy import config
     from neuropythy.commands import atlas
-    from os import environ
-
-    print(config)
 
     if subjects_dir is not None:
-        environ['SUBJECTS_DIR'] = str(subjects_dir)
-        config['freesurfer_subject_paths'].append(str(subjects_dir))
         subject_id = str(Path(subjects_dir).resolve() / subject_id)
-
-    print(config)
 
     output_path = str(Path('.').resolve() / subject_id)
 

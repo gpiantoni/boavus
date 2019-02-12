@@ -1,6 +1,5 @@
 from nipype import Node
 from boavus.mri.neuropythy import function_neuropythy_atlas
-from neuropythy import freesurfer_subject, config
 
 from .paths import ANALYSIS_PATH, FREESURFER_PATH
 
@@ -12,10 +11,3 @@ def test_neuropythy_atlas():
     n.inputs.subject_id = 'sub-delft'
     n.inputs.subjects_dir = str(FREESURFER_PATH)
     n.run()
-
-
-def test_neuropythy_atlas_1():
-
-    print(config)
-    config['freesurfer_subject_paths'].append(str(FREESURFER_PATH))
-    print(freesurfer_subject('sub-delft'))
