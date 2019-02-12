@@ -59,9 +59,6 @@ script:
     testing 
     python3 make.py --tests
   - find * -type d
-  - find tests/data/analysis/atlas
-  - cat tests/data/analysis/atlas/_report/report.rst
-  - cat tests/data/analysis/atlas/*.json
 
 after_success:
   - pip install sphinx sphinx_rtd_theme
