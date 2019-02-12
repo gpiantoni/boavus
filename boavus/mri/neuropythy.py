@@ -21,6 +21,7 @@ def wrapper_neuropythy_atlas(subject_id, subjects_dir=None):
     atlas.main([
         subject_id,
         '--overwrite',
+        '--verbose',
         '--create-directory',
         '--output-path',
         output_path,
