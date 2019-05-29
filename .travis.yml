@@ -41,7 +41,7 @@ before_install:
     > dockerfile
 
   # use the same user UID for travis / docker
-  - sed -i "s/RUN useradd/& -u $UID/" dockerfile
+  - sed -i "s/useradd/& -u $UID/" dockerfile
 
   - cat dockerfile
 
