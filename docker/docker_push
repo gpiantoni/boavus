@@ -14,7 +14,7 @@ neurodocker generate docker \
   --env PATH='${PATH}:/home/neuro/.local/bin:/home/neuro/docker' \
   > dockerfile
 
-sed -i "s/RUN useradd/& -u $UID/" dockerfile
+sed -i "s/useradd/& -u $UID/" dockerfile
 
 docker build --tag gpiantoni/boavus:$TRAVIS_TAG .
 
