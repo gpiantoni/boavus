@@ -19,13 +19,13 @@ def read_ieeg_block(filename, electrode_file, cond, minimalduration, output_dir)
     clean_labels = _reject_channels(d, elec_names, cond, minimalduration)
 
     outputs = []
-    for cond_name, cond_mrk in cond.items():
+    for cond_name in cond:
         block_beg = []
         block_end = []
 
         for mrk in markers:
 
-            if mrk['name'] in cond_mrk:
+            if mrk['name'] in cond_name:
                 dur = (mrk['end'] - mrk['start'])
                 if dur >= minimalduration:
                     block_beg.append(mrk['start'])
@@ -49,7 +49,7 @@ def _reject_channels(d, elec_names, cond, minimalduration):
     block_beg = []
     block_end = []
     for mrk in markers:
-        if mrk['name'] in cond.values():
+        if mrk['name'] in cond:
             dur = (mrk['end'] - mrk['start'])
             if dur >= minimalduration:
 
