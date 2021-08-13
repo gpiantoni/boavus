@@ -7,7 +7,7 @@ from bidso.find import find_in_bids
 from bidso.utils import replace_underscore, read_tsv
 
 from wonambi.attr import Channels, Freesurfer
-from wonambi.viz import Viz3
+# from wonambi.viz import Viz3
 
 from ..bidso import read_channels
 

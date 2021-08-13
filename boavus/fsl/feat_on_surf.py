@@ -3,7 +3,7 @@ from shutil import rmtree
 from subprocess import Popen, PIPE
 
 from nibabel import load as nload
-from wonambi.viz import Viz3
+# from wonambi.viz import Viz3
 from wonambi.attr import Freesurfer
 
 from bidso import file_Core

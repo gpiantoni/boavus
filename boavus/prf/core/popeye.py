@@ -5,9 +5,15 @@ from numpy import (array,
                    pi,
                    tan,
                    )
-from popeye.utilities import grid_slice
-from popeye.visual_stimulus import VisualStimulus
-from popeye.og import GaussianFit, GaussianModel
+try:
+    from popeye.utilities import grid_slice
+    from popeye.visual_stimulus import VisualStimulus
+    from popeye.og import GaussianFit, GaussianModel
+except ImportError:
+    popeye = False
+else:
+    popeye = True
+
 
 
 SCREEN_WIDTH = 25

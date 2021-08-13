@@ -12,8 +12,8 @@ from nibabel import load as nload
 from nibabel.affines import apply_affine
 from nibabel import Nifti1Image
 
-from sanajeh.data import data_aparc
-from sanajeh.fmri import select_region
+# from sanajeh.data import data_aparc
+# from sanajeh.fmri import select_region
 from .core.least_squares import fit_analyzePRF
 from .core.popeye import fit_popeye
 # from ..ieeg.read import read_prf_stimuli

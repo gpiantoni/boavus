@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>boavus.command API documentation</title>
+<meta name="description" content="Complex but elegant approach to passing arguments and parameters …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>boavus.command</code></h1>
+</header>
+<section id="section-intro">
+<p>Complex but elegant approach to passing arguments and parameters.</p>
+<p>Make sure that the functions are organized in module/function.py.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Complex but elegant approach to passing arguments and parameters.
+
+Make sure that the functions are organized in module/function.py.
+&#34;&#34;&#34;
+from inspect import signature, getdoc
+from collections import defaultdict
+from argparse import ArgumentParser, RawTextHelpFormatter
+from importlib import import_module
+from logging import getLogger, StreamHandler, Formatter, INFO, DEBUG
+from pathlib import Path
+from warnings import filterwarnings
+
+filterwarnings(&#39;ignore&#39;, category=FutureWarning)
+lg = getLogger(&#39;boavus&#39;)
+
+FOLDERS_DOC = {
+    &#39;bids_dir&#39;: &#39;The directory with the raw data organized in the BIDS format&#39;,
+    &#39;freesurfer_dir&#39;: &#39;The directory with Freesurfer&#39;,
+    &#39;analysis_dir&#39;: &#39;The directory with preprocessed / analyzed data for each subject&#39;,
+    &#39;output_dir&#39;: &#39;The directory with custom output&#39;,
+    }
+
+
+def __main__():
+    import boavus
+    all_mod = defaultdict(dict)
+    for one in sorted(Path(boavus.__path__[0]).rglob(&#39;*.py&#39;)):
+        mod = import_module(str(one.relative_to(Path(__file__).parents[1])).replace(&#39;/&#39;, &#39;.&#39;)[:-3])
+        if hasattr(mod, &#39;main&#39;):
+            mod_name = one.stem
+            grp_name = one.parent.stem
+            all_mod[grp_name][mod_name] = mod.main
+
+    parser = ArgumentParser(description=&#39;Tools to analyze data structured as BIDS in Python&#39;, formatter_class=RawTextHelpFormatter)
+    list_modules = parser.add_subparsers(title=&#39;Modules&#39;, help=&#39;Modules containing the functions&#39;)
+
+    for m_k, m_v in all_mod.items():
+        module = list_modules.add_parser(m_k)
+        module.set_defaults(module=m_k)
+        list_functions = module.add_subparsers(title=f&#39;Functions in {m_k} module&#39;)
+
+        for f_k, f_v in m_v.items():
+            function = list_functions.add_parser(f_k,
+                                                 formatter_class=RawTextHelpFormatter)
+            function.set_defaults(function=f_k)
+            add_to_parser(function, f_v)
+            function.add_argument(&#39;-l&#39;, &#39;--log&#39;, default=&#39;info&#39;,
+                                  help=&#39;Logging level: info (default), debug&#39;)
+
+    return parser
+
+
+def add_to_parser(function, main_f):
+    doc = getdoc(main_f)
+    args = {}
+    maindoc, docargs = doc.split(&#39;\nParameters\n----------\n&#39;)
+    docargs = docargs.split(&#39;\n&#39;)
+    for i in range(0, len(docargs), 2):
+        a_name, a_type = docargs[i].split(&#39;:&#39;)
+        if i &lt; len(docargs) - 1:
+            comment = docargs[i + 1].strip()
+        else:
+            comment = &#39;&#39;
+        args[a_name.strip()] = (a_type.strip(), comment)
+
+    sign = signature(main_f)
+
+    folders_arg = function.add_argument_group(&#39;folders arguments&#39;)
+    optionals_arg = function.add_argument_group(&#39;optional arguments&#39;)
+
+    for name, param in sign.parameters.items():
+        if args[name][0] == &#39;path&#39;:
+            one_arg = folders_arg
+            help_str = FOLDERS_DOC[name]
+            metavar = name.upper()
+            action = None
+            const = None
+
+        elif args[name][0] == &#39;bool&#39;:
+            assert not param.default, f&#39;bool value {name} should be False, otherwise it\&#39;s hard to interpret&#39;
+            one_arg = optionals_arg
+            help_str = args[name][1]
+            metavar = None
+            action = &#39;store_const&#39;
+            const = not param.default
+
+        else:
+            one_arg = optionals_arg
+            help_str = args[name][1]
+            metavar = f&#39;&#34;{param.default}&#34;&#39;
+            action = None
+            const = None
+
+        if param.default == param.empty:
+            required = True
+        else:
+            required = False
+        if not required and args[name][0] == &#39;path&#39;:
+            help_str = &#39;(optional) &#39; + help_str
+
+        one_arg.add_argument(
+            &#39;--&#39; + param.name,
+            required=required,
+            help=help_str,
+            metavar=metavar,
+            action=action,
+            const=const,
+            default=param.default,
+            )
+
+
+def boavus(arguments=None):
+
+    parser = __main__()
+
+    # treat arguments as dict so we can remove keys as we go
+    args = vars(parser.parse_args(arguments))
+
+    # log can be info or debug
+    DATE_FORMAT = &#39;%H:%M:%S&#39;
+    log_level = args.pop(&#39;log&#39;)
+    if log_level[:1].lower() == &#39;i&#39;:
+        lg.setLevel(INFO)
+        FORMAT = &#39;{asctime:&lt;10}{message}&#39;
+
+    elif log_level[:1].lower() == &#39;d&#39;:
+        lg.setLevel(DEBUG)
+        FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;10}{filename:&lt;40}(l. {lineno: 6d})/ {funcName:&lt;40}: {message}&#39;
+
+    formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT, style=&#39;{&#39;)
+    handler = StreamHandler()
+    handler.setFormatter(formatter)
+
+    lg.handlers = []
+    lg.addHandler(handler)
+
+    &#34;&#34;&#34;
+    the user passes two arguments: a module and a function. A module is the
+    name of the folder and the function is the name of the .py file.
+    Each .py file contains one and ony one main() function, which is what is
+    called in general.
+    &#34;&#34;&#34;
+    module = import_module(&#39;boavus.&#39; + args.pop(&#39;module&#39;) + &#39;.&#39; + args.pop(&#39;function&#39;))
+
+    &#34;&#34;&#34;
+    Use the leftover arguments only
+    &#34;&#34;&#34;
+    # this only works if all the arguments are paths
+    for k, v in args.items():
+        if k.endswith(&#39;_dir&#39;):
+            args[k] = _path(v)
+
+    &#34;&#34;&#34;
+    Call the actual main function of the specified .py file
+    &#34;&#34;&#34;
+    lg.debug(f&#39;Calling main() from {module.__file__} with: &#39; + &#39;, &#39;.join(f&#39;{k}={v}&#39; for k, v in args.items()))
+    module.main(**args)
+
+
+def _path(dirname):
+    &#34;&#34;&#34;Always use absolute paths, easier to control when working with FSL / Freesurfer&#34;&#34;&#34;
+    if dirname is None:
+        return None
+    else:
+        return Path(dirname).resolve()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="boavus.command.add_to_parser"><code class="name flex">
+<span>def <span class="ident">add_to_parser</span></span>(<span>function, main_f)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_to_parser(function, main_f):
+    doc = getdoc(main_f)
+    args = {}
+    maindoc, docargs = doc.split(&#39;\nParameters\n----------\n&#39;)
+    docargs = docargs.split(&#39;\n&#39;)
+    for i in range(0, len(docargs), 2):
+        a_name, a_type = docargs[i].split(&#39;:&#39;)
+        if i &lt; len(docargs) - 1:
+            comment = docargs[i + 1].strip()
+        else:
+            comment = &#39;&#39;
+        args[a_name.strip()] = (a_type.strip(), comment)
+
+    sign = signature(main_f)
+
+    folders_arg = function.add_argument_group(&#39;folders arguments&#39;)
+    optionals_arg = function.add_argument_group(&#39;optional arguments&#39;)
+
+    for name, param in sign.parameters.items():
+        if args[name][0] == &#39;path&#39;:
+            one_arg = folders_arg
+            help_str = FOLDERS_DOC[name]
+            metavar = name.upper()
+            action = None
+            const = None
+
+        elif args[name][0] == &#39;bool&#39;:
+            assert not param.default, f&#39;bool value {name} should be False, otherwise it\&#39;s hard to interpret&#39;
+            one_arg = optionals_arg
+            help_str = args[name][1]
+            metavar = None
+            action = &#39;store_const&#39;
+            const = not param.default
+
+        else:
+            one_arg = optionals_arg
+            help_str = args[name][1]
+            metavar = f&#39;&#34;{param.default}&#34;&#39;
+            action = None
+            const = None
+
+        if param.default == param.empty:
+            required = True
+        else:
+            required = False
+        if not required and args[name][0] == &#39;path&#39;:
+            help_str = &#39;(optional) &#39; + help_str
+
+        one_arg.add_argument(
+            &#39;--&#39; + param.name,
+            required=required,
+            help=help_str,
+            metavar=metavar,
+            action=action,
+            const=const,
+            default=param.default,
+            )</code></pre>
+</details>
+</dd>
+<dt id="boavus.command.boavus"><code class="name flex">
+<span>def <span class="ident">boavus</span></span>(<span>arguments=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def boavus(arguments=None):
+
+    parser = __main__()
+
+    # treat arguments as dict so we can remove keys as we go
+    args = vars(parser.parse_args(arguments))
+
+    # log can be info or debug
+    DATE_FORMAT = &#39;%H:%M:%S&#39;
+    log_level = args.pop(&#39;log&#39;)
+    if log_level[:1].lower() == &#39;i&#39;:
+        lg.setLevel(INFO)
+        FORMAT = &#39;{asctime:&lt;10}{message}&#39;
+
+    elif log_level[:1].lower() == &#39;d&#39;:
+        lg.setLevel(DEBUG)
+        FORMAT = &#39;{asctime:&lt;10}{levelname:&lt;10}{filename:&lt;40}(l. {lineno: 6d})/ {funcName:&lt;40}: {message}&#39;
+
+    formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT, style=&#39;{&#39;)
+    handler = StreamHandler()
+    handler.setFormatter(formatter)
+
+    lg.handlers = []
+    lg.addHandler(handler)
+
+    &#34;&#34;&#34;
+    the user passes two arguments: a module and a function. A module is the
+    name of the folder and the function is the name of the .py file.
+    Each .py file contains one and ony one main() function, which is what is
+    called in general.
+    &#34;&#34;&#34;
+    module = import_module(&#39;boavus.&#39; + args.pop(&#39;module&#39;) + &#39;.&#39; + args.pop(&#39;function&#39;))
+
+    &#34;&#34;&#34;
+    Use the leftover arguments only
+    &#34;&#34;&#34;
+    # this only works if all the arguments are paths
+    for k, v in args.items():
+        if k.endswith(&#39;_dir&#39;):
+            args[k] = _path(v)
+
+    &#34;&#34;&#34;
+    Call the actual main function of the specified .py file
+    &#34;&#34;&#34;
+    lg.debug(f&#39;Calling main() from {module.__file__} with: &#39; + &#39;, &#39;.join(f&#39;{k}={v}&#39; for k, v in args.items()))
+    module.main(**args)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="boavus" href="index.html">boavus</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="boavus.command.add_to_parser" href="#boavus.command.add_to_parser">add_to_parser</a></code></li>
+<li><code><a title="boavus.command.boavus" href="#boavus.command.boavus">boavus</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

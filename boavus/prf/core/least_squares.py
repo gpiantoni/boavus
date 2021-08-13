@@ -7,7 +7,7 @@ from numpy import (arange,
                    )
 from scipy.optimize import least_squares
 
-from popeye.visual_stimulus import gaussian_2D
+# from popeye.visual_stimulus import gaussian_2D
 
 
 def modelfun(pp, dd, X, Y):

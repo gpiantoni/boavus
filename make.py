@@ -3,6 +3,8 @@
 from argparse import ArgumentParser
 from os import environ
 from pathlib import Path
+from pdoc.cli import parser as pdoc_parser
+from pdoc.cli import main as pdoc
 from shutil import rmtree
 from subprocess import run
 from tempfile import mkstemp
@@ -23,7 +25,7 @@ parser.add_argument('-g', '--get_files', action='store_true',
 parser.add_argument('-t', '--tests', action='store_true',
                     help='run tests')
 parser.add_argument('-d', '--docs', action='store_true',
-                    help='create documentations (run tests first)')
+                    help='create documentations')
 parser.add_argument('-c', '--clean', action='store_true',
                     help='clean up docs (including intermediate files)')
 
@@ -36,10 +38,7 @@ VER_PATH = PKG_PATH / 'VERSION'
 CHANGES_PATH = BASE_PATH / 'CHANGES.rst'
 
 DOCS_PATH = BASE_PATH / 'docs'
-BUILD_PATH = DOCS_PATH / 'build'
-SOURCE_PATH = DOCS_PATH / 'source'
-HTML_PATH = BUILD_PATH / 'html'
-API_PATH = SOURCE_PATH / 'api'
+API_PATH = BASE_PATH / 'docs' / PACKAGE
 
 TEST_PATH = BASE_PATH / 'tests'
 DATA_PATH = TEST_PATH / 'data'
@@ -99,6 +98,9 @@ def _new_version(level):
 
 def _release(level):
     """TODO: we should make sure that we are on master release"""
+
+    _docs()
+
     version, comment = _new_version(level)
 
     if version is not None:
@@ -188,30 +190,24 @@ def _tests():
 
 
 def _docs():
-    run([
-        'sphinx-apidoc',
-        '-f',
-        '-e',
-        '--module-first',
-        '-o',
-        str(API_PATH),
-        str(PKG_PATH),
+    rmtree(API_PATH, ignore_errors=True)
+    args = pdoc_parser.parse_args([
+        PACKAGE,
+        '--output-dir',
+        str(DOCS_PATH),
+        '--html',
         ])
-    output = run([
-        'sphinx-build',
-        '-T',
-        '-b',
-        'html',
-        '-d',
-        str(BUILD_PATH / 'doctrees'),
-        str(SOURCE_PATH),
-        str(HTML_PATH),
-        ])
-    return output.returncode
+    pdoc(args)
+
+    run(['git',
+         'add',
+         'docs',
+         ])
+
+    return 0
 
 
 def _clean_all():
-    rmtree(BUILD_PATH, ignore_errors=True)
     rmtree(API_PATH, ignore_errors=True)
     rmtree(DATA_PATH, ignore_errors=True)
     rmtree(ANALYSIS_PATH, ignore_errors=True)
