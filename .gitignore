@@ -1,6 +1,4 @@
 .cache/
-docs/build/
-docs/source/api/
 
 tests/data/
 tests/parameters/
@@ -9,3 +7,4 @@ tests/parameters/
 htmlcov/
 
 dist/
+to_include/
