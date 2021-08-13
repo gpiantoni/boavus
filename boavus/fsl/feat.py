@@ -57,6 +57,7 @@ def _write_events(events_input, events_output):
     EVENTS = (
         'move',
         'verbgen',
+        'music',
         )
 
     tsv = read_tsv(events_input)

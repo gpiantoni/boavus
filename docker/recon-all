@@ -1,5 +1,0 @@
-#!/bin/bash
-
-recon-all(){
-  return 0;
-}
