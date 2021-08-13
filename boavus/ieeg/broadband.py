@@ -26,7 +26,7 @@ from wonambi.trans import math
 lg = getLogger(__name__)
 
 
-def main(analysis_dir, bands=[], method="5", noparallel=False):
+def xmain(analysis_dir, bands=[], method="5", noparallel=False):
     """
     extract timefrequency after bandpass
 

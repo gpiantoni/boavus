@@ -19,7 +19,7 @@ lg = getLogger(__name__)
 SURF_DIR = 'feat_surf'
 
 
-def main(analysis_dir, freesurfer_dir, output_dir, modality='compare',
+def xmain(analysis_dir, freesurfer_dir, output_dir, modality='compare',
          surface='white', surf_fwhm=0):
     """
     map feat values on freesurfer surface',

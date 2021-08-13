@@ -8,7 +8,7 @@ from ..utils import ENVIRON
 lg = getLogger(__name__)
 
 
-def main(analysis_dir, freesurfer_dir):
+def xmain(analysis_dir, freesurfer_dir):
     """
     coreg feat with freesurfer
 

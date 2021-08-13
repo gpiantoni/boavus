@@ -2,7 +2,7 @@
 
 [Installation](installation.md)
 
-[Preparation of the Data](preparation.md)
+[Structure](structure.md)
 
 [API](boavus/index.html)
 

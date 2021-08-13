@@ -21,7 +21,7 @@ from .core.popeye import fit_popeye
 lg = getLogger(__name__)
 
 
-def main(analysis_dir, method="analyzePRF", task='bairprf', input='ieegprocpsd', noparallel=False):
+def xmain(analysis_dir, method="analyzePRF", task='bairprf', input='ieegprocpsd', noparallel=False):
     """
     compute psd for two conditions
 

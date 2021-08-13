@@ -16,7 +16,7 @@ lg = getLogger(__name__)
 ELECSURF_DIR = 'electrodes_on_surface'
 
 
-def main(bids_dir, analysis_dir, freesurfer_dir, output_dir,
+def xmain(bids_dir, analysis_dir, freesurfer_dir, output_dir,
          acquisition='clinical', measure_modality="", measure_column=""):
     """
     plot electrodes onto the brain surface,

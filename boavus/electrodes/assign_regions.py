@@ -9,7 +9,7 @@ from bidso.utils import replace_underscore
 from wonambi.attr import Freesurfer
 
 
-def main(bids_dir, freesurfer_dir, acquisition='clinical', noparallel=False):
+def xmain(bids_dir, freesurfer_dir, acquisition='clinical', noparallel=False):
     """
     assign electrodes to brain regions',
 

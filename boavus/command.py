@@ -18,6 +18,7 @@ FOLDERS_DOC = {
     'freesurfer_dir': 'The directory with Freesurfer',
     'analysis_dir': 'The directory with preprocessed / analyzed data for each subject',
     'output_dir': 'The directory with custom output',
+    'angiogram': 'The file with the angiogram at 7T (two images)',
     }
 
 
